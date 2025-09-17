@@ -1,69 +1,174 @@
-# React + TypeScript + Vite
+# 🏋️ LevelUp Gym App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**LevelUp** es una aplicación de fitness con inteligencia artificial que ofrece rutinas de entrenamiento personalizadas y planes de dieta adaptados a cada usuario.
 
-Currently, two official plugins are available:
+## 🚀 Stack Tecnológico
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: React 19 + TypeScript + Vite
+- **Móvil**: Capacitor (Android/iOS)
+- **Backend**: Supabase (PostgreSQL + Auth + Real-time)
+- **Gestión de paquetes**: pnpm
+- **IA**: OpenAI/Gemini APIs para generación de contenido
 
-## Expanding the ESLint configuration
+## ✨ Características Principales
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 💪 **Rutinas de Entrenamiento**: Generación automática de rutinas personalizadas con IA
+- 🥗 **Planes de Dieta**: Recomendaciones nutricionales adaptadas a objetivos
+- 📅 **Calendario de Entrenamientos**: Seguimiento de progreso y planificación
+- 👥 **Dashboard Administrativo**: Panel de control para gestión de usuarios
+- 🔐 **Autenticación**: Sistema seguro de login y registro
+- 📱 **Multiplataforma**: Web, Android e iOS
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Guía de Desarrollo
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Prerrequisitos
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+ 
+- pnpm (gestor de paquetes)
+- Android Studio (para desarrollo Android)
+- Git
+
+### Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/DavElizG/LevelUp.git
+   cd LevelUp
+   ```
+
+2. **Instalar dependencias**
+   ```bash
+   pnpm install
+   ```
+
+3. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env
+   # Editar .env con tus claves de Supabase y APIs
+   ```
+
+### Comandos de Desarrollo
+
+#### 🌐 Desarrollo Web
+```bash
+# Servidor de desarrollo (Hot Reload)
+pnpm run dev
+
+# Build de producción
+pnpm run build
+
+# Preview del build
+pnpm run preview
+
+# Linting
+pnpm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+#### 📱 Desarrollo Móvil
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Sincronizar cambios con plataformas nativas
+npx cap sync
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Abrir en Android Studio
+npx cap open android
+
+# Abrir en Xcode (macOS únicamente)
+npx cap open ios
+
+# Build y sync en un comando
+pnpm run build && npx cap sync
 ```
+
+#### 🔧 Capacitor - Gestión de Plataformas
+
+```bash
+# Agregar plataforma Android
+npx cap add android
+
+# Agregar plataforma iOS (requiere macOS)
+npx cap add ios
+
+# Ejecutar en dispositivo Android
+npx cap run android
+
+# Ejecutar en simulador iOS
+npx cap run ios
+```
+
+### 📁 Estructura del Proyecto
+
+```
+LevelUp/
+├── src/
+│   ├── components/       # Componentes reutilizables
+│   ├── screens/         # Pantallas principales
+│   │   ├── Auth/        # Login/Registro
+│   │   ├── Rutina/      # Entrenamientos
+│   │   ├── Dieta/       # Nutrición
+│   │   └── Dashboard/   # Panel admin
+│   ├── services/        # APIs y lógica de negocio
+│   ├── hooks/          # Custom React hooks
+│   ├── types/          # Definiciones TypeScript
+│   ├── utils/          # Funciones utilitarias
+│   └── constants/      # Constantes de la app
+├── android/            # Proyecto Android nativo
+├── dist/              # Build de producción
+├── public/            # Archivos estáticos
+└── capacitor.config.ts # Configuración Capacitor
+```
+
+### 🌍 Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+# Supabase
+VITE_SUPABASE_URL=tu_supabase_url
+VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
+
+# APIs de IA
+VITE_OPENAI_API_KEY=tu_openai_key
+VITE_GEMINI_API_KEY=tu_gemini_key
+
+# Configuración de desarrollo
+VITE_APP_ENV=development
+```
+
+### 🚀 Deployment
+
+#### Web
+```bash
+# Build optimizado
+pnpm run build
+
+# Los archivos están en /dist para deployment
+```
+
+#### Android
+```bash
+# Generar APK/AAB en Android Studio
+npx cap open android
+# En Android Studio: Build → Generate Signed Bundle/APK
+```
+
+### 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+### 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+
+### 📞 Contacto
+
+- **Desarrollador**: DavElizG
+- **Repositorio**: [https://github.com/DavElizG/LevelUp](https://github.com/DavElizG/LevelUp)
+
+---
+
+*Desarrollado con ❤️ para la comunidad fitness*
