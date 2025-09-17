@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LevelUp Gym</string>
+    <string name="title_activity_main">LevelUp Gym</string>
+    <string name="package_name">com.levelup.gym</string>
+    <string name="custom_url_scheme">com.levelup.gym</string>
+</resources>
