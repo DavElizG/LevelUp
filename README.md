@@ -135,9 +135,24 @@ VITE_GEMINI_API_KEY=tu_gemini_key
 VITE_APP_ENV=development
 ```
 
-### 🚀 Deployment
+### 🔐 Secrets y seguridad
+
+- **Importante**: todas las variables que comienzan con `VITE_` son incluidas por Vite en el bundle del frontend y por tanto pueden ser visibles por cualquiera que inspeccione la aplicación. No pongas claves secretas o tokens administrativos en variables `VITE_`.
+
+- **Claves aceptables en el cliente**: la `VITE_SUPABASE_ANON_KEY` (la anon key) está diseñada para usarse en clientes y es segura en ese contexto. Evita exponer `service_role` u otros tokens con privilegios elevados.
+
+- **Claves sensibles** (por ejemplo: OpenAI server keys, Supabase `service_role`, tokens administrativos): almacénalas en el backend (por ejemplo en el microservicio NestJS) o en el entorno de CI/hosting (GitHub Secrets, Vercel/Netlify environment variables) y nunca en el repositorio.
+
+- **.env**: no comitees tu `.env`. Hay un `.env.example` en el repo; copia y rellena `.env` localmente. El proyecto ya incluye `.env` en `.gitignore`.
+
+- **Rotación y revocación**: si alguna clave fue subida accidentalmente al repositorio (o en `.vscode`), rótala y revócala inmediatamente.
+
+- **Escaneo en CI**: recomendamos añadir un paso en CI que busque secrets y que ejecute `npx eslint .` + `npx tsc --noEmit` antes de permitir merges.
+
+### Deployment
 
 #### Web
+
 ```bash
 # Build optimizado
 pnpm run build
@@ -146,6 +161,7 @@ pnpm run build
 ```
 
 #### Android
+
 ```bash
 # Generar APK/AAB en Android Studio
 npx cap open android
@@ -171,4 +187,4 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 ---
 
-*Desarrollado con ❤️ para la comunidad fitness*
+Desarrollado con ❤️ para la comunidad fitness
