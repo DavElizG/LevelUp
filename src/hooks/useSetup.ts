@@ -1,6 +1,70 @@
 import { useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase.ts';
 
+// --- Local storage encryption helpers (Web Crypto API) ---
+// NOTE: This is intended to protect sensitive data in local development only.
+// For production, manage keys securely (do NOT hardcode passphrases or persist keys in localStorage).
+const DEV_ENCRYPTION_PASSPHRASE = 'levelup-dev-local-passphrase-change-me';
+
+async function getCryptoKey(passphrase: string): Promise<CryptoKey | null> {
+  if (!window?.crypto?.subtle) return null;
+  const enc = new TextEncoder();
+  const passBytes = enc.encode(passphrase);
+  const hash = await window.crypto.subtle.digest('SHA-256', passBytes);
+  return window.crypto.subtle.importKey(
+    'raw',
+    hash,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+function bufToBase64(buf: ArrayBuffer) {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function base64ToBuf(base64: string) {
+  const binary = atob(base64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function encryptText(plain: string): Promise<string> {
+  const key = await getCryptoKey(DEV_ENCRYPTION_PASSPHRASE);
+  if (!key) return plain; // fallback: return plaintext if Web Crypto not available
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const ct = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plain));
+  // store iv + ciphertext as base64
+  const ivB64 = bufToBase64(iv.buffer);
+  const ctB64 = bufToBase64(ct);
+  return ivB64 + ':' + ctB64;
+}
+
+async function decryptText(payload: string): Promise<string | null> {
+  const key = await getCryptoKey(DEV_ENCRYPTION_PASSPHRASE);
+  if (!key) return payload; // fallback: assume plaintext
+  try {
+    const [ivB64, ctB64] = payload.split(':');
+    if (!ivB64 || !ctB64) return null;
+    const ivBuf = base64ToBuf(ivB64);
+    const ctBuf = base64ToBuf(ctB64);
+    const plainBuf = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(ivBuf) }, key, ctBuf);
+    const dec = new TextDecoder();
+    return dec.decode(plainBuf);
+  } catch (err) {
+    console.warn('Failed to decrypt local profile data:', err);
+    return null;
+  }
+}
+
+
 export type FitnessGoal = 'lose_weight' | 'maintain' | 'gain_muscle' | 'improve_endurance';
 
 export interface SetupData {
@@ -78,9 +142,16 @@ export const useSetup = () => {
         };
         
   // Supabase not configured. Saving profile locally for development only.
-        // Save to localStorage
-        localStorage.setItem(`user_profile_${userId}`, JSON.stringify(profileData));
-        
+        // Save encrypted profile to localStorage (dev only)
+        try {
+          const encryptedProfile = await encryptText(JSON.stringify(profileData));
+          localStorage.setItem(`user_profile_${userId}`, encryptedProfile);
+        } catch (e) {
+          // Fallback: save plaintext if encryption fails
+          console.warn('Failed to encrypt profile data, saving plaintext for dev only.', e);
+          localStorage.setItem(`user_profile_${userId}`, JSON.stringify(profileData));
+        }
+
         // Simulate async operation
         await new Promise(resolve => setTimeout(resolve, 1000));
         return true;
@@ -128,7 +199,16 @@ export const useSetup = () => {
         // Try to load from localStorage
         const savedProfile = localStorage.getItem(`user_profile_${userId}`);
         if (savedProfile) {
-          const data = JSON.parse(savedProfile);
+          // Try to decrypt, fall back to plaintext
+          let jsonStr: string | null = null;
+          try {
+            const dec = await decryptText(savedProfile);
+            jsonStr = dec ?? savedProfile;
+          } catch (e) {
+            console.warn('Failed to decrypt saved profile, attempting plaintext parse.', e);
+            jsonStr = savedProfile;
+          }
+          const data = JSON.parse(jsonStr);
           setSetupData({
             gender: data.gender,
             age: data.age,
