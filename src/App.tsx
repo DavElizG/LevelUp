@@ -1,9 +1,9 @@
-import Setup from './components/Setup/Setup.tsx';
+import AppRoutes from './routes/routes';
 
 function App() {
   return (
     <div className="App">
-      <Setup />
+      <AppRoutes />
     </div>
   );
 }
