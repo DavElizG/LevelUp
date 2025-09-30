@@ -29,7 +29,9 @@ export interface User extends BaseEntity {
 // User Profile (matches Supabase user_profiles table)
 export interface UserProfile extends BaseEntity {
   userId: string;
-  fullName: string;
+  name: string;
+  lastname1: string;
+  lastname2?: string;
   gender?: 'male' | 'female' | 'other';
   birthDate?: string;
   heightCm?: number;
