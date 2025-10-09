@@ -25,8 +25,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<PublicRoute />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
       
-      {/* Reset Password Route - Public but with token validation */}
-      <Route path="/reset-password" element={<Auth />} />
+      {/* Reset Password Route - Public, accessible even with temporary session during recovery */}
+      <Route 
+        path="/reset-password" 
+        element={<Auth />} 
+      />
       
       {/* Protected Routes - require authentication */}
       <Route path="/setup" element={
@@ -126,8 +129,19 @@ const PublicRoute: React.FC = () => {
 const AuthRoutes: React.FC = () => {
   const { user } = useAuth();
   
-  // If user is already authenticated, redirect to dashboard
-  if (user) {
+  // Check if this is a password recovery flow
+  const isRecoveryFlow = (): boolean => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
+    
+    const type = urlParams.get('type') || hashParams?.get('type');
+    const accessToken = urlParams.get('access_token') || hashParams?.get('access_token');
+    
+    return type === 'recovery' && !!accessToken;
+  };
+  
+  // If user is already authenticated BUT it's NOT a recovery flow, redirect to dashboard
+  if (user && !isRecoveryFlow()) {
     return <Navigate to="/dashboard" replace />;
   }
   
