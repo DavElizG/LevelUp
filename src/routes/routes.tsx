@@ -25,6 +25,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<PublicRoute />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
       
+      {/* Reset Password Route - Public but with token validation */}
+      <Route path="/reset-password" element={<Auth />} />
+      
       {/* Protected Routes - require authentication */}
       <Route path="/setup" element={
         <ProtectedRoute>

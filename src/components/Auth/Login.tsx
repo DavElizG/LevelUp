@@ -26,10 +26,20 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous messages
+    setResetMessage(null);
+    
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      return;
+    }
+    
     const result = await signIn(formData.email, formData.password);
     if (result.success) {
-      console.log('Login successful!');
       // Navigation will be handled by the auth state change
+    } else {
+      // Error message is already displayed by useAuth error state
+      console.error('Login failed:', result.error);
     }
   };
 
@@ -43,14 +53,26 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const handleForgotPassword = async (e: React.MouseEvent) => {
     e.preventDefault();
     
-    if (!formData.email) {
-      alert('Por favor ingresa tu email primero');
+    if (!formData.email || formData.email.trim() === '') {
+      setResetMessage(null);
+      alert('Por favor ingresa tu email primero para solicitar el restablecimiento de contraseña.');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setResetMessage(null);
+      alert('Por favor ingresa un email válido.');
       return;
     }
 
     const result = await resetPassword(formData.email);
     if (result.success) {
-      setResetMessage('Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu email.');
+      setResetMessage('Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu email (incluyendo spam).');
+    } else {
+      setResetMessage(null);
+      // Error is already displayed by useAuth
     }
   };
 
