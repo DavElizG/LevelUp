@@ -4,8 +4,9 @@ import Register from './Register';
 import EmailConfirmation from './EmailConfirmation';
 import ResetPassword from './ResetPassword';
 import ResetPasswordError from './ResetPasswordError';
+import ForgotPassword from './ForgotPassword';
 
-type AuthMode = 'login' | 'register' | 'email-confirmation' | 'reset-password' | 'reset-password-error';
+type AuthMode = 'login' | 'register' | 'email-confirmation' | 'reset-password' | 'reset-password-error' | 'forgot-password';
 
 const Auth: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -17,8 +18,9 @@ const Auth: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
     
-    // Try to get token from both query and hash params
+    // Try to get token/code from both query and hash params
     const token = urlParams.get('access_token') || hashParams?.get('access_token');
+    const code = urlParams.get('code') || hashParams?.get('code');
     const type = urlParams.get('type') || hashParams?.get('type');
     const error = urlParams.get('error') || hashParams?.get('error');
     const errorCode = urlParams.get('error_code') || hashParams?.get('error_code');
@@ -37,8 +39,9 @@ const Auth: React.FC = () => {
       return;
     }
     
-    // Handle successful password reset link (recovery type)
-    if (token && type === 'recovery') {
+    // Handle successful password reset link
+    // PKCE flow sends code, Implicit flow sends access_token
+    if (code || (token && type === 'recovery')) {
       setMode('reset-password');
       return;
     }
@@ -52,6 +55,8 @@ const Auth: React.FC = () => {
   
   const switchToRegister = () => setMode('register');
   
+  const switchToForgotPassword = () => setMode('forgot-password');
+  
   const switchToEmailConfirmation = (email: string) => {
     setPendingEmail(email);
     setMode('email-confirmation');
@@ -60,7 +65,10 @@ const Auth: React.FC = () => {
   return (
     <>
       {mode === 'login' && (
-        <Login onSwitchToRegister={switchToRegister} />
+        <Login 
+          onSwitchToRegister={switchToRegister}
+          onSwitchToForgotPassword={switchToForgotPassword}
+        />
       )}
       {mode === 'register' && (
         <Register 
@@ -71,6 +79,11 @@ const Auth: React.FC = () => {
       {mode === 'email-confirmation' && (
         <EmailConfirmation 
           email={pendingEmail}
+          onBackToLogin={switchToLogin}
+        />
+      )}
+      {mode === 'forgot-password' && (
+        <ForgotPassword 
           onBackToLogin={switchToLogin}
         />
       )}

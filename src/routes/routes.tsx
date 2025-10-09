@@ -130,14 +130,18 @@ const AuthRoutes: React.FC = () => {
   const { user } = useAuth();
   
   // Check if this is a password recovery flow
+  // PKCE flow sends ?code=xxx, Implicit flow sends ?access_token=xxx
   const isRecoveryFlow = (): boolean => {
     const urlParams = new URLSearchParams(window.location.search);
     const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
     
     const type = urlParams.get('type') || hashParams?.get('type');
+    const code = urlParams.get('code') || hashParams?.get('code');
     const accessToken = urlParams.get('access_token') || hashParams?.get('access_token');
     
-    return type === 'recovery' && !!accessToken;
+    // Recovery flow is detected if we have a code OR access_token (regardless of type param)
+    // type=recovery is optional in PKCE flow
+    return !!(code || accessToken) && (type === 'recovery' || !!code);
   };
   
   // If user is already authenticated BUT it's NOT a recovery flow, redirect to dashboard
@@ -150,6 +154,7 @@ const AuthRoutes: React.FC = () => {
       <Route path="/" element={<Auth />} />
       <Route path="/login" element={<Auth />} />
       <Route path="/register" element={<Auth />} />
+      <Route path="/forgot-password" element={<Auth />} />
       <Route path="/reset-password" element={<Auth />} />
       <Route path="/email-confirmation" element={<Auth />} />
       <Route path="*" element={<Navigate to="/auth" replace />} />

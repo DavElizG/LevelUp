@@ -5,15 +5,15 @@ import AuthLayout from './AuthLayout';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassword }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [resetMessage, setResetMessage] = useState<string | null>(null);
-  const { signIn, signInWithProvider, resetPassword, loading, error } = useAuth();
+  const { signIn, signInWithProvider, loading, error } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,9 +25,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Clear previous messages
-    setResetMessage(null);
     
     // Basic validation
     if (!formData.email || !formData.password) {
@@ -50,42 +47,14 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     }
   };
 
-  const handleForgotPassword = async (e: React.MouseEvent) => {
+  const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
-    
-    if (!formData.email || formData.email.trim() === '') {
-      setResetMessage(null);
-      alert('Por favor ingresa tu email primero para solicitar el restablecimiento de contraseña.');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setResetMessage(null);
-      alert('Por favor ingresa un email válido.');
-      return;
-    }
-
-    const result = await resetPassword(formData.email);
-    if (result.success) {
-      setResetMessage('Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu email (incluyendo spam).');
-    } else {
-      setResetMessage(null);
-      // Error is already displayed by useAuth
-    }
+    onSwitchToForgotPassword();
   };
 
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Success Message */}
-        {resetMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-            <p className="text-green-600 text-sm">{resetMessage}</p>
-          </div>
-        )}
-
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">

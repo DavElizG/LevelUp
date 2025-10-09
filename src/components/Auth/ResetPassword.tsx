@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabase';
 import AuthLayout from './AuthLayout';
 
 interface ResetPasswordProps {
@@ -19,25 +20,30 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin }) => {
   const { updatePassword, verifyRecoveryToken, signOutAfterPasswordReset, loading, error } = useAuth();
 
   useEffect(() => {
-    // Extract access_token from URL (both query params and hash)
-    const extractToken = (): string | null => {
-      // Check query params first
+    // Extract code (PKCE flow) or access_token (Implicit flow) from URL
+    const extractTokenOrCode = (): { type: 'code' | 'token' | null; value: string | null } => {
       const urlParams = new URLSearchParams(window.location.search);
-      let token = urlParams.get('access_token');
+      const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
       
-      // If not found, check hash params
-      if (!token && window.location.hash) {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        token = hashParams.get('access_token');
+      // Check for PKCE code first
+      const code = urlParams.get('code') || hashParams?.get('code');
+      if (code) {
+        return { type: 'code', value: code };
       }
       
-      return token;
+      // Check for implicit flow access_token
+      const token = urlParams.get('access_token') || hashParams?.get('access_token');
+      if (token) {
+        return { type: 'token', value: token };
+      }
+      
+      return { type: null, value: null };
     };
 
-    const validateToken = async () => {
-      const token = extractToken();
+    const validateAndExchangeToken = async () => {
+      const { type, value } = extractTokenOrCode();
       
-      if (!token) {
+      if (!value) {
         // Check if there's an error in the URL
         const urlParams = new URLSearchParams(window.location.search);
         const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
@@ -47,28 +53,63 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin }) => {
         if (errorParam || errorDescription) {
           setTokenError(errorDescription || 'Error al procesar el enlace de recuperación.');
         } else {
-          setTokenError('No se encontró el token de recuperación. El enlace puede ser inválido.');
+          setTokenError('No se encontró el código de recuperación. El enlace puede ser inválido.');
         }
         setTokenValid(false);
         return;
       }
 
-      // For clock skew issues, we'll skip validation and let the user try to update password
-      // The actual validation happens when they submit the form
-      setTokenValid(true);
-      
-      // Optionally verify in background but don't block the UI
-      verifyRecoveryToken(token).then(result => {
-        if (!result.success && result.error) {
-          console.warn('Token verification warning:', result.error);
-          // Don't block the UI, let user try to update password anyway
+      // Handle PKCE code exchange
+      if (type === 'code') {
+        if (!supabase) {
+          setTokenError('Error de configuración: cliente de Supabase no disponible.');
+          setTokenValid(false);
+          return;
         }
-      }).catch(err => {
-        console.warn('Token verification error:', err);
-      });
+
+        try {
+          console.log('🔄 Exchanging PKCE code for session...');
+          const { data, error } = await supabase.auth.exchangeCodeForSession(value);
+          
+          if (error) {
+            console.error('❌ Code exchange failed:', error);
+            setTokenError(error.message || 'El código de recuperación es inválido o ha expirado.');
+            setTokenValid(false);
+            return;
+          }
+          
+          if (data?.session) {
+            console.log('✅ Code exchange successful, session created');
+            setTokenValid(true);
+          } else {
+            setTokenError('No se pudo crear la sesión de recuperación.');
+            setTokenValid(false);
+          }
+        } catch (err) {
+          console.error('❌ Unexpected error during code exchange:', err);
+          setTokenError('Error inesperado al procesar el código de recuperación.');
+          setTokenValid(false);
+        }
+        return;
+      }
+
+      // Handle implicit flow access_token (legacy)
+      if (type === 'token') {
+        setTokenValid(true);
+        
+        // Optionally verify in background but don't block the UI
+        verifyRecoveryToken(value).then(result => {
+          if (!result.success && result.error) {
+            console.warn('Token verification warning:', result.error);
+            // Don't block the UI, let user try to update password anyway
+          }
+        }).catch(err => {
+          console.warn('Token verification error:', err);
+        });
+      }
     };
 
-    validateToken();
+    validateAndExchangeToken();
   }, [verifyRecoveryToken]);
 
   const validatePassword = (password: string): string[] => {
