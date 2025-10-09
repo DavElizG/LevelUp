@@ -12,6 +12,8 @@ import Setup from '../components/Setup/Setup';
 import { Dashboard, Profile, Workouts, Diet, Settings } from '../pages';
 import Progress from '../pages/Progress';
 import Nutrition from '../pages/Nutrition';
+import FoodSearchPage from '../pages/FoodSearchPage';
+import FoodPhotoAnalyzerPage from '../pages/FoodPhotoAnalyzerPage';
 
 // Route Protection Component
 import ProtectedRoute from './ProtectedRoute.tsx';
@@ -57,6 +59,21 @@ const AppRoutes: React.FC = () => {
       <Route path="/nutrition" element={
         <ProtectedRoute>
           <Nutrition />
+        </ProtectedRoute>
+      } />
+      
+      {/* Redirect meal-log to nutrition */}
+      <Route path="/meal-log" element={<Navigate to="/nutrition" replace />} />
+
+      <Route path="/food-search" element={
+        <ProtectedRoute>
+          <FoodSearchPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/food-photo-analyzer" element={
+        <ProtectedRoute>
+          <FoodPhotoAnalyzerPage />
         </ProtectedRoute>
       } />
       

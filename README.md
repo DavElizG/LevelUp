@@ -14,7 +14,11 @@
 
 - 💪 **Rutinas de Entrenamiento**: Generación automática de rutinas personalizadas con IA
 - 🥗 **Planes de Dieta**: Recomendaciones nutricionales adaptadas a objetivos
-- 📅 **Calendario de Entrenamientos**: Seguimiento de progreso y planificación
+- � **Análisis de Comida con IA**: Toma fotos de tus comidas y obtén información nutricional automática
+- 🍽️ **Registro de Comidas**: Seguimiento detallado de calorías y macronutrientes
+- 💧 **Registro de Hidratación**: Control de consumo diario de agua
+- 📊 **Dashboard Nutricional**: Visualización en tiempo real de tu progreso diario
+- �📅 **Calendario de Entrenamientos**: Seguimiento de progreso y planificación
 - 👥 **Dashboard Administrativo**: Panel de control para gestión de usuarios
 - 🔐 **Autenticación**: Sistema seguro de login y registro
 - 📱 **Multiplataforma**: Web, Android e iOS
@@ -46,6 +50,18 @@
    cp .env.example .env
    # Editar .env con tus claves de Supabase y APIs
    ```
+
+4. **Configurar base de datos en Supabase**
+   ```bash
+   # 1. Ve a tu proyecto en Supabase → SQL Editor
+   # 2. Copia y ejecuta el contenido de: scripts/setup-database.sql
+   # 3. Crea el bucket 'food-photos' en Storage (ver SETUP_INSTRUCTIONS.md)
+   ```
+   
+   📖 **Documentación detallada:**
+   - `docs/DATABASE_SETUP.md` - Schema completo de la base de datos
+   - `docs/SETUP_INSTRUCTIONS.md` - Guía paso a paso de configuración
+   - `docs/CHANGELOG.md` - Resumen de todas las funcionalidades
 
 ### Comandos de Desarrollo
 
