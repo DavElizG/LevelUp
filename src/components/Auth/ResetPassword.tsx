@@ -38,20 +38,34 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin }) => {
       const token = extractToken();
       
       if (!token) {
-        setTokenError('No se encontró el token de recuperación. El enlace puede ser inválido.');
+        // Check if there's an error in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
+        const errorParam = urlParams.get('error') || hashParams?.get('error');
+        const errorDescription = urlParams.get('error_description') || hashParams?.get('error_description');
+        
+        if (errorParam || errorDescription) {
+          setTokenError(errorDescription || 'Error al procesar el enlace de recuperación.');
+        } else {
+          setTokenError('No se encontró el token de recuperación. El enlace puede ser inválido.');
+        }
         setTokenValid(false);
         return;
       }
 
-      // Verify the token with Supabase
-      const result = await verifyRecoveryToken(token);
+      // For clock skew issues, we'll skip validation and let the user try to update password
+      // The actual validation happens when they submit the form
+      setTokenValid(true);
       
-      if (result.success) {
-        setTokenValid(true);
-      } else {
-        setTokenError(result.error || 'El token de recuperación es inválido o ha expirado.');
-        setTokenValid(false);
-      }
+      // Optionally verify in background but don't block the UI
+      verifyRecoveryToken(token).then(result => {
+        if (!result.success && result.error) {
+          console.warn('Token verification warning:', result.error);
+          // Don't block the UI, let user try to update password anyway
+        }
+      }).catch(err => {
+        console.warn('Token verification error:', err);
+      });
     };
 
     validateToken();
