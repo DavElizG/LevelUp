@@ -300,13 +300,30 @@ export const useAuth = () => {
     }
 
     try {
-      // Set the session with the recovery token
-      const { data, error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: '' // Recovery tokens don't need refresh token
+      // Verify token by exchanging it for a valid session
+      // This handles clock skew and validates the token with Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: accessToken,
+        type: 'recovery'
       });
 
-      if (error) throw error;
+      if (error) {
+        // If verifyOtp fails, try setSession as fallback
+        const sessionResult = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: ''
+        });
+
+        if (sessionResult.error) {
+          throw sessionResult.error;
+        }
+
+        if (!sessionResult.data.session) {
+          throw new Error('Token inválido o expirado');
+        }
+
+        return { success: true };
+      }
       
       if (!data.session) {
         throw new Error('Token inválido o expirado');
@@ -315,6 +332,15 @@ export const useAuth = () => {
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error verifying token';
+      
+      // Check if error is related to clock skew
+      if (errorMessage.includes('issued in the future') || errorMessage.includes('clock skew')) {
+        return { 
+          success: false, 
+          error: 'El enlace de recuperación tiene un problema de sincronización. Por favor, verifica la hora de tu dispositivo e intenta nuevamente.' 
+        };
+      }
+      
       return { success: false, error: errorMessage };
     }
   };
