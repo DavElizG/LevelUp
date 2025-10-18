@@ -3,7 +3,7 @@ import BottomNavbar from '../components/shared/BottomNavbar';
 
 const Progress: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-3 border-b border-gray-200">
         <div className="flex items-center justify-between">
