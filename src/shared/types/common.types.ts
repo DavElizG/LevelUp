@@ -2,6 +2,8 @@
 export interface ApiResponse<T = unknown> {
   data: T | null;
   error?: Error | string | null;
+  success: boolean;
+  message?: string;
 }
 
 export interface ApiResponseList<T = unknown> {

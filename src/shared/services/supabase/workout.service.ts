@@ -5,7 +5,11 @@ import type {
   WorkoutRoutine,
   Exercise,
   CreateWorkoutData,
-  UpdateWorkoutData
+  UpdateWorkoutData,
+  ExerciseSearchFilters,
+  WorkoutSession,
+  WorkoutExerciseLog,
+  CreateExerciseLogData
 } from '../../types/index.ts';
 
 /**
@@ -223,7 +227,7 @@ export class SupabaseWorkoutService implements WorkoutService {
     }
   }
 
-  async generateAIWorkout(_preferences: any): Promise<ApiResponse<WorkoutRoutine>> {
+  async generateAIWorkout(_preferences: Record<string, unknown>): Promise<ApiResponse<WorkoutRoutine>> {
     // This method will call the AI microservice
     // For now, return a placeholder response
     return {
@@ -258,6 +262,216 @@ export class SupabaseWorkoutService implements WorkoutService {
         success: false,
         data: null,
         error: error instanceof Error ? error.message : 'Failed to fetch exercises',
+      };
+    }
+  }
+
+  // Implement missing methods required by WorkoutService interface
+  async searchExercises(filters: ExerciseSearchFilters): Promise<ApiResponse<Exercise[]>> {
+    try {
+      let query = supabase.from('exercises').select('*');
+
+      if (filters.muscleGroup) {
+        query = query.eq('muscle_group', filters.muscleGroup);
+      }
+
+      if (filters.category) {
+        query = query.eq('category', filters.category);
+      }
+
+      if (filters.difficulty) {
+        query = query.eq('difficulty', filters.difficulty);
+      }
+
+      if (filters.query) {
+        query = query.ilike('name', `%${filters.query}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || [],
+        message: 'Exercises searched successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to search exercises',
+      };
+    }
+  }
+
+  async startWorkoutSession(routineId: string): Promise<ApiResponse<WorkoutSession>> {
+    try {
+      const { data, error } = await supabase
+        .from('workout_sessions')
+        .insert({
+          workout_routine_id: routineId,
+          start_time: new Date().toISOString(),
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        message: 'Workout session started successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to start workout session',
+      };
+    }
+  }
+
+  async endWorkoutSession(sessionId: string, rating?: number, notes?: string): Promise<ApiResponse<WorkoutSession>> {
+    try {
+      const { data, error } = await supabase
+        .from('workout_sessions')
+        .update({
+          end_time: new Date().toISOString(),
+          status: 'completed',
+          rating,
+          notes
+        })
+        .eq('id', sessionId)
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        message: 'Workout session ended successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to end workout session',
+      };
+    }
+  }
+
+  async logExercise(sessionId: string, exerciseLog: CreateExerciseLogData): Promise<ApiResponse<WorkoutExerciseLog>> {
+    try {
+      const { data, error } = await supabase
+        .from('workout_exercise_logs')
+        .insert({
+          workout_session_id: sessionId,
+          ...exerciseLog
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        message: 'Exercise logged successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to log exercise',
+      };
+    }
+  }
+
+  async getWorkoutSessions(routineId?: string): Promise<ApiResponse<WorkoutSession[]>> {
+    try {
+      let query = supabase.from('workout_sessions').select('*');
+
+      if (routineId) {
+        query = query.eq('workout_routine_id', routineId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || [],
+        message: 'Workout sessions retrieved successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch workout sessions',
+      };
+    }
+  }
+
+  async getSessionDetails(sessionId: string): Promise<ApiResponse<WorkoutSession>> {
+    try {
+      const { data, error } = await supabase
+        .from('workout_sessions')
+        .select('*, workout_exercise_logs(*)')
+        .eq('id', sessionId)
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        message: 'Session details retrieved successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch session details',
       };
     }
   }

@@ -17,100 +17,73 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin }) => {
   const [success, setSuccess] = useState(false);
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const [tokenError, setTokenError] = useState<string>('');
-  const { updatePassword, verifyRecoveryToken, signOutAfterPasswordReset, loading, error } = useAuth();
+  const { updatePassword, signOutAfterPasswordReset, loading, error } = useAuth();
 
   useEffect(() => {
-    // Extract code (PKCE flow) or access_token (Implicit flow) from URL
-    const extractTokenOrCode = (): { type: 'code' | 'token' | null; value: string | null } => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
-      
-      // Check for PKCE code first
-      const code = urlParams.get('code') || hashParams?.get('code');
-      if (code) {
-        return { type: 'code', value: code };
-      }
-      
-      // Check for implicit flow access_token
-      const token = urlParams.get('access_token') || hashParams?.get('access_token');
-      if (token) {
-        return { type: 'token', value: token };
-      }
-      
-      return { type: null, value: null };
-    };
-
-    const validateAndExchangeToken = async () => {
-      const { type, value } = extractTokenOrCode();
-      
-      if (!value) {
-        // Check if there's an error in the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
-        const errorParam = urlParams.get('error') || hashParams?.get('error');
-        const errorDescription = urlParams.get('error_description') || hashParams?.get('error_description');
-        
-        if (errorParam || errorDescription) {
-          setTokenError(errorDescription || 'Error al procesar el enlace de recuperación.');
-        } else {
-          setTokenError('No se encontró el código de recuperación. El enlace puede ser inválido.');
-        }
+    // Supabase detectSessionInUrl automatically handles PKCE code exchange
+    // We just need to wait for the session to be established
+    const checkSession = async () => {
+      if (!supabase) {
+        setTokenError('Error de configuración: cliente de Supabase no disponible.');
         setTokenValid(false);
         return;
       }
 
-      // Handle PKCE code exchange
-      if (type === 'code') {
-        if (!supabase) {
-          setTokenError('Error de configuración: cliente de Supabase no disponible.');
+      // Check if there's a code or token in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
+      
+      const code = urlParams.get('code') || hashParams?.get('code');
+      const token = urlParams.get('access_token') || hashParams?.get('access_token');
+      const errorParam = urlParams.get('error') || hashParams?.get('error');
+      const errorDescription = urlParams.get('error_description') || hashParams?.get('error_description');
+      
+      // Handle errors first
+      if (errorParam || errorDescription) {
+        setTokenError(errorDescription || 'Error al procesar el enlace de recuperación.');
+        setTokenValid(false);
+        return;
+      }
+
+      // If no code or token, it's invalid
+      if (!code && !token) {
+        setTokenError('No se encontró el código de recuperación. El enlace puede ser inválido.');
+        setTokenValid(false);
+        return;
+      }
+
+      // Wait a bit for Supabase to process the URL automatically
+      // detectSessionInUrl: true handles the PKCE exchange
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      try {
+        // Check if session was created
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ Session check failed:', error);
+          setTokenError(error.message || 'El código de recuperación es inválido o ha expirado.');
           setTokenValid(false);
           return;
         }
 
-        try {
-          console.log('🔄 Exchanging PKCE code for session...');
-          const { data, error } = await supabase.auth.exchangeCodeForSession(value);
-          
-          if (error) {
-            console.error('❌ Code exchange failed:', error);
-            setTokenError(error.message || 'El código de recuperación es inválido o ha expirado.');
-            setTokenValid(false);
-            return;
-          }
-          
-          if (data?.session) {
-            console.log('✅ Code exchange successful, session created');
-            setTokenValid(true);
-          } else {
-            setTokenError('No se pudo crear la sesión de recuperación.');
-            setTokenValid(false);
-          }
-        } catch (err) {
-          console.error('❌ Unexpected error during code exchange:', err);
-          setTokenError('Error inesperado al procesar el código de recuperación.');
+        if (session) {
+          console.log('✅ Recovery session detected');
+          setTokenValid(true);
+        } else {
+          // If no session after waiting, the code/token might be invalid
+          setTokenError('El código de recuperación es inválido o ha expirado.');
           setTokenValid(false);
         }
-        return;
-      }
-
-      // Handle implicit flow access_token (legacy)
-      if (type === 'token') {
-        setTokenValid(true);
-        
-        // Optionally verify in background but don't block the UI
-        verifyRecoveryToken(value).then(result => {
-          if (!result.success && result.error) {
-            console.warn('Token verification warning:', result.error);
-            // Don't block the UI, let user try to update password anyway
-          }
-        }).catch(err => {
-          console.warn('Token verification error:', err);
-        });
+      } catch (err) {
+        console.error('❌ Unexpected error checking session:', err);
+        setTokenError('Error inesperado al procesar el código de recuperación.');
+        setTokenValid(false);
       }
     };
 
-    validateAndExchangeToken();
-  }, [verifyRecoveryToken]);
+    checkSession();
+  }, []);
 
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];

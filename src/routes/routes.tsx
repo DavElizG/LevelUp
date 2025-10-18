@@ -14,6 +14,7 @@ import Progress from '../pages/Progress';
 import Nutrition from '../pages/Nutrition';
 import FoodSearchPage from '../pages/FoodSearchPage';
 import FoodPhotoAnalyzerPage from '../pages/FoodPhotoAnalyzerPage';
+import WorkoutExecutionPage from '../pages/WorkoutExecutionPage';
 
 // Route Protection Component
 import ProtectedRoute from './ProtectedRoute.tsx';
@@ -53,6 +54,25 @@ const AppRoutes: React.FC = () => {
       <Route path="/workouts" element={
         <ProtectedRoute>
           <Workouts />
+        </ProtectedRoute>
+      } />
+      
+      {/* Dynamic workout execution routes */}
+      <Route path="/workouts/:routineId" element={
+        <ProtectedRoute>
+          <WorkoutExecutionPage />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/workouts/:routineId/:exerciseIndex" element={
+        <ProtectedRoute>
+          <WorkoutExecutionPage />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/workouts/:routineId/:exerciseIndex/:setNumber" element={
+        <ProtectedRoute>
+          <WorkoutExecutionPage />
         </ProtectedRoute>
       } />
       

@@ -9,6 +9,8 @@ export interface Exercise extends BaseEntity {
   difficultyLevel?: FitnessLevel;
   description?: string;
   instructions?: string;
+  videoUrl?: string;
+  thumbnailUrl?: string;
 }
 
 // Workout Routine (matches Supabase workout_routines table)
@@ -24,6 +26,7 @@ export interface WorkoutRoutine extends BaseEntity {
   aiPrompt?: string;
   aiModel?: string;
   isActive?: boolean;
+  isPublic?: boolean;
   exercises?: RoutineExercise[];
 }
 
@@ -124,6 +127,33 @@ export type UpdateWorkoutSessionData = Partial<CreateWorkoutSessionData>;
 
 export type CreateExerciseLogData = Omit<WorkoutExerciseLog, 'id' | 'createdAt' | 'updatedAt'>;
 
+// Filtros de búsqueda de ejercicios
+export interface ExerciseSearchFilters {
+  query?: string;
+  muscleGroup?: string;
+  category?: string;
+  difficulty?: FitnessLevel;
+  limit?: number;
+}
+
+// Agrupación de ejercicios por día para UI
+export interface WorkoutDay {
+  dayNumber: number;
+  exercises: RoutineExercise[];
+}
+
+// Estado del cronómetro de entrenamiento
+export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
+
+export interface WorkoutTimerState {
+  status: TimerStatus;
+  currentExerciseIndex: number;
+  currentSet: number;
+  elapsedSeconds: number;
+  restTimeRemaining: number;
+  isResting: boolean;
+}
+
 // Workout Service Contract
 export interface WorkoutService {
   getWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>>;
@@ -133,6 +163,7 @@ export interface WorkoutService {
   deleteWorkout(id: string): Promise<ApiResponse<void>>;
   generateAIWorkout(preferences: Record<string, unknown>): Promise<ApiResponse<WorkoutRoutine>>;
   getExercises(): Promise<ApiResponse<Exercise[]>>;
+  searchExercises(filters: ExerciseSearchFilters): Promise<ApiResponse<Exercise[]>>;
   
   // Session management
   startWorkoutSession(routineId: string): Promise<ApiResponse<WorkoutSession>>;

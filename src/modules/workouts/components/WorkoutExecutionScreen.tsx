@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { WorkoutRoutine, ExerciseExecutionState, ActiveWorkoutSession } from '../../../shared/types/workout.types';
 import workoutService from '../services/workoutService';
+import { RestTimerScreen } from './RestTimerScreen';
 
 interface Props {
   routine: WorkoutRoutine;
@@ -16,7 +17,26 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
   const [weightInput, setWeightInput] = useState('');
   const [restTimer, setRestTimer] = useState(0);
   const [isResting, setIsResting] = useState(false);
+  const [showRestScreen, setShowRestScreen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (isResting && restTimer > 0) {
+      const timer = setInterval(() => {
+        setRestTimer(prev => {
+          if (prev <= 1) {
+            setIsResting(false);
+            setShowRestScreen(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isResting, restTimer]);
 
   useEffect(() => {
     const init = async () => {
@@ -55,7 +75,42 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
     init();
   }, [routine]);
 
+  // Handler functions
+  const handleRestComplete = () => {
+    setIsResting(false);
+    setShowRestScreen(false);
+    setRestTimer(0);
+  };
+
+  const handleSkipRest = () => {
+    setIsResting(false);
+    setShowRestScreen(false);
+    setRestTimer(0);
+  };
+
+  const handleBackFromRest = () => {
+    // Pausar el cronómetro pero mantener el tiempo
+    setIsResting(false);
+    setShowRestScreen(false);
+    // El timer se mantiene para poder reanudarlo
+  };
+
   const currentExercise = session?.exercises[currentExerciseIndex];
+
+  // Mostrar pantalla de descanso si está activa
+  if (showRestScreen && currentExercise) {
+    return (
+      <RestTimerScreen
+        restSeconds={restTimer}
+        currentExercise={currentExercise.exercise}
+        currentSet={currentSet}
+        totalSets={currentExercise.totalSets}
+        onRestComplete={handleRestComplete}
+        onSkipRest={handleSkipRest}
+        onBack={handleBackFromRest}
+      />
+    );
+  }
 
   const handleCompleteSet = () => {
     if (!currentExercise || !repsInput) return;
@@ -65,19 +120,21 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
     
     exercise.repsPerformed.push(Number(repsInput));
     exercise.weightUsedKg.push(Number(weightInput) || 0);
-    exercise.currentSet += 1;
 
     setSession(prev => prev ? { ...prev, exercises: updatedExercises } : null);
     setRepsInput('');
     setWeightInput('');
 
     // Si quedan series, iniciar descanso
-    if (exercise.currentSet <= exercise.totalSets) {
-      setCurrentSet(exercise.currentSet);
-      if (exercise.restSeconds) {
+    if (exercise.currentSet < exercise.totalSets) {
+      if (exercise.restSeconds && exercise.restSeconds > 0) {
         setRestTimer(exercise.restSeconds);
         setIsResting(true);
+        setShowRestScreen(true);
       }
+      // Incrementar después de iniciar descanso
+      exercise.currentSet += 1;
+      setCurrentSet(exercise.currentSet);
     } else {
       // Ejercicio completado
       exercise.completed = true;
@@ -86,10 +143,19 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
   };
 
   const handleSkipExercise = () => {
-    if (!session) return;
+    if (!session || !currentExercise) return;
+
+    // Confirmar si el usuario realmente quiere saltar
+    if (!globalThis.confirm(`¿Saltar ${currentExercise.exercise.name}? Las series completadas se guardarán.`)) {
+      return;
+    }
 
     const updatedExercises = [...session.exercises];
-    updatedExercises[currentExerciseIndex].skipped = true;
+    const exercise = updatedExercises[currentExerciseIndex];
+    
+    // Marcar como saltado PERO conservar las series ya completadas
+    exercise.skipped = true;
+    
     setSession({ ...session, exercises: updatedExercises });
     moveToNextExercise();
   };
@@ -145,7 +211,7 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
   };
 
   const handleCancel = async () => {
-    if (session && window.confirm('¿Estás seguro de cancelar el entrenamiento?')) {
+    if (session && globalThis.confirm('¿Estás seguro de cancelar el entrenamiento?')) {
       await workoutService.endWorkoutSession(session.sessionId, undefined, 'Cancelado por usuario');
       onCancel();
     } else if (!session) {
@@ -238,22 +304,27 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
           )}
         </div>
 
-        {/* Rest Timer */}
+        {/* Rest Timer - Compact Design */}
         {isResting && (
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6 text-center">
-            <div className="text-sm text-blue-700 mb-2 font-medium">DESCANSANDO</div>
-            <div className="text-6xl font-bold text-blue-600 mb-2">
-              {Math.floor(restTimer / 60)}:{String(restTimer % 60).padStart(2, '0')}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 mb-6 text-center shadow-lg">
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                <span className="font-semibold">Descansando</span>
+              </div>
+              <div className="text-3xl font-bold">
+                {Math.floor(restTimer / 60)}:{String(restTimer % 60).padStart(2, '0')}
+              </div>
+              <button
+                onClick={() => {
+                  setIsResting(false);
+                  setRestTimer(0);
+                }}
+                className="px-4 py-1 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+              >
+                Saltar
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setIsResting(false);
-                setRestTimer(0);
-              }}
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Saltar descanso
-            </button>
           </div>
         )}
 

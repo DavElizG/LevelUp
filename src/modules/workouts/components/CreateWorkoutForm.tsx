@@ -23,6 +23,9 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
   const [description, setDescription] = useState('');
   const [selected, setSelected] = useState<SelectedExercise[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterMuscle, setFilterMuscle] = useState('');
+  const [filterDifficulty, setFilterDifficulty] = useState('');
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -31,6 +34,32 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
     };
     loadExercises();
   }, []);
+
+  // Filtrar ejercicios
+  const filteredExercises = exercises.filter(ex => {
+    const matchesSearch = !searchQuery || ex.name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Mapeo de filtros español -> inglés
+    const muscleMap: Record<string, string[]> = {
+      'pecho': ['pectorals', 'chest'],
+      'espalda': ['latissimus_dorsi', 'rhomboids', 'back'],
+      'piernas': ['quadriceps', 'hamstrings', 'glutes', 'legs'],
+      'brazos': ['biceps', 'triceps', 'arms'],
+      'hombros': ['anterior_deltoids', 'posterior_deltoids', 'shoulders'],
+      'core': ['rectus_abdominis', 'transverse_abdominis', 'core', 'erector_spinae']
+    };
+    
+    const matchesMuscle = !filterMuscle || 
+      (muscleMap[filterMuscle.toLowerCase()] && 
+       ex.muscleGroups?.some(mg => 
+         muscleMap[filterMuscle.toLowerCase()].some(mapped => 
+           mg.toLowerCase().includes(mapped)
+         )
+       ));
+       
+    const matchesDifficulty = !filterDifficulty || ex.difficultyLevel === filterDifficulty;
+    return matchesSearch && matchesMuscle && matchesDifficulty;
+  });
 
   function toggleExercise(exId: string) {
     setSelected(prev => {
@@ -133,8 +162,47 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
         <label className="block text-base font-semibold text-gray-800 mb-3">
           Ejercicios * ({selected.length} seleccionados)
         </label>
+        
+        {/* Filtros de búsqueda */}
+        <div className="mb-4 space-y-3">
+          <input
+            type="text"
+            placeholder="Buscar ejercicios..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+          />
+          
+          <div className="grid grid-cols-2 gap-3">
+            <select
+              value={filterMuscle}
+              onChange={e => setFilterMuscle(e.target.value)}
+              className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+            >
+              <option value="">Todos los músculos</option>
+              <option value="pecho">Pecho</option>
+              <option value="espalda">Espalda</option>
+              <option value="piernas">Piernas</option>
+              <option value="brazos">Brazos</option>
+              <option value="hombros">Hombros</option>
+              <option value="core">Core</option>
+            </select>
+            
+            <select
+              value={filterDifficulty}
+              onChange={e => setFilterDifficulty(e.target.value)}
+              className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+            >
+              <option value="">Todas las dificultades</option>
+              <option value="beginner">Principiante</option>
+              <option value="intermediate">Intermedio</option>
+              <option value="advanced">Avanzado</option>
+            </select>
+          </div>
+        </div>
+        
         <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2">
-          {exercises.map(ex => {
+          {filteredExercises.map(ex => {
             const sel = selected.find(s => s.exerciseId === ex.id);
             const isSelected = !!sel;
             
@@ -153,6 +221,13 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
                     <div className="text-sm text-gray-600 mt-1">
                       {ex.category} • {ex.muscleGroups?.join(', ')}
                     </div>
+                    {isSelected && sel && (
+                      <div className="mt-2">
+                        <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+                          Día {sel.dayOfWeek} • {sel.sets} series • {sel.restSeconds}s descanso
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <button 
                     type="button" 
@@ -169,7 +244,7 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
 
                 {sel && (
                   <div className="mt-4 pt-3 border-t-2 border-orange-200">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-3 mb-3">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Día</label>
                         <select 
@@ -186,7 +261,7 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
                           <option value={7}>Día 7</option>
                         </select>
                       </div>
-
+                      
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Series</label>
                         <input 
@@ -200,30 +275,7 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Reps (min-max)</label>
-                        <div className="flex gap-1 items-center">
-                          <input 
-                            type="number"
-                            min={1}
-                            max={50}
-                            value={sel.repsMin} 
-                            onChange={e => updateSelected(sel.exerciseId, { repsMin: Number(e.target.value) })} 
-                            className="w-full border-2 border-gray-300 p-2 rounded-md text-sm focus:border-orange-500 focus:outline-none"
-                          />
-                          <span className="text-gray-500">-</span>
-                          <input 
-                            type="number"
-                            min={1}
-                            max={50}
-                            value={sel.repsMax} 
-                            onChange={e => updateSelected(sel.exerciseId, { repsMax: Number(e.target.value) })} 
-                            className="w-full border-2 border-gray-300 p-2 rounded-md text-sm focus:border-orange-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Descanso (seg)</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Descanso</label>
                         <input 
                           type="number"
                           min={15}
@@ -231,6 +283,30 @@ const CreateWorkoutForm: React.FC<Props> = ({ onClose, onCreated }) => {
                           step={15}
                           value={sel.restSeconds} 
                           onChange={e => updateSelected(sel.exerciseId, { restSeconds: Number(e.target.value) })} 
+                          className="w-full border-2 border-gray-300 p-2 rounded-md text-sm focus:border-orange-500 focus:outline-none"
+                          placeholder="60"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Reps (min-max)</label>
+                      <div className="flex gap-1 items-center">
+                        <input 
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={sel.repsMin} 
+                          onChange={e => updateSelected(sel.exerciseId, { repsMin: Number(e.target.value) })} 
+                          className="w-full border-2 border-gray-300 p-2 rounded-md text-sm focus:border-orange-500 focus:outline-none"
+                        />
+                        <span className="text-gray-500">-</span>
+                        <input 
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={sel.repsMax} 
+                          onChange={e => updateSelected(sel.exerciseId, { repsMax: Number(e.target.value) })} 
                           className="w-full border-2 border-gray-300 p-2 rounded-md text-sm focus:border-orange-500 focus:outline-none"
                         />
                       </div>

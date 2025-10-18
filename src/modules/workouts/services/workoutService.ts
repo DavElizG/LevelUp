@@ -1,36 +1,34 @@
-import supabase, { isSupabaseConfigured } from '../../../lib/supabase';
-import type { 
-  WorkoutService, 
-  WorkoutRoutine, 
-  Exercise, 
+import { supabase } from '../../../lib/supabase';
+import type {
+  WorkoutService,
+  WorkoutRoutine,
+  Exercise,
   CreateWorkoutData,
+  ExerciseSearchFilters,
+  ApiResponse,
   WorkoutSession,
-  CreateWorkoutSessionData,
   CreateExerciseLogData,
   WorkoutExerciseLog
-} from '../../../shared/types/workout.types';
+} from '../../../shared/types/index';
 
+// Check if Supabase is properly configured
+const isSupabaseConfigured = !!supabase;
+
+// Mock data for development/fallback
 const mockRoutines: WorkoutRoutine[] = [
-  {
-    id: 'mock-1',
-    userId: 'user-1',
-    name: 'Rutina Full Body (mock)',
-    description: 'Rutina generada - cuerpo completo',
-    goal: 'general',
-    difficultyLevel: 'intermediate',
-    durationWeeks: 4,
-    daysPerWeek: 3,
-    generatedByAi: false,
-    isActive: true,
-    exercises: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
+  // Add mock data if needed
 ];
 
 export const workoutService: WorkoutService = {
-  async getWorkouts() {
-    if (!isSupabaseConfigured || !supabase) return { data: mockRoutines, error: null };
+  async getWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: mockRoutines, 
+        error: null,
+        message: 'Mock data loaded successfully'
+      };
+    }
 
     const { data, error } = await supabase
       .from('workout_routines')
@@ -43,11 +41,23 @@ export const workoutService: WorkoutService = {
       `)
       .order('created_at', { ascending: false });
 
-    return { data: data as WorkoutRoutine[], error };
+    return { 
+      success: !error, 
+      data: data as WorkoutRoutine[] || [], 
+      error,
+      message: error ? 'Failed to fetch workouts' : 'Workouts fetched successfully'
+    };
   },
 
-  async getWorkout(id: string) {
-    if (!isSupabaseConfigured || !supabase) return { data: mockRoutines[0], error: null };
+  async getWorkout(id: string): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: mockRoutines[0] || null, 
+        error: null,
+        message: 'Mock workout loaded successfully'
+      };
+    }
 
     const { data, error } = await supabase
       .from('workout_routines')
@@ -61,15 +71,39 @@ export const workoutService: WorkoutService = {
       .eq('id', id)
       .single();
 
-    return { data: data as WorkoutRoutine, error };
+    return { 
+      success: !error, 
+      data: data as WorkoutRoutine || null, 
+      error,
+      message: error ? 'Failed to fetch workout' : 'Workout fetched successfully'
+    };
   },
 
-  async createWorkout(workout: CreateWorkoutData) {
-    if (!isSupabaseConfigured || !supabase) return { data: mockRoutines[0], error: null };
+  async createWorkout(workout: CreateWorkoutData): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: mockRoutines[0] || null, 
+        error: null,
+        message: 'Mock workout created successfully'
+      };
+    }
 
-    // Insert the routine first (omit nested exercises)
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return { 
+        success: false,
+        data: null, 
+        error: new Error('Usuario no autenticado. Por favor inicia sesión.'),
+        message: 'Authentication required'
+      };
+    }
+
+    // Insert the routine first
     const routinePayload = {
-      user_id: workout.userId ?? null,
+      user_id: user.id,
       name: workout.name,
       description: workout.description ?? null,
       goal: workout.goal ?? null,
@@ -80,10 +114,23 @@ export const workoutService: WorkoutService = {
       ai_prompt: workout.aiPrompt ?? null,
       ai_model: workout.aiModel ?? null,
       is_active: workout.isActive ?? true,
+      is_public: workout.isPublic ?? false,
     };
 
-    const { data: routineData, error: routineError } = await supabase.from('workout_routines').insert(routinePayload).select().single();
-    if (routineError) return { data: null, error: routineError };
+    const { data: routineData, error: routineError } = await supabase
+      .from('workout_routines')
+      .insert(routinePayload)
+      .select()
+      .single();
+
+    if (routineError) {
+      return { 
+        success: false, 
+        data: null, 
+        error: routineError,
+        message: 'Failed to create workout routine'
+      };
+    }
 
     // Insert routine_exercises if any
     if (workout.exercises && workout.exercises.length > 0) {
@@ -100,11 +147,19 @@ export const workoutService: WorkoutService = {
         notes: ex.notes ?? null,
       }));
 
-      const { error: exercisesError } = await supabase.from('routine_exercises').insert(exercisesToInsert);
+      const { error: exercisesError } = await supabase
+        .from('routine_exercises')
+        .insert(exercisesToInsert);
+
       if (exercisesError) {
         // rollback
         await supabase.from('workout_routines').delete().eq('id', routineData.id);
-        return { data: null, error: exercisesError };
+        return { 
+          success: false, 
+          data: null, 
+          error: exercisesError,
+          message: 'Failed to add exercises to routine'
+        };
       }
     }
 
@@ -121,159 +176,273 @@ export const workoutService: WorkoutService = {
       .eq('id', routineData.id)
       .single();
 
-    return { data: data as WorkoutRoutine, error };
-  },
-
-  async updateWorkout(id: string, workout) {
-    if (!isSupabaseConfigured || !supabase) return { data: mockRoutines[0], error: null };
-
-    const { data, error } = await supabase.from('workout_routines').update(workout).eq('id', id).select().single();
-    return { data: data as WorkoutRoutine, error };
-  },
-
-  async deleteWorkout(id: string) {
-    if (!isSupabaseConfigured || !supabase) return { data: null, error: null };
-
-    const { error } = await supabase.from('workout_routines').delete().eq('id', id);
-    return { data: null, error };
-  },
-
-  async generateAIWorkout(_preferences: Record<string, unknown>) {
-    // Placeholder: future integration point for AI generation
-    return { data: mockRoutines[0], error: null };
-  },
-
-  async getExercises() {
-    if (!isSupabaseConfigured || !supabase) return { data: [] as Exercise[], error: null };
-
-    const { data, error } = await supabase.from('exercises').select('*');
-    return { data: data as Exercise[], error };
-  },
-
-  // Session management methods
-  async startWorkoutSession(routineId: string) {
-    if (!isSupabaseConfigured || !supabase) {
-      return { data: null, error: new Error('Supabase no configurado') };
-    }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: null, error: new Error('Usuario no autenticado') };
-    }
-
-    const sessionData: CreateWorkoutSessionData = {
-      userId: user.id,
-      routineId,
-      sessionDate: new Date().toISOString().split('T')[0],
-      startTime: new Date().toISOString(),
+    return { 
+      success: !error, 
+      data: data as WorkoutRoutine || null, 
+      error,
+      message: error ? 'Failed to fetch created routine' : 'Workout created successfully'
     };
+  },
+
+  async updateWorkout(id: string, workout: Partial<CreateWorkoutData>): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: mockRoutines[0] || null, 
+        error: null,
+        message: 'Mock workout updated successfully'
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('workout_routines')
+      .update(workout)
+      .eq('id', id)
+      .select(`
+        *,
+        exercises:routine_exercises(
+          *,
+          exercise:exercises(*)
+        )
+      `)
+      .single();
+
+    return { 
+      success: !error, 
+      data: data as WorkoutRoutine || null, 
+      error,
+      message: error ? 'Failed to update workout' : 'Workout updated successfully'
+    };
+  },
+
+  async deleteWorkout(id: string): Promise<ApiResponse<void>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: null, 
+        error: null,
+        message: 'Mock workout deleted successfully'
+      };
+    }
+
+    const { error } = await supabase
+      .from('workout_routines')
+      .delete()
+      .eq('id', id);
+
+    return { 
+      success: !error, 
+      data: null, 
+      error,
+      message: error ? 'Failed to delete workout' : 'Workout deleted successfully'
+    };
+  },
+
+  async generateAIWorkout(_preferences: Record<string, unknown>): Promise<ApiResponse<WorkoutRoutine>> {
+    // Mock implementation for AI generation
+    return { 
+      success: true, 
+      data: mockRoutines[0] || null, 
+      error: null,
+      message: 'AI workout generated successfully (mock)'
+    };
+  },
+
+  async getExercises(): Promise<ApiResponse<Exercise[]>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: [], 
+        error: null,
+        message: 'Mock exercises loaded successfully'
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('exercises')
+      .select('*');
+
+    return { 
+      success: !error, 
+      data: data as Exercise[] || [], 
+      error,
+      message: error ? 'Failed to fetch exercises' : 'Exercises fetched successfully'
+    };
+  },
+
+  async searchExercises(filters: ExerciseSearchFilters): Promise<ApiResponse<Exercise[]>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        data: [], 
+        error: null,
+        message: 'Mock exercise search completed'
+      };
+    }
+
+    let query = supabase.from('exercises').select('*');
+
+    if (filters.muscleGroup) {
+      query = query.eq('muscle_group', filters.muscleGroup);
+    }
+    if (filters.category) {
+      query = query.eq('category', filters.category);
+    }
+    if (filters.difficulty) {
+      query = query.eq('difficulty', filters.difficulty);
+    }
+    if (filters.query) {
+      query = query.ilike('name', `%${filters.query}%`);
+    }
+    if (filters.limit) {
+      query = query.limit(filters.limit);
+    }
+
+    const { data, error } = await query;
+
+    return { 
+      success: !error, 
+      data: data as Exercise[] || [], 
+      error,
+      message: error ? 'Failed to search exercises' : 'Exercise search completed successfully'
+    };
+  },
+
+  async startWorkoutSession(routineId: string): Promise<ApiResponse<WorkoutSession>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot start workout session'
+      };
+    }
 
     const { data, error } = await supabase
       .from('workout_sessions')
       .insert({
-        user_id: sessionData.userId,
-        routine_id: sessionData.routineId,
-        session_date: sessionData.sessionDate,
-        start_time: sessionData.startTime,
+        workout_routine_id: routineId,
+        start_time: new Date().toISOString(),
+        status: 'active'
       })
       .select()
       .single();
 
-    return { data: data as WorkoutSession, error };
+    return { 
+      success: !error, 
+      data: data as WorkoutSession || null, 
+      error,
+      message: error ? 'Failed to start workout session' : 'Workout session started successfully'
+    };
   },
 
-  async endWorkoutSession(sessionId: string, rating?: number, notes?: string) {
+  async endWorkoutSession(sessionId: string, rating?: number, notes?: string): Promise<ApiResponse<WorkoutSession>> {
     if (!isSupabaseConfigured || !supabase) {
-      return { data: null, error: new Error('Supabase no configurado') };
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot end workout session'
+      };
     }
 
     const { data, error } = await supabase
       .from('workout_sessions')
       .update({
         end_time: new Date().toISOString(),
-        rating: rating ?? null,
-        notes: notes ?? null,
+        status: 'completed',
+        rating,
+        notes
       })
       .eq('id', sessionId)
       .select()
       .single();
 
-    return { data: data as WorkoutSession, error };
+    return { 
+      success: !error, 
+      data: data as WorkoutSession || null, 
+      error,
+      message: error ? 'Failed to end workout session' : 'Workout session ended successfully'
+    };
   },
 
-  async logExercise(sessionId: string, exerciseLog: CreateExerciseLogData) {
+  async logExercise(sessionId: string, exerciseLog: CreateExerciseLogData): Promise<ApiResponse<WorkoutExerciseLog>> {
     if (!isSupabaseConfigured || !supabase) {
-      return { data: null, error: new Error('Supabase no configurado') };
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot log exercise'
+      };
     }
 
     const { data, error } = await supabase
       .from('workout_exercise_logs')
       .insert({
-        session_id: sessionId,
-        exercise_id: exerciseLog.exerciseId,
-        order_performed: exerciseLog.orderPerformed,
-        sets_completed: exerciseLog.setsCompleted,
-        reps_performed: exerciseLog.repsPerformed,
-        weight_used_kg: exerciseLog.weightUsedKg,
-        rest_time_seconds: exerciseLog.restTimeSeconds ?? null,
-        skipped: exerciseLog.skipped,
-        notes: exerciseLog.notes ?? null,
+        workout_session_id: sessionId,
+        ...exerciseLog
       })
       .select()
       .single();
 
-    return { data: data as WorkoutExerciseLog, error };
+    return { 
+      success: !error, 
+      data: data as WorkoutExerciseLog || null, 
+      error,
+      message: error ? 'Failed to log exercise' : 'Exercise logged successfully'
+    };
   },
 
-  async getWorkoutSessions(routineId?: string) {
+  async getWorkoutSessions(routineId?: string): Promise<ApiResponse<WorkoutSession[]>> {
     if (!isSupabaseConfigured || !supabase) {
-      return { data: [], error: null };
+      return { 
+        success: false, 
+        data: [], 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot fetch workout sessions'
+      };
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: [], error: new Error('Usuario no autenticado') };
-    }
-
-    let query = supabase
-      .from('workout_sessions')
-      .select(`
-        *,
-        exerciseLogs:workout_exercise_logs(
-          *,
-          exercise:exercises(*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('session_date', { ascending: false });
+    let query = supabase.from('workout_sessions').select('*');
 
     if (routineId) {
-      query = query.eq('routine_id', routineId);
+      query = query.eq('workout_routine_id', routineId);
     }
 
     const { data, error } = await query;
-    return { data: data as WorkoutSession[], error };
+
+    return { 
+      success: !error, 
+      data: data as WorkoutSession[] || [], 
+      error,
+      message: error ? 'Failed to fetch workout sessions' : 'Workout sessions fetched successfully'
+    };
   },
 
-  async getSessionDetails(sessionId: string) {
+  async getSessionDetails(sessionId: string): Promise<ApiResponse<WorkoutSession>> {
     if (!isSupabaseConfigured || !supabase) {
-      return { data: null, error: new Error('Supabase no configurado') };
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot fetch session details'
+      };
     }
 
     const { data, error } = await supabase
       .from('workout_sessions')
-      .select(`
-        *,
-        exerciseLogs:workout_exercise_logs(
-          *,
-          exercise:exercises(*)
-        )
-      `)
+      .select('*, workout_exercise_logs(*)')
       .eq('id', sessionId)
       .single();
 
-    return { data: data as WorkoutSession, error };
+    return { 
+      success: !error, 
+      data: data as WorkoutSession || null, 
+      error,
+      message: error ? 'Failed to fetch session details' : 'Session details fetched successfully'
+    };
   }
 };
 
+// Export as default for backward compatibility
 export default workoutService;

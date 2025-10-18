@@ -16,7 +16,7 @@ import type {
 export function workoutRoutineToWorkout(routine: WorkoutRoutine): Workout {
   return {
     id: routine.id,
-    userId: routine.userId,
+    userId: routine.userId || 'unknown',
     name: routine.name,
     description: routine.description,
     exercises: routine.exercises?.map(routineExercise => routineExercise.exercise).filter(Boolean) as Exercise[] || [],

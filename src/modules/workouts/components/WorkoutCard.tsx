@@ -89,9 +89,12 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete }) =>
         <div className="flex gap-2">
           <button
             onClick={() => onStart?.(routine)}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
-            ▶ Iniciar
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Iniciar
           </button>
           
           {onEdit && (
@@ -107,7 +110,7 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete }) =>
           {onDelete && (
             <button
               onClick={() => {
-                if (window.confirm(`¿Eliminar la rutina "${routine.name}"?`)) {
+                if (globalThis.confirm(`¿Eliminar la rutina "${routine.name}"?`)) {
                   onDelete(routine.id);
                 }
               }}
