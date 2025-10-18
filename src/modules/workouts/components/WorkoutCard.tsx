@@ -6,9 +6,11 @@ interface Props {
   onStart?: (routine: WorkoutRoutine) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onClone?: (id: string) => void; // Nuevo prop para clonar rutinas públicas
+  isPublic?: boolean; // Flag para saber si es rutina pública
 }
 
-const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete }) => {
+const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onClone, isPublic }) => {
   const exercisesCount = routine.exercises?.length ?? 0;
   const totalSets = routine.exercises?.reduce((sum, ex) => sum + ex.sets, 0) ?? 0;
 
@@ -94,10 +96,23 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete }) =>
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
-            Iniciar
+            {isPublic ? 'Usar' : 'Iniciar'}
           </button>
           
-          {onEdit && (
+          {isPublic && onClone && (
+            <button
+              onClick={() => onClone(routine.id)}
+              className="px-4 py-3 border-2 border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-2"
+              title="Clonar rutina a tu colección"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span className="hidden sm:inline">Clonar</span>
+            </button>
+          )}
+          
+          {!isPublic && onEdit && (
             <button
               onClick={() => onEdit(routine.id)}
               className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -107,7 +122,7 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete }) =>
             </button>
           )}
           
-          {onDelete && (
+          {!isPublic && onDelete && (
             <button
               onClick={() => {
                 if (globalThis.confirm(`¿Eliminar la rutina "${routine.name}"?`)) {

@@ -475,6 +475,226 @@ export class SupabaseWorkoutService implements WorkoutService {
       };
     }
   }
+
+  async getPublicWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('workout_routines')
+        .select(`
+          *,
+          exercises:routine_exercises(
+            *,
+            exercise:exercises(*)
+          )
+        `)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || [],
+        message: 'Public workout routines retrieved successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch public workout routines',
+      };
+    }
+  }
+
+  async getUserWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>> {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        return {
+          success: false,
+          data: null,
+          error: 'User not authenticated',
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('workout_routines')
+        .select(`
+          *,
+          exercises:routine_exercises(
+            *,
+            exercise:exercises(*)
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_public', false)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || [],
+        message: 'User workout routines retrieved successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch user workout routines',
+      };
+    }
+  }
+
+  async clonePublicWorkout(routineId: string): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      // Get authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        return {
+          success: false,
+          data: null,
+          error: 'User not authenticated',
+        };
+      }
+
+      // Get the public routine with all exercises
+      const { data: originalRoutine, error: fetchError } = await supabase
+        .from('workout_routines')
+        .select(`
+          *,
+          exercises:routine_exercises(
+            *,
+            exercise:exercises(*)
+          )
+        `)
+        .eq('id', routineId)
+        .eq('is_public', true)
+        .single();
+
+      if (fetchError || !originalRoutine) {
+        return {
+          success: false,
+          data: null,
+          error: fetchError?.message || 'Routine not found',
+        };
+      }
+
+      // Create new routine for the user
+      const { data: newRoutine, error: createError } = await supabase
+        .from('workout_routines')
+        .insert({
+          user_id: user.id,
+          name: `${originalRoutine.name} (Copia)`,
+          description: originalRoutine.description,
+          difficulty_level: originalRoutine.difficulty_level,
+          days_per_week: originalRoutine.days_per_week,
+          goal: originalRoutine.goal,
+          is_public: false,
+          generated_by_ai: false
+        })
+        .select()
+        .single();
+
+      if (createError || !newRoutine) {
+        return {
+          success: false,
+          data: null,
+          error: createError?.message || 'Failed to create routine',
+        };
+      }
+
+      // Clone all exercises
+      interface RoutineExerciseData {
+        exercise_id: string;
+        day_of_week: number;
+        order_in_day: number;
+        sets: number;
+        reps_min: number;
+        reps_max: number;
+        rest_seconds: number;
+        notes?: string;
+      }
+      
+      const routineWithExercises = originalRoutine as unknown as {
+        exercises: RoutineExerciseData[];
+      };
+      
+      const exercisesToClone = routineWithExercises.exercises.map((ex) => ({
+        routine_id: newRoutine.id,
+        exercise_id: ex.exercise_id,
+        day_of_week: ex.day_of_week,
+        order_in_day: ex.order_in_day,
+        sets: ex.sets,
+        reps_min: ex.reps_min,
+        reps_max: ex.reps_max,
+        rest_seconds: ex.rest_seconds,
+        notes: ex.notes
+      }));
+
+      const { error: exercisesError } = await supabase
+        .from('routine_exercises')
+        .insert(exercisesToClone);
+
+      if (exercisesError) {
+        // Rollback: delete the created routine
+        await supabase.from('workout_routines').delete().eq('id', newRoutine.id);
+        
+        return {
+          success: false,
+          data: null,
+          error: exercisesError.message,
+        };
+      }
+
+      // Fetch the complete cloned routine
+      const { data: completeRoutine, error: finalError } = await supabase
+        .from('workout_routines')
+        .select(`
+          *,
+          exercises:routine_exercises(
+            *,
+            exercise:exercises(*)
+          )
+        `)
+        .eq('id', newRoutine.id)
+        .single();
+
+      if (finalError) {
+        return {
+          success: false,
+          data: null,
+          error: finalError.message,
+        };
+      }
+
+      return {
+        success: true,
+        data: completeRoutine,
+        message: 'Routine cloned successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to clone routine',
+      };
+    }
+  }
 }
 
 // Export instance

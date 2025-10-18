@@ -171,4 +171,9 @@ export interface WorkoutService {
   logExercise(sessionId: string, exerciseLog: CreateExerciseLogData): Promise<ApiResponse<WorkoutExerciseLog>>;
   getWorkoutSessions(routineId?: string): Promise<ApiResponse<WorkoutSession[]>>;
   getSessionDetails(sessionId: string): Promise<ApiResponse<WorkoutSession>>;
+  
+  // Public and user routines
+  getPublicWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>>;
+  getUserWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>>;
+  clonePublicWorkout(routineId: string): Promise<ApiResponse<WorkoutRoutine>>;
 }

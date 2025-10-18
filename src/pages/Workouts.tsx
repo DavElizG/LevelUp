@@ -10,6 +10,7 @@ import type { WorkoutRoutine } from '../shared/types/workout.types';
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
   const [workouts, setWorkouts] = useState<WorkoutRoutine[]>([]);
+  const [publicWorkouts, setPublicWorkouts] = useState<WorkoutRoutine[]>([]);
   const [activeRoutine, setActiveRoutine] = useState<WorkoutRoutine | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -17,8 +18,15 @@ const Workouts: React.FC = () => {
 
   const loadWorkouts = async () => {
     setLoading(true);
-    const res = await workoutService.getWorkouts();
-    if (res?.data) setWorkouts(res.data);
+    
+    // Cargar rutinas del usuario
+    const userRes = await workoutService.getUserWorkouts();
+    if (userRes?.data) setWorkouts(userRes.data);
+    
+    // Cargar rutinas públicas
+    const publicRes = await workoutService.getPublicWorkouts();
+    if (publicRes?.data) setPublicWorkouts(publicRes.data);
+    
     setLoading(false);
   };
 
@@ -47,6 +55,17 @@ const Workouts: React.FC = () => {
     if (res.error) {
       alert('Error al eliminar la rutina');
     } else {
+      loadWorkouts();
+    }
+  };
+
+  const handleCloneRoutine = async (id: string) => {
+    const res = await workoutService.clonePublicWorkout(id);
+    if (res.error) {
+      const errorMsg = typeof res.error === 'string' ? res.error : res.error.message;
+      alert('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
+    } else {
+      alert('✅ Rutina clonada exitosamente a tu colección');
       loadWorkouts();
     }
   };
@@ -116,11 +135,6 @@ const Workouts: React.FC = () => {
         </div>
 
         {/* Main Content - Workouts Grid */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Tus Rutinas</h2>
-          <p className="text-gray-600">Selecciona una rutina para comenzar a entrenar</p>
-        </div>
-
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
@@ -130,14 +144,14 @@ const Workouts: React.FC = () => {
           </div>
         ) : null}
 
-        {!loading && workouts.length === 0 ? (
+        {!loading && workouts.length === 0 && publicWorkouts.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-md p-12 text-center">
             <div className="text-6xl mb-4">🏋️</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               No tienes rutinas todavía
             </h3>
             <p className="text-gray-600 mb-6">
-              Crea tu primera rutina para comenzar a entrenar
+              Crea tu primera rutina o usa una de las rutinas populares
             </p>
             <button 
               onClick={() => setShowCreate(true)}
@@ -148,18 +162,47 @@ const Workouts: React.FC = () => {
           </div>
         ) : null}
 
-        {!loading && workouts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {workouts.map((workout) => (
-              <WorkoutCard 
-                key={workout.id} 
-                routine={workout} 
-                onStart={handleStartRoutine}
-                onDelete={handleDeleteRoutine}
-              />
-            ))}
+        {!loading && workouts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Mis Rutinas</h2>
+            <p className="text-gray-600 mb-6">Rutinas personalizadas que has creado</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {workouts.map((workout) => (
+                <WorkoutCard 
+                  key={workout.id} 
+                  routine={workout} 
+                  onStart={handleStartRoutine}
+                  onDelete={handleDeleteRoutine}
+                  isPublic={false}
+                />
+              ))}
+            </div>
           </div>
-        ) : null}
+        )}
+
+        {!loading && publicWorkouts.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Rutinas Populares</h2>
+                <p className="text-gray-600">
+                  Rutinas profesionales diseñadas por expertos. Clónalas para empezar a entrenar.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {publicWorkouts.map((workout) => (
+                <WorkoutCard 
+                  key={workout.id} 
+                  routine={workout} 
+                  onStart={handleStartRoutine}
+                  onClone={handleCloneRoutine}
+                  isPublic={true}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <BottomNavbar />
