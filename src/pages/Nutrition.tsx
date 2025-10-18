@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { useProfile } from '../hooks/useProfile';
+import { calculateCaloriesFromProfile, getCalorieProgress } from '../shared/utils/calorieCalculator';
+import type { CalorieCalculationResult } from '../shared/utils/calorieCalculator';
 import BottomNavbar from '../components/shared/BottomNavbar';
 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useProfile(user?.id);
+  
   type MealType = 'breakfast' | 'lunch' | 'snack' | 'dinner';
   interface MealLog {
     id: string;
@@ -22,6 +29,19 @@ const Nutrition: React.FC = () => {
   const [macros, setMacros] = useState({calories: 0, protein: 0, carbs: 0, fat: 0});
   const [waterIntake, setWaterIntake] = useState(0); // in mL
   const [waterGoal] = useState(2500); // 2.5L in mL
+  const [calorieData, setCalorieData] = useState<CalorieCalculationResult | null>(null);
+
+  // Calculate personalized calories when profile is loaded
+  useEffect(() => {
+    if (profile) {
+      try {
+        const result = calculateCaloriesFromProfile(profile);
+        setCalorieData(result);
+      } catch (err) {
+        console.error('Error calculating calories:', err);
+      }
+    }
+  }, [profile]);
 
   const fetchData = async () => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -108,29 +128,27 @@ const Nutrition: React.FC = () => {
     snack: [],
     dinner: []
   };
-  meals.forEach((meal) => {
+  for (const meal of meals) {
     groupedMeals[meal.meal_type].push(meal);
-  });
+  }
 
-  // Objetivos (puedes hacerlos dinámicos si tienes en la DB)
-  const calorieGoal = 2400;
-  const proteinGoal = 120;
-  const carbGoal = 180;
-  const fatGoal = 65;
+  // Calcular progreso de calorías
+  const calorieProgress = calorieData 
+    ? getCalorieProgress(macros.calories, calorieData.targetCalories)
+    : null;
+
+  // Usar objetivos personalizados o valores por defecto
+  const calorieGoal = calorieData?.targetCalories || 2400;
+  const proteinGoal = calorieData?.macros.protein_g || 120;
+  const carbGoal = calorieData?.macros.carbs_g || 180;
+  const fatGoal = calorieData?.macros.fat_g || 65;
 
   // Formatear litros con 1 decimal
   const formatLiters = (ml: number) => (ml / 1000).toFixed(1);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-medium text-gray-900">Mi Plan Nutricional</h1>
-          <div className="text-sm text-gray-500">19:02</div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50 pb-24">
+     
       {/* Content */}
       <div className="p-6">
         {/* Daily Summary */}
@@ -172,21 +190,21 @@ const Nutrition: React.FC = () => {
           {/* Macros */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-lg font-bold text-orange-500">{macros.protein}g</div>
+              <div className="text-lg font-bold text-orange-500">{macros.protein.toFixed(1)}g</div>
               <div className="text-sm text-gray-600">Proteínas</div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                 <div className="bg-orange-500 h-2 rounded-full" style={{width: `${Math.min(100, macros.protein/proteinGoal*100)}%`}}></div>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-green-500">{macros.carbs}g</div>
+              <div className="text-lg font-bold text-green-500">{macros.carbs.toFixed(1)}g</div>
               <div className="text-sm text-gray-600">Carbohidratos</div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                 <div className="bg-green-500 h-2 rounded-full" style={{width: `${Math.min(100, macros.carbs/carbGoal*100)}%`}}></div>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-blue-500">{macros.fat}g</div>
+              <div className="text-lg font-bold text-blue-500">{macros.fat.toFixed(1)}g</div>
               <div className="text-sm text-gray-600">Grasas</div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                 <div className="bg-blue-500 h-2 rounded-full" style={{width: `${Math.min(100, macros.fat/fatGoal*100)}%`}}></div>
@@ -198,7 +216,7 @@ const Nutrition: React.FC = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <button 
-            onClick={() => navigate('/food-search', { state: { mealType: 'any' } })}
+            onClick={() => navigate('/food-search', { state: { mealType: 'lunch' } })}
             className="bg-pink-500 rounded-2xl p-4 text-white"
           >
             <div className="flex items-center justify-center mb-2">
@@ -210,7 +228,7 @@ const Nutrition: React.FC = () => {
           </button>
           
           <button 
-            onClick={() => navigate('/food-photo-analyzer')}
+            onClick={() => navigate('/food-photo-analyzer', { state: { mealType: 'lunch' } })}
             className="bg-purple-600 rounded-2xl p-4 text-white"
           >
             <div className="flex items-center justify-center mb-2">
@@ -222,6 +240,56 @@ const Nutrition: React.FC = () => {
             <span className="text-sm font-medium">Foto con IA</span>
           </button>
         </div>
+
+        {/* Personalized Calorie Info */}
+        {calorieData && calorieProgress && (
+          <div className="bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl p-6 mb-6 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Tu Plan Personalizado</h3>
+              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
+                {calorieProgress.status === 'on_track' && '✅ En Meta'}
+                {calorieProgress.status === 'under' && '⚠️ Por Debajo'}
+                {calorieProgress.status === 'over' && '⚠️ Excedido'}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="bg-white/10 rounded-xl p-3">
+                <div className="text-xs opacity-90 mb-1">Metabolismo Basal</div>
+                <div className="text-2xl font-bold">{calorieData.bmr}</div>
+                <div className="text-xs opacity-75">kcal/día</div>
+              </div>
+              <div className="bg-white/10 rounded-xl p-3">
+                <div className="text-xs opacity-90 mb-1">Factor Actividad</div>
+                <div className="text-2xl font-bold">{calorieData.activityFactor}x</div>
+                <div className="text-xs opacity-75">multiplicador</div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 rounded-xl p-4">
+              <div className="text-sm opacity-90 mb-2">{calorieProgress.message}</div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold">{macros.calories}</span>
+                <span className="text-lg opacity-75">/ {calorieData.targetCalories} kcal</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-2 mt-3">
+                <div 
+                  className="bg-white h-2 rounded-full transition-all duration-500" 
+                  style={{width: `${Math.min(100, calorieProgress.percentage)}%`}}
+                ></div>
+              </div>
+              <div className="text-xs opacity-75 mt-2 text-right">{calorieProgress.percentage}%</div>
+            </div>
+
+            {calorieData.adjustment !== 0 && (
+              <div className="mt-4 text-xs opacity-90 text-center">
+                {calorieData.adjustment > 0 ? '📈' : '📉'} 
+                {' '}Ajuste: {calorieData.adjustment > 0 ? '+' : ''}{calorieData.adjustment} kcal
+                {' '}(según tu objetivo de fitness)
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Comidas de Hoy - Detailed View */}
         <div className="bg-white rounded-2xl p-6 mb-6">
