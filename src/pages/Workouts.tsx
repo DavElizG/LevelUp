@@ -173,6 +173,7 @@ const Workouts: React.FC = () => {
                   routine={workout} 
                   onStart={handleStartRoutine}
                   onDelete={handleDeleteRoutine}
+                  onPreview={(id) => navigate(`/workouts/${id}/preview`)}
                   isPublic={false}
                 />
               ))}
@@ -197,6 +198,7 @@ const Workouts: React.FC = () => {
                   routine={workout} 
                   onStart={handleStartRoutine}
                   onClone={handleCloneRoutine}
+                  onPreview={(id) => navigate(`/workouts/${id}/preview`)}
                   isPublic={true}
                 />
               ))}

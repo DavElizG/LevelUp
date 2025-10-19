@@ -176,4 +176,57 @@ export interface WorkoutService {
   getPublicWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>>;
   getUserWorkouts(): Promise<ApiResponse<WorkoutRoutine[]>>;
   clonePublicWorkout(routineId: string): Promise<ApiResponse<WorkoutRoutine>>;
+
+  // Granular editing methods
+  updateWorkoutBasicInfo(
+    routineId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      goal?: string;
+      difficultyLevel?: string;
+      daysPerWeek?: number;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>>;
+
+  moveExerciseToDay(
+    routineExerciseId: string,
+    newDayOfWeek: number,
+    newOrderInDay?: number
+  ): Promise<ApiResponse<WorkoutRoutine>>;
+
+  updateRoutineExercise(
+    routineExerciseId: string,
+    updates: {
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>>;
+
+  removeExerciseFromRoutine(routineExerciseId: string): Promise<ApiResponse<WorkoutRoutine>>;
+
+  addExerciseToRoutine(
+    routineId: string,
+    exerciseId: string,
+    dayOfWeek: number,
+    options?: {
+      orderInDay?: number;
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>>;
+
+  reorderExercisesInDay(
+    routineId: string,
+    dayOfWeek: number,
+    exerciseOrders: Array<{ id: string; order: number }>
+  ): Promise<ApiResponse<WorkoutRoutine>>;
 }

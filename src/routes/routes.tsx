@@ -9,7 +9,7 @@ import { Auth } from '../components/Auth';
 import Setup from '../components/Setup/Setup';
 
 // Page Components
-import { Dashboard, Profile, Workouts, Diet, Settings } from '../pages';
+import { Dashboard, Profile, Workouts, Diet, Settings, WorkoutPreviewPage, WorkoutEditPage } from '../pages';
 import Progress from '../pages/Progress';
 import Nutrition from '../pages/Nutrition';
 import FoodSearchPage from '../pages/FoodSearchPage';
@@ -54,6 +54,20 @@ const AppRoutes: React.FC = () => {
       <Route path="/workouts" element={
         <ProtectedRoute>
           <Workouts />
+        </ProtectedRoute>
+      } />
+      
+      {/* Workout preview route - must come before dynamic routes */}
+      <Route path="/workouts/:id/preview" element={
+        <ProtectedRoute>
+          <WorkoutPreviewPage />
+        </ProtectedRoute>
+      } />
+
+      {/* Workout edit route */}
+      <Route path="/workouts/:id/edit" element={
+        <ProtectedRoute>
+          <WorkoutEditPage />
         </ProtectedRoute>
       } />
       
