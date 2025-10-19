@@ -1,9 +1,14 @@
 // Common types used across the application
 export interface ApiResponse<T = unknown> {
   data: T | null;
+  error?: Error | string | null;
   success: boolean;
   message?: string;
-  error?: string;
+}
+
+export interface ApiResponseList<T = unknown> {
+  data: T[];
+  error?: Error | string | null;
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {

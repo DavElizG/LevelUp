@@ -1,28 +1,89 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Check } from 'lucide-react';
+import { Lock, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabase';
 import AuthLayout from './AuthLayout';
 
 interface ResetPasswordProps {
   onBackToLogin: () => void;
-  accessToken?: string;
 }
 
-const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin, accessToken }) => {
+const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin }) => {
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+  const [tokenError, setTokenError] = useState<string>('');
   const { updatePassword, signOutAfterPasswordReset, loading, error } = useAuth();
 
   useEffect(() => {
-    // If no access token is provided, redirect back to login
-    if (!accessToken) {
-      onBackToLogin();
-    }
-  }, [accessToken, onBackToLogin]);
+    // Supabase detectSessionInUrl automatically handles PKCE code exchange
+    // We just need to wait for the session to be established
+    const checkSession = async () => {
+      if (!supabase) {
+        setTokenError('Error de configuración: cliente de Supabase no disponible.');
+        setTokenValid(false);
+        return;
+      }
+
+      // Check if there's a code or token in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
+      
+      const code = urlParams.get('code') || hashParams?.get('code');
+      const token = urlParams.get('access_token') || hashParams?.get('access_token');
+      const errorParam = urlParams.get('error') || hashParams?.get('error');
+      const errorDescription = urlParams.get('error_description') || hashParams?.get('error_description');
+      
+      // Handle errors first
+      if (errorParam || errorDescription) {
+        setTokenError(errorDescription || 'Error al procesar el enlace de recuperación.');
+        setTokenValid(false);
+        return;
+      }
+
+      // If no code or token, it's invalid
+      if (!code && !token) {
+        setTokenError('No se encontró el código de recuperación. El enlace puede ser inválido.');
+        setTokenValid(false);
+        return;
+      }
+
+      // Wait a bit for Supabase to process the URL automatically
+      // detectSessionInUrl: true handles the PKCE exchange
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      try {
+        // Check if session was created
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ Session check failed:', error);
+          setTokenError(error.message || 'El código de recuperación es inválido o ha expirado.');
+          setTokenValid(false);
+          return;
+        }
+
+        if (session) {
+          console.log('✅ Recovery session detected');
+          setTokenValid(true);
+        } else {
+          // If no session after waiting, the code/token might be invalid
+          setTokenError('El código de recuperación es inválido o ha expirado.');
+          setTokenValid(false);
+        }
+      } catch (err) {
+        console.error('❌ Unexpected error checking session:', err);
+        setTokenError('Error inesperado al procesar el código de recuperación.');
+        setTokenValid(false);
+      }
+    };
+
+    checkSession();
+  }, []);
 
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
@@ -93,6 +154,50 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBackToLogin, accessToke
       }, 3000);
     }
   };
+
+  // Loading state while validating token
+  if (tokenValid === null) {
+    return (
+      <AuthLayout>
+        <div className="text-center space-y-6">
+          <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-600">Validando enlace de recuperación...</p>
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  // Invalid token state
+  if (tokenValid === false) {
+    return (
+      <AuthLayout>
+        <div className="text-center space-y-6">
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Enlace inválido o expirado
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {tokenError}
+            </p>
+            <p className="text-sm text-gray-500">
+              Por favor, solicita un nuevo enlace de recuperación de contraseña.
+            </p>
+          </div>
+
+          <button
+            onClick={onBackToLogin}
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-full transition-colors"
+          >
+            Volver al inicio de sesión
+          </button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (success) {
     return (
