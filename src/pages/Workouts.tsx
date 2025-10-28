@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNavbar from '../components/shared/BottomNavbar';
-import WorkoutCard from '../modules/workouts/components/WorkoutCard';
-import CreateWorkoutForm from '../modules/workouts/components/CreateWorkoutForm';
-import WorkoutExecutionScreen from '../modules/workouts/components/WorkoutExecutionScreen';
+import { WorkoutSkeletonGrid } from '../components/shared/WorkoutSkeleton';
+import WorkoutCard from '../modules/workouts/components/cards/WorkoutCard';
+import { CreateWorkoutFormImproved } from '../modules/workouts/components/forms/CreateWorkoutFormImproved';
+import WorkoutExecutionScreen from '../modules/workouts/components/execution/WorkoutExecutionScreen';
 import workoutService from '../modules/workouts/services/workoutService';
-import type { WorkoutRoutine } from '../shared/types/workout.types';
+import type { WorkoutRoutine, CreateWorkoutData } from '../shared/types/workout.types';
+import { toast } from '../hooks/useNotification';
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
@@ -42,7 +44,7 @@ const Workouts: React.FC = () => {
   const handleCompleteWorkout = () => {
     setIsExecuting(false);
     setActiveRoutine(null);
-    alert('¡Entrenamiento completado! 🎉');
+    toast.success('¡Entrenamiento completado! 🎉');
   };
 
   const handleCancelWorkout = () => {
@@ -53,7 +55,7 @@ const Workouts: React.FC = () => {
   const handleDeleteRoutine = async (id: string) => {
     const res = await workoutService.deleteWorkout(id);
     if (res.error) {
-      alert('Error al eliminar la rutina');
+      toast.error('Error al eliminar la rutina');
     } else {
       loadWorkouts();
     }
@@ -63,9 +65,9 @@ const Workouts: React.FC = () => {
     const res = await workoutService.clonePublicWorkout(id);
     if (res.error) {
       const errorMsg = typeof res.error === 'string' ? res.error : res.error.message;
-      alert('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
+      toast.error('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
     } else {
-      alert('✅ Rutina clonada exitosamente a tu colección');
+      toast.success('✅ Rutina clonada exitosamente a tu colección');
       loadWorkouts();
     }
   };
@@ -85,25 +87,20 @@ const Workouts: React.FC = () => {
   if (showCreate) {
     return (
       <div className="min-h-screen bg-gray-50 pb-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Crear Rutina</h1>
-            <button 
-              onClick={() => setShowCreate(false)} 
-              className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
-            >
-              ✕ Cerrar
-            </button>
-          </div>
-
-          <CreateWorkoutForm 
-            onCreated={() => { 
+        <CreateWorkoutFormImproved 
+          onCreated={async (data: CreateWorkoutData) => {
+            // Crear la rutina usando el servicio
+            const result = await workoutService.createWorkout(data);
+            if (result?.data) {
+              toast.success('✅ Rutina creada exitosamente');
               setShowCreate(false); 
-              loadWorkouts(); 
-            }} 
-            onClose={() => setShowCreate(false)} 
-          />
-        </div>
+              await loadWorkouts();
+            } else {
+              toast.error('❌ Error al crear la rutina');
+            }
+          }} 
+          onClose={() => setShowCreate(false)} 
+        />
 
         <BottomNavbar />
       </div>
@@ -147,11 +144,12 @@ const Workouts: React.FC = () => {
 
         {/* Main Content - Workouts Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-orange-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Cargando rutinas...</p>
+          <div className="mb-12">
+            <div className="mb-6">
+              <div className="h-8 bg-gray-200 rounded-lg w-48 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
             </div>
+            <WorkoutSkeletonGrid count={6} />
           </div>
         ) : null}
 

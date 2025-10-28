@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTimer } from '../hooks/useTimer';
+import { useTimer } from '../../hooks/useTimer';
 
 interface Props {
   initialSeconds?: number;

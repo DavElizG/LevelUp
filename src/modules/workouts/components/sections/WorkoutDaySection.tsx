@@ -1,6 +1,6 @@
 import React from 'react';
-import type { RoutineExercise } from '../../../shared/types/workout.types';
-import { WorkoutExerciseCard } from './WorkoutExerciseCard';
+import type { RoutineExercise } from '../../../../shared/types/workout.types';
+import { WorkoutExerciseCard } from '../cards/WorkoutExerciseCard';
 //import { WorkoutExerciseCard } from './WorkoutExerciseCard';
 
 interface WorkoutDaySectionProps {

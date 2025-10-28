@@ -15,6 +15,7 @@ import {
 import { useWorkoutSession } from '../modules/workouts/hooks';
 import workoutService from '../modules/workouts/services/workoutService';
 import type { Exercise, RoutineExercise } from '../shared/types/workout.types';
+import { toast, confirm } from '../hooks/useNotification';
 
 interface WorkoutExecutionPageProps {
   routineId?: string;
@@ -226,13 +227,13 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
   // Handlers
   const handleCompleteSet = async () => {
     if (reps === 0) {
-      alert('⚠️ Por favor ingresa las repeticiones realizadas');
+      toast.warning('⚠️ Por favor ingresa las repeticiones realizadas');
       return;
     }
 
     // Validar que no se exceda el máximo de series
     if (progress.setNumber > totalSets) {
-      alert('⚠️ Ya completaste todas las series de este ejercicio');
+      toast.warning('⚠️ Ya completaste todas las series de este ejercicio');
       return;
     }
     
@@ -248,7 +249,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         startRestCountdown(recommendedRestTime);
         await startRest(recommendedRestTime);
       } else {
-        alert('✅ ¡Ejercicio completado! Pasa al siguiente cuando estés listo.');
+        toast.success('✅ ¡Ejercicio completado! Pasa al siguiente cuando estés listo.');
       }
     }
     setIsSaving(false);
@@ -266,13 +267,31 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
     
     if (isLast) {
       // Es el último ejercicio del día
-      const shouldComplete = globalThis.confirm('¡Has completado todos los ejercicios del día! ¿Terminar rutina por hoy?');
+      const shouldComplete = await confirm(
+        '¡Completar día!',
+        '¡Has completado todos los ejercicios del día! ¿Terminar rutina por hoy?',
+        {
+          confirmText: 'Completar',
+          cancelText: 'Continuar',
+          type: 'info'
+        }
+      );
+      
       if (shouldComplete) {
         await completeSession();
         
         // Verificar si hay más días
         if (routineData && currentDay < routineData.totalDays) {
-          const goToNextDay = globalThis.confirm(`¡Excelente trabajo! ¿Quieres empezar el Día ${currentDay + 1}?`);
+          const goToNextDay = await confirm(
+            '¡Excelente trabajo!',
+            `¿Quieres empezar el Día ${currentDay + 1}?`,
+            {
+              confirmText: 'Comenzar',
+              cancelText: 'Terminar',
+              type: 'info'
+            }
+          );
+          
           if (goToNextDay) {
             setCurrentDay(currentDay + 1);
             navigate(`/workouts/${routineId}/0/1`, { replace: true });
@@ -280,7 +299,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
             navigate('/workouts');
           }
         } else {
-          alert('🎉 ¡Rutina completada! Has terminado todos los días.');
+          toast.success('🎉 ¡Rutina completada! Has terminado todos los días.');
           navigate('/workouts');
         }
       }
@@ -288,13 +307,22 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
       // No es el último, continuar normalmente
       const success = await nextExercise(true);
       if (!success) {
-        alert('⚠️ Error al pasar al siguiente ejercicio');
+        toast.error('⚠️ Error al pasar al siguiente ejercicio');
       }
     }
   };
 
   const handleSkipExercise = async () => {
-    const shouldSkip = globalThis.confirm('¿Saltar este ejercicio sin guardarlo como completado?');
+    const shouldSkip = await confirm(
+      'Saltar ejercicio',
+      '¿Saltar este ejercicio sin guardarlo como completado?',
+      {
+        confirmText: 'Saltar',
+        cancelText: 'Continuar',
+        type: 'warning'
+      }
+    );
+    
     if (shouldSkip) {
       const success = await nextExercise(false);
       if (success && isWorkoutComplete()) {
@@ -317,8 +345,18 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
     return success;
   };
 
-  const handleExit = () => {
-    if (globalThis.confirm('¿Seguro que quieres salir? Tu progreso se guardará.')) {
+  const handleExit = async () => {
+    const shouldExit = await confirm(
+      'Salir del entrenamiento',
+      '¿Seguro que quieres salir? Tu progreso se guardará.',
+      {
+        confirmText: 'Salir',
+        cancelText: 'Continuar',
+        type: 'warning'
+      }
+    );
+    
+    if (shouldExit) {
       navigate('/workouts');
     }
   };

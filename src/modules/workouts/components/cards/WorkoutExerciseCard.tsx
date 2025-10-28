@@ -1,6 +1,6 @@
 import React from 'react';
-import type { RoutineExercise } from '../../../shared/types/workout.types';
-import { calculateAutoRestTime, formatRestTime } from '../utils/restCalculator';
+import type { RoutineExercise } from '../../../../shared/types/workout.types';
+import { calculateAutoRestTime, formatRestTime } from '../../utils/restCalculator';
 
 interface WorkoutExerciseCardProps {
   exercise: RoutineExercise;

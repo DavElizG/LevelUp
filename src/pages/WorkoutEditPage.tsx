@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { workoutService } from '../modules/workouts/services/workoutService';
 import type { WorkoutRoutine, RoutineExercise } from '../shared/types';
+import { toast, confirm } from '../hooks/useNotification';
 
 interface DraggingState {
   exerciseId: string;
@@ -141,11 +142,11 @@ export const WorkoutEditPage = () => {
         setRoutine(res.data);
       } else {
         console.error('Error moving exercise:', res.error);
-        alert('Error al mover ejercicio');
+        toast.error('Error al mover ejercicio');
       }
     } catch (err) {
       console.error('Error moving exercise:', err);
-      alert('Error al mover ejercicio');
+      toast.error('Error al mover ejercicio');
     } finally {
       setSaving(false);
       setDragging(null);
@@ -172,11 +173,11 @@ export const WorkoutEditPage = () => {
         setRoutine(res.data);
       } else {
         console.error('Error moving exercise:', res.error);
-        alert('Error al mover ejercicio');
+        toast.error('Error al mover ejercicio');
       }
     } catch (err) {
       console.error('Error moving exercise:', err);
-      alert('Error al mover ejercicio');
+      toast.error('Error al mover ejercicio');
     } finally {
       setSaving(false);
     }
@@ -220,7 +221,17 @@ export const WorkoutEditPage = () => {
   };
 
   const removeExercise = async (exerciseId: string) => {
-    if (!confirm('¿Eliminar este ejercicio de la rutina?')) return;
+    const confirmed = await confirm(
+      'Eliminar ejercicio',
+      '¿Estás seguro de eliminar este ejercicio de la rutina?',
+      {
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        type: 'danger'
+      }
+    );
+    
+    if (!confirmed) return;
 
     setSaving(true);
 
@@ -605,7 +616,7 @@ export const WorkoutEditPage = () => {
                 {/* Botón agregar ejercicio */}
                 <button
                   onClick={() => {
-                    alert('Para agregar ejercicios, usa la aplicación web completa o contacta al administrador');
+                    toast.info('Para agregar ejercicios, usa la aplicación web completa o contacta al administrador');
                   }}
                   className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-orange-400 hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
                 >

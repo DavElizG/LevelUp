@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { aiService } from '../shared/services/ai/microservice';
-import { Dumbbell, Target, Clock, TrendingUp, Zap, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Dumbbell, Target, Clock, TrendingUp, Zap, AlertCircle, CheckCircle } from 'lucide-react';
+import WorkoutGenerationSkeleton from '../components/shared/WorkoutGenerationSkeleton';
 
 interface WorkoutFormData {
   goal: string;
@@ -129,18 +130,15 @@ const WorkoutGeneratorPage: React.FC = () => {
   ];
 
   if (profileLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20">
-        <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando perfil...</p>
-        </div>
-      </div>
-    );
+    return <WorkoutGenerationSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <>
+      {/* Show skeleton during AI generation */}
+      {generating && <WorkoutGenerationSkeleton />}
+      
+      <div className="min-h-screen bg-gray-50 pb-24">
       <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -368,7 +366,7 @@ const WorkoutGeneratorPage: React.FC = () => {
         >
           {generating ? (
             <>
-              <Loader className="w-5 h-5 mr-2 animate-spin" />
+              <TrendingUp className="w-5 h-5 mr-2 animate-pulse" />
               Generando con IA... (10-20 segundos)
             </>
           ) : success ? (
@@ -396,6 +394,7 @@ const WorkoutGeneratorPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

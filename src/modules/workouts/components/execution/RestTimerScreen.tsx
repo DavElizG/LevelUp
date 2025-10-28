@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { Exercise } from '../../../shared/types/workout.types';
+import type { Exercise } from '../../../../shared/types/workout.types';
 
 interface Props {
   restSeconds: number;

@@ -1,7 +1,8 @@
 import React from 'react';
-import { useWorkoutTimer } from '../hooks/useWorkoutTimer';
-import type { RoutineExercise } from '../../../shared/types/workout.types';
-import { calculateAutoRestTime } from '../utils/restCalculator';
+import { useWorkoutTimer } from '../../hooks/useWorkoutTimer';
+import type { RoutineExercise } from '../../../../shared/types/workout.types';
+import { calculateAutoRestTime } from '../../utils/restCalculator';
+import { confirm } from '../../../../hooks/useNotification';
 
 interface WorkoutTimerDisplayProps {
   exercises: RoutineExercise[];
@@ -87,8 +88,18 @@ export const WorkoutTimerDisplay: React.FC<WorkoutTimerDisplayProps> = ({
           <p className="text-2xl font-bold">{formatTime(timerState.elapsedSeconds)}</p>
         </div>
         <button
-          onClick={() => {
-            if (globalThis.confirm('¿Terminar entrenamiento?')) {
+          onClick={async () => {
+            const confirmed = await confirm(
+              'Terminar entrenamiento',
+              '¿Estás seguro de terminar el entrenamiento?',
+              {
+                confirmText: 'Terminar',
+                cancelText: 'Continuar',
+                type: 'warning'
+              }
+            );
+            
+            if (confirmed) {
               finish();
             }
           }}

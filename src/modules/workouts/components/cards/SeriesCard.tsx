@@ -1,5 +1,5 @@
 import React from 'react';
-import type { RoutineExercise } from '../../../shared/types/workout.types';
+import type { RoutineExercise } from '../../../../shared/types/workout.types';
 
 interface Props {
   series: RoutineExercise;

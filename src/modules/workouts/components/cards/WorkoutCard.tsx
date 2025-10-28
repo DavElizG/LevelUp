@@ -1,6 +1,7 @@
 import React from 'react';
 import { Eye } from 'lucide-react';
-import type { WorkoutRoutine } from '../../../shared/types/workout.types';
+import type { WorkoutRoutine } from '../../../../shared/types/workout.types';
+import { confirm } from '../../../../hooks/useNotification';
 
 interface Props {
   routine: WorkoutRoutine;
@@ -142,8 +143,17 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onCl
           
           {!isPublic && onDelete && (
             <button
-              onClick={() => {
-                if (globalThis.confirm(`¿Eliminar la rutina "${routine.name}"?`)) {
+              onClick={async () => {
+                const confirmed = await confirm(
+                  'Eliminar rutina',
+                  `¿Estás seguro de eliminar la rutina "${routine.name}"? Esta acción no se puede deshacer.`,
+                  {
+                    confirmText: 'Eliminar',
+                    cancelText: 'Cancelar',
+                    type: 'danger'
+                  }
+                );
+                if (confirmed) {
                   onDelete(routine.id);
                 }
               }}

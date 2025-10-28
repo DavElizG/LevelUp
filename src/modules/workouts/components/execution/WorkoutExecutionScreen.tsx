@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import type { WorkoutRoutine, ExerciseExecutionState, ActiveWorkoutSession } from '../../../shared/types/workout.types';
-import workoutService from '../services/workoutService';
+import type { WorkoutRoutine, ExerciseExecutionState, ActiveWorkoutSession } from '../../../../shared/types/workout.types';
+import workoutService from '../../services/workoutService';
 import { RestTimerScreen } from './RestTimerScreen';
+import { confirm } from '../../../../hooks/useNotification';
 
 interface Props {
   routine: WorkoutRoutine;
@@ -142,11 +143,21 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
     }
   };
 
-  const handleSkipExercise = () => {
+  const handleSkipExercise = async () => {
     if (!session || !currentExercise) return;
 
     // Confirmar si el usuario realmente quiere saltar
-    if (!globalThis.confirm(`¿Saltar ${currentExercise.exercise.name}? Las series completadas se guardarán.`)) {
+    const confirmed = await confirm(
+      'Saltar ejercicio',
+      `¿Saltar ${currentExercise.exercise.name}? Las series completadas se guardarán.`,
+      {
+        confirmText: 'Saltar',
+        cancelText: 'Continuar',
+        type: 'warning'
+      }
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -211,7 +222,19 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
   };
 
   const handleCancel = async () => {
-    if (session && globalThis.confirm('¿Estás seguro de cancelar el entrenamiento?')) {
+    if (!session) return;
+    
+    const confirmed = await confirm(
+      'Cancelar entrenamiento',
+      '¿Estás seguro de cancelar el entrenamiento? Se perderá el progreso actual.',
+      {
+        confirmText: 'Cancelar entrenamiento',
+        cancelText: 'Continuar',
+        type: 'danger'
+      }
+    );
+    
+    if (confirmed) {
       await workoutService.endWorkoutSession(session.sessionId, undefined, 'Cancelado por usuario');
       onCancel();
     } else if (!session) {

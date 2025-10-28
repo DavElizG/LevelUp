@@ -4,6 +4,7 @@ import { ArrowLeft, Dumbbell, Play, Edit, Copy, ChevronLeft, ChevronRight } from
 import BottomNavbar from '../components/shared/BottomNavbar';
 import workoutService from '../modules/workouts/services/workoutService';
 import type { WorkoutRoutine } from '../shared/types/workout.types';
+import { toast } from '../hooks/useNotification';
 
 interface ExerciseDetail {
   id: string;
@@ -113,8 +114,9 @@ const WorkoutPreviewPage: React.FC = () => {
     const res = await workoutService.clonePublicWorkout(id);
     if (res.error) {
       const errorMsg = typeof res.error === 'string' ? res.error : res.error.message;
-      alert('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
+      toast.error('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
     } else if (res.data) {
+      toast.success('✅ Rutina clonada exitosamente');
       // Navegar a edición después de clonar
       navigate(`/workouts/${res.data.id}/edit`);
     }
