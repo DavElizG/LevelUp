@@ -217,9 +217,9 @@ export async function saveMealLog(
     }
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error in saveMealLog:', err);
-    return { success: false, error: err.message || 'Error desconocido' };
+    return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
   }
 }
 

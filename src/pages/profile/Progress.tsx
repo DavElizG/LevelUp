@@ -1,5 +1,5 @@
 import React from 'react';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 
 const Progress: React.FC = () => {
   return (

@@ -5,14 +5,14 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { searchFood, saveMealLog, type FoodItem } from '../shared/services/foodSearch';
+import { searchFood, saveMealLog, type FoodItem } from '../../shared/services/foodSearch';
 
 const FoodSearchPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // Obtener meal type del estado de navegación
-  const mealType = (location.state as any)?.mealType || 'lunch';
+  const mealType = (location.state as { mealType?: string })?.mealType || 'lunch';
 
   // Estados
   const [query, setQuery] = useState('');
@@ -43,7 +43,7 @@ const FoodSearchPage: React.FC = () => {
       if (searchResults.length === 0) {
         setErrorMsg('No se encontraron resultados. Intenta con otro nombre.');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Search error:', err);
       setErrorMsg('Error al buscar. Intenta de nuevo.');
     } finally {
@@ -82,7 +82,7 @@ const FoodSearchPage: React.FC = () => {
       } else {
         setErrorMsg(result.error || 'Error al guardar');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Save error:', err);
       setErrorMsg('Error al guardar. Intenta de nuevo.');
     } finally {

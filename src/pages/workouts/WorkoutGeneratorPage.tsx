@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useProfile } from '../hooks/useProfile';
-import { aiService } from '../shared/services/ai/microservice';
+import { useAuth } from '../../hooks/useAuth';
+import { useProfile } from '../../hooks/useProfile';
+import { aiService } from '../../shared/services/ai/microservice';
 import { Dumbbell, Target, Clock, TrendingUp, Zap, AlertCircle, CheckCircle } from 'lucide-react';
-import WorkoutGenerationSkeleton from '../components/shared/WorkoutGenerationSkeleton';
+import WorkoutGenerationSkeleton from '../../components/shared/WorkoutGenerationSkeleton';
 
 interface WorkoutFormData {
   goal: string;

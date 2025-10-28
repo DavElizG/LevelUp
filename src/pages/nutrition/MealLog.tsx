@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import BottomNavbar from '../components/shared/BottomNavbar';
-import FoodPhotoAnalyzer from '../components/nutrition/FoodPhotoAnalyzer';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import BottomNavbar from '../../components/shared/BottomNavbar';
+import FoodPhotoAnalyzer from '../../components/nutrition/FoodPhotoAnalyzer';
 
 type MealType = 'breakfast' | 'lunch' | 'snack' | 'dinner';
 
@@ -67,9 +67,9 @@ const MealLog: React.FC = () => {
       if (error) throw error;
 
       const grouped = { ...emptyMeals } as Record<MealType, MealItem[]>;
-      (data || []).forEach((row: any) => {
+      (data || []).forEach((row: Record<string, unknown>) => {
         const mt = row.meal_type as MealType;
-        if (grouped[mt]) grouped[mt].push(row as MealItem);
+        if (grouped[mt]) grouped[mt].push(row as unknown as MealItem);
       });
       setMeals(grouped);
     } catch (err) {
@@ -81,10 +81,9 @@ const MealLog: React.FC = () => {
 
   useEffect(() => {
     fetchTodaysMeals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePhotoAnalysis = async (analyzedFood: any) => {
+  const handlePhotoAnalysis = async (analyzedFood: Record<string, unknown>) => {
     if (!isSupabaseConfigured || !supabase) {
       alert('Supabase no está configurado. No se puede guardar.');
       return;
@@ -95,23 +94,22 @@ const MealLog: React.FC = () => {
       let userId: string | null = null;
       try {
         // supabase v2
-        // @ts-ignore
         const userRes = await supabase.auth.getUser();
         userId = userRes?.data?.user?.id || null;
       } catch (e) {
         console.warn('Could not get user', e);
       }
 
-      const cal100 = analyzedFood.estimated_calories ?? 0;
-      const prot100 = analyzedFood.estimated_protein ?? 0;
-      const carb100 = analyzedFood.estimated_carbs ?? 0;
-      const fat100 = analyzedFood.estimated_fat ?? 0;
+      const cal100 = (analyzedFood.estimated_calories as number) ?? 0;
+      const prot100 = (analyzedFood.estimated_protein as number) ?? 0;
+      const carb100 = (analyzedFood.estimated_carbs as number) ?? 0;
+      const fat100 = (analyzedFood.estimated_fat as number) ?? 0;
 
       const multiplier = 250 / 100; // default 250g
       const newRow = {
         user_id: userId,
         meal_type: 'lunch', // default meal type for photo analysis
-        food_name: analyzedFood.name || 'Comida analizada',
+        food_name: (analyzedFood.name as string) || 'Comida analizada',
         quantity_grams: 250,
         calories: Math.round(cal100 * multiplier),
         protein: Math.round(prot100 * multiplier * 10) / 10,
@@ -210,7 +208,7 @@ const MealLog: React.FC = () => {
 
       {showPhotoAnalyzer && (
         <FoodPhotoAnalyzer
-          onAnalysisComplete={(data) => handlePhotoAnalysis(data)}
+          onAnalysisComplete={(data) => handlePhotoAnalysis(data as unknown as Record<string, unknown>)}
           onClose={() => setShowPhotoAnalyzer(false)}
         />
       )}

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useSetup } from '../hooks/useSetup';
-import { useProfile } from '../hooks/useProfile';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { calculateCaloriesFromProfile } from '../shared/utils/calorieCalculator';
-import type { CalorieCalculationResult } from '../shared/utils/calorieCalculator';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import { useAuth } from '../../hooks/useAuth';
+import { useSetup } from '../../hooks/useSetup';
+import { useProfile } from '../../hooks/useProfile';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { calculateCaloriesFromProfile } from '../../shared/utils/calorieCalculator';
+import type { CalorieCalculationResult } from '../../shared/utils/calorieCalculator';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();

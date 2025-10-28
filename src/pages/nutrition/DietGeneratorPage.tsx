@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useProfile } from '../hooks/useProfile';
-import { aiService } from '../shared/services/ai/microservice';
+import { useAuth } from '../../hooks/useAuth';
+import { useProfile } from '../../hooks/useProfile';
+import { aiService } from '../../shared/services/ai/microservice';
 import { UtensilsCrossed, Target, Clock, Zap, AlertCircle, CheckCircle, Apple } from 'lucide-react';
-import DietGenerationSkeleton from '../components/shared/DietGenerationSkeleton';
+import DietGenerationSkeleton from '../../components/shared/DietGenerationSkeleton';
 
 interface DietFormData {
   goal: string;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useProfile } from '../hooks/useProfile';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import { useAuth } from '../../hooks/useAuth';
+import { useProfile } from '../../hooks/useProfile';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 
 const Profile: React.FC = () => {
   const { user, signOut } = useAuth();

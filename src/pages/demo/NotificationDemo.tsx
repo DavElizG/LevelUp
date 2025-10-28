@@ -1,5 +1,5 @@
 import React from 'react';
-import { toast, confirm } from '../hooks/useNotification';
+import { toast, confirm } from '../../hooks/useNotification';
 
 /**
  * NotificationDemo - Página de demostración del sistema de notificaciones

@@ -12,10 +12,10 @@ import {
   SkipForward,
   X
 } from 'lucide-react';
-import { useWorkoutSession } from '../modules/workouts/hooks';
-import workoutService from '../modules/workouts/services/workoutService';
-import type { Exercise, RoutineExercise } from '../shared/types/workout.types';
-import { toast, confirm } from '../hooks/useNotification';
+import { useWorkoutSession } from '../../modules/workouts/hooks';
+import workoutService from '../../modules/workouts/services/workoutService';
+import type { Exercise, RoutineExercise } from '../../shared/types/workout.types';
+import { toast, confirm } from '../../hooks/useNotification';
 
 interface WorkoutExecutionPageProps {
   routineId?: string;

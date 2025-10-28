@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
-import { useProfile } from '../hooks/useProfile';
-import { calculateCaloriesFromProfile, getCalorieProgress } from '../shared/utils/calorieCalculator';
-import type { CalorieCalculationResult } from '../shared/utils/calorieCalculator';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import { useProfile } from '../../hooks/useProfile';
+import { calculateCaloriesFromProfile, getCalorieProgress } from '../../shared/utils/calorieCalculator';
+import type { CalorieCalculationResult } from '../../shared/utils/calorieCalculator';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ const Nutrition: React.FC = () => {
       
       // Calcular macros totales
       let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-      (mealsData || []).forEach((row: any) => {
+      (mealsData || []).forEach((row: { calories?: number; protein?: number; carbs?: number; fat?: number }) => {
         totalCalories += row.calories || 0;
         totalProtein += row.protein || 0;
         totalCarbs += row.carbs || 0;

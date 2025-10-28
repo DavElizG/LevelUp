@@ -45,16 +45,28 @@ export class ServiceAdapter {
 
   // Generate AI workout and save to Supabase
   async generateAndSaveWorkout(preferences: {
+    userId: string;
     goal: string;
     level: string;
     duration: number;
     equipment: string[];
+    daysPerWeek?: number;
     muscleGroups?: string[];
     workoutType?: string;
   }): Promise<ApiResponse<Workout>> {
     try {
-      // Generate workout with AI
-      const aiResponse = await this.ai.generateWorkout(preferences);
+      // Generate workout with AI - map to the expected format
+      const aiResponse = await this.ai.generateWorkout({
+        userId: preferences.userId,
+        goal: preferences.goal,
+        difficulty: preferences.level,
+        daysPerWeek: preferences.daysPerWeek || 3,
+        duration: preferences.duration,
+        equipment: preferences.equipment,
+        targetMuscles: preferences.muscleGroups,
+        preferences: preferences.workoutType,
+      });
+      
       if (!aiResponse.success || !aiResponse.data) {
         return aiResponse;
       }
@@ -89,6 +101,7 @@ export class ServiceAdapter {
 
   // Generate AI diet plan and save to Supabase
   async generateAndSaveDietPlan(preferences: {
+    userId: string;
     goal: string;
     calories: number;
     restrictions: string[];
@@ -97,8 +110,17 @@ export class ServiceAdapter {
     allergies?: string[];
   }): Promise<ApiResponse<DietPlan>> {
     try {
-      // Generate diet plan with AI
-      const aiResponse = await this.ai.generateDietPlan(preferences);
+      // Generate diet plan with AI - map to the expected format
+      const aiResponse = await this.ai.generateDietPlan({
+        userId: preferences.userId,
+        goal: preferences.goal,
+        calories: preferences.calories,
+        restrictions: preferences.restrictions,
+        mealsPerDay: preferences.meals,
+        avoidFoods: preferences.allergies,
+        preferences: preferences.dietType,
+      });
+      
       if (!aiResponse.success || !aiResponse.data) {
         return aiResponse;
       }
@@ -166,7 +188,11 @@ export class ServiceAdapter {
       // Get user from Supabase
       const userResponse = await this.auth.getCurrentUser();
       if (!userResponse.success || !userResponse.data) {
-        return userResponse as any;
+        return {
+          success: false,
+          data: null,
+          error: userResponse.error || 'Failed to get user',
+        };
       }
 
       // Get workout stats from backend
@@ -204,6 +230,7 @@ export class ServiceAdapter {
   }
 
   // Initialize user data after registration
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async initializeUserData(_userId: string): Promise<ApiResponse<void>> {
     try {
       // Could create default workout/diet preferences in backend

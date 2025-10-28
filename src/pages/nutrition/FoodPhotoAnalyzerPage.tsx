@@ -6,21 +6,20 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// @ts-ignore
 import { Camera, CameraResultType } from '@capacitor/camera';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import {
   loadModel,
   analyzeFoodImage,
   createImageElement,
   getTensorFlowInfo,
-} from '../shared/utils/aiFoodAnalyzer';
-import { saveMealLog, type FoodItem } from '../shared/services/foodSearch';
+} from '../../shared/utils/aiFoodAnalyzer';
+import { saveMealLog, type FoodItem } from '../../shared/services/foodSearch';
 
 const FoodPhotoAnalyzerPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const mealType = (location.state as any)?.mealType || 'lunch';
+  const mealType = (location.state as { mealType?: string })?.mealType || 'lunch';
 
   // Estados
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -36,7 +35,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isNative = !!(window as any).Capacitor;
+  const isNative = !!(window as { Capacitor?: unknown }).Capacitor;
 
   /**
    * Pre-cargar el modelo al montar el componente
@@ -165,9 +164,9 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
           console.error('Error saving to database:', err);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Analysis error:', err);
-      setErrorMsg(err.message || 'Error al analizar la imagen. Intenta de nuevo.');
+      setErrorMsg(err instanceof Error ? err.message : 'Error al analizar la imagen. Intenta de nuevo.');
     } finally {
       setAnalyzing(false);
     }
@@ -195,7 +194,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       } else {
         setErrorMsg(result.error || 'Error al guardar');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Save error:', err);
       setErrorMsg('Error al guardar. Intenta de nuevo.');
     } finally {

@@ -10,9 +10,9 @@ import {
   Edit2,
   Check
 } from 'lucide-react';
-import { workoutService } from '../modules/workouts/services/workoutService';
-import type { WorkoutRoutine, RoutineExercise } from '../shared/types';
-import { toast, confirm } from '../hooks/useNotification';
+import { workoutService } from '../../modules/workouts/services/workoutService';
+import type { WorkoutRoutine, RoutineExercise } from '../../shared/types';
+import { toast, confirm } from '../../hooks/useNotification';
 
 interface DraggingState {
   exerciseId: string;

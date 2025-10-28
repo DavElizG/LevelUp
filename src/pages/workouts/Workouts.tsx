@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNavbar from '../components/shared/BottomNavbar';
-import { WorkoutSkeletonGrid } from '../components/shared/WorkoutSkeleton';
-import WorkoutCard from '../modules/workouts/components/cards/WorkoutCard';
-import { CreateWorkoutFormImproved } from '../modules/workouts/components/forms/CreateWorkoutFormImproved';
-import WorkoutExecutionScreen from '../modules/workouts/components/execution/WorkoutExecutionScreen';
-import workoutService from '../modules/workouts/services/workoutService';
-import type { WorkoutRoutine, CreateWorkoutData } from '../shared/types/workout.types';
-import { toast } from '../hooks/useNotification';
+import BottomNavbar from '../../components/shared/BottomNavbar';
+import { WorkoutSkeletonGrid } from '../../components/shared/WorkoutSkeleton';
+import WorkoutCard from '../../modules/workouts/components/cards/WorkoutCard';
+import { CreateWorkoutFormImproved } from '../../modules/workouts/components/forms/CreateWorkoutFormImproved';
+import WorkoutExecutionScreen from '../../modules/workouts/components/execution/WorkoutExecutionScreen';
+import workoutService from '../../modules/workouts/services/workoutService';
+import type { WorkoutRoutine, CreateWorkoutData } from '../../shared/types/workout.types';
+import { toast } from '../../hooks/useNotification';
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();

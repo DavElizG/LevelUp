@@ -9,12 +9,22 @@ import { Auth } from '../components/Auth';
 import Setup from '../components/Setup/Setup';
 
 // Page Components
-import { Dashboard, Profile, Workouts, Diet, Settings, WorkoutPreviewPage, WorkoutEditPage, WorkoutGeneratorPage, DietGeneratorPage } from '../pages';
-import Progress from '../pages/Progress';
-import Nutrition from '../pages/Nutrition';
-import FoodSearchPage from '../pages/FoodSearchPage';
-import FoodPhotoAnalyzerPage from '../pages/FoodPhotoAnalyzerPage';
-import WorkoutExecutionPage from '../pages/WorkoutExecutionPage';
+import { 
+  Dashboard, 
+  Profile, 
+  Progress,
+  Settings,
+  Workouts, 
+  WorkoutPreviewPage, 
+  WorkoutEditPage, 
+  WorkoutGeneratorPage,
+  WorkoutExecutionPage,
+  Diet, 
+  DietGeneratorPage,
+  Nutrition,
+  FoodSearchPage,
+  FoodPhotoAnalyzerPage
+} from '../pages';
 
 // Route Protection Component
 import ProtectedRoute from './ProtectedRoute.tsx';

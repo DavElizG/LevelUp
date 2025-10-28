@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Dumbbell, Play, Edit, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
-import BottomNavbar from '../components/shared/BottomNavbar';
-import workoutService from '../modules/workouts/services/workoutService';
-import type { WorkoutRoutine } from '../shared/types/workout.types';
-import { toast } from '../hooks/useNotification';
+import BottomNavbar from '../../components/shared/BottomNavbar';
+import workoutService from '../../modules/workouts/services/workoutService';
+import type { WorkoutRoutine } from '../../shared/types/workout.types';
+import { toast } from '../../hooks/useNotification';
 
 interface ExerciseDetail {
   id: string;
