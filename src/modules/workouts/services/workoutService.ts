@@ -59,23 +59,55 @@ export const workoutService: WorkoutService = {
       };
     }
 
-    const { data, error } = await supabase
-      .from('workout_routines')
-      .select(`
-        *,
-        exercises:routine_exercises(
-          *,
-          exercise:exercises(*)
-        )
-      `)
-      .eq('id', id)
-      .single();
+    // Usar función almacenada para obtener rutina con ejercicios
+    const { data, error } = await supabase.rpc('get_workout_with_exercises', {
+      p_routine_id: id
+    });
+
+    console.log('🔍 [getWorkout] RPC raw response:', JSON.stringify(data, null, 2));
+    console.log('🔍 [getWorkout] Data type:', typeof data);
+    console.log('🔍 [getWorkout] Is array?', Array.isArray(data));
+
+    if (error) {
+      console.error('❌ Error fetching workout:', error);
+      return {
+        success: false,
+        data: null,
+        error,
+        message: 'Failed to fetch workout'
+      };
+    }
+
+    // Supabase returns JSONB stored procedures as direct objects, not arrays
+    let routine = null;
+    if (data && typeof data === 'object') {
+      // Handle array response (some Supabase versions wrap in array)
+      if (Array.isArray(data) && data.length > 0) {
+        const firstItem = data[0];
+        if (firstItem && typeof firstItem === 'object' && 'get_workout_with_exercises' in firstItem) {
+          routine = firstItem.get_workout_with_exercises;
+        } else {
+          routine = firstItem;
+        }
+      } 
+      // Handle direct object response (current case - Supabase returns JSONB as object)
+      else if (!Array.isArray(data)) {
+        routine = data;
+        console.log('✅ [getWorkout] Using direct object response, routine:', data.name);
+      }
+    }
+
+    if (!routine) {
+      console.error('❌ [getWorkout] Failed to extract routine from response');
+    }
+
+    console.log('📦 [getWorkout] Final routine:', routine?.name || 'null');
 
     return { 
-      success: !error, 
-      data: data as WorkoutRoutine || null, 
-      error,
-      message: error ? 'Failed to fetch workout' : 'Workout fetched successfully'
+      success: true, 
+      data: routine as WorkoutRoutine, 
+      error: null,
+      message: 'Workout fetched successfully'
     };
   },
 
@@ -238,6 +270,7 @@ export const workoutService: WorkoutService = {
     };
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async generateAIWorkout(_preferences: Record<string, unknown>): Promise<ApiResponse<WorkoutRoutine>> {
     // Mock implementation for AI generation
     return { 
@@ -453,23 +486,25 @@ export const workoutService: WorkoutService = {
       };
     }
 
-    const { data, error } = await supabase
-      .from('workout_routines')
-      .select(`
-        *,
-        exercises:routine_exercises(
-          *,
-          exercise:exercises(*)
-        )
-      `)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+    // Usar función almacenada para obtener rutinas con ejercicios correctamente
+    const { data, error } = await supabase.rpc('get_public_workouts_with_exercises');
 
+    if (error) {
+      console.error('❌ Error fetching public workouts:', error);
+      return {
+        success: false,
+        data: [],
+        error,
+        message: 'Failed to fetch public workouts'
+      };
+    }
+
+    // La función ya devuelve el array directamente
     return { 
-      success: !error, 
-      data: data as WorkoutRoutine[] || [], 
-      error,
-      message: error ? 'Failed to fetch public workouts' : 'Public workouts fetched successfully'
+      success: true, 
+      data: (data || []) as WorkoutRoutine[], 
+      error: null,
+      message: 'Public workouts fetched successfully'
     };
   },
 
@@ -494,24 +529,27 @@ export const workoutService: WorkoutService = {
       };
     }
 
-    const { data, error } = await supabase
-      .from('workout_routines')
-      .select(`
-        *,
-        exercises:routine_exercises(
-          *,
-          exercise:exercises(*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('is_public', false)
-      .order('created_at', { ascending: false });
+    // Usar función almacenada para obtener rutinas del usuario con ejercicios
+    const { data, error } = await supabase.rpc('get_user_workouts_with_exercises', {
+      p_user_id: user.id
+    });
 
+    if (error) {
+      console.error('❌ Error fetching user workouts:', error);
+      return {
+        success: false,
+        data: [],
+        error,
+        message: 'Failed to fetch user workouts'
+      };
+    }
+
+    // La función ya devuelve el array directamente
     return { 
-      success: !error, 
-      data: data as WorkoutRoutine[] || [], 
-      error,
-      message: error ? 'Failed to fetch user workouts' : 'User workouts fetched successfully'
+      success: true, 
+      data: (data || []) as WorkoutRoutine[], 
+      error: null,
+      message: 'User workouts fetched successfully'
     };
   },
 
@@ -647,6 +685,258 @@ export const workoutService: WorkoutService = {
       data: completeRoutine as WorkoutRoutine || null, 
       error: finalError,
       message: finalError ? 'Failed to fetch cloned routine' : 'Rutina clonada exitosamente'
+    };
+  },
+
+  // ============== NUEVOS MÉTODOS PARA EDICIÓN GRANULAR ==============
+
+  async updateWorkoutBasicInfo(
+    routineId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      goal?: string;
+      difficultyLevel?: string;
+      daysPerWeek?: number;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot update workout'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('update_workout_basic_info', {
+      p_routine_id: routineId,
+      p_name: updates.name || null,
+      p_description: updates.description || null,
+      p_goal: updates.goal || null,
+      p_difficulty_level: updates.difficultyLevel || null,
+      p_days_per_week: updates.daysPerWeek || null
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to update workout info'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Workout updated successfully'
+    };
+  },
+
+  async moveExerciseToDay(
+    routineExerciseId: string,
+    newDayOfWeek: number,
+    newOrderInDay?: number
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot move exercise'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('move_exercise_to_day', {
+      p_routine_exercise_id: routineExerciseId,
+      p_new_day_of_week: newDayOfWeek,
+      p_new_order_in_day: newOrderInDay || null
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to move exercise'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Exercise moved successfully'
+    };
+  },
+
+  async updateRoutineExercise(
+    routineExerciseId: string,
+    updates: {
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot update exercise'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('update_routine_exercise', {
+      p_routine_exercise_id: routineExerciseId,
+      p_sets: updates.sets || null,
+      p_reps_min: updates.repsMin || null,
+      p_reps_max: updates.repsMax || null,
+      p_rest_seconds: updates.restSeconds || null,
+      p_weight_kg: updates.weightKg || null,
+      p_notes: updates.notes || null
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to update exercise'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Exercise updated successfully'
+    };
+  },
+
+  async removeExerciseFromRoutine(routineExerciseId: string): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot remove exercise'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('remove_exercise_from_routine', {
+      p_routine_exercise_id: routineExerciseId
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to remove exercise'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Exercise removed successfully'
+    };
+  },
+
+  async addExerciseToRoutine(
+    routineId: string,
+    exerciseId: string,
+    dayOfWeek: number,
+    options?: {
+      orderInDay?: number;
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot add exercise'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('add_exercise_to_routine', {
+      p_routine_id: routineId,
+      p_exercise_id: exerciseId,
+      p_day_of_week: dayOfWeek,
+      p_order_in_day: options?.orderInDay || null,
+      p_sets: options?.sets || 3,
+      p_reps_min: options?.repsMin || 8,
+      p_reps_max: options?.repsMax || 12,
+      p_rest_seconds: options?.restSeconds || 90,
+      p_weight_kg: options?.weightKg || null,
+      p_notes: options?.notes || null
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to add exercise'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Exercise added successfully'
+    };
+  },
+
+  async reorderExercisesInDay(
+    routineId: string,
+    dayOfWeek: number,
+    exerciseOrders: Array<{ id: string; order: number }>
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: false, 
+        data: null, 
+        error: new Error('Supabase not configured'),
+        message: 'Cannot reorder exercises'
+      };
+    }
+
+    const { data, error } = await supabase.rpc('reorder_exercises_in_day', {
+      p_routine_id: routineId,
+      p_day_of_week: dayOfWeek,
+      p_exercise_orders: JSON.stringify(exerciseOrders)
+    });
+
+    if (error) {
+      return { 
+        success: false, 
+        data: null, 
+        error,
+        message: 'Failed to reorder exercises'
+      };
+    }
+
+    return { 
+      success: true, 
+      data: data as WorkoutRoutine, 
+      error: null,
+      message: 'Exercises reordered successfully'
     };
   }
 };

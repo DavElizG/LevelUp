@@ -4,3 +4,7 @@ export { default as Workouts } from './Workouts';
 export { default as Diet } from './Diet';
 export { default as Settings } from './Settings';
 export { default as WorkoutExecutionPage } from './WorkoutExecutionPage';
+export { default as WorkoutPreviewPage } from './WorkoutPreviewPage';
+export { WorkoutEditPage } from './WorkoutEditPage';
+export { default as WorkoutGeneratorPage } from './WorkoutGeneratorPage';
+export { default as DietGeneratorPage } from './DietGeneratorPage';

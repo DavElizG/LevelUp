@@ -1,4 +1,5 @@
 import React from 'react';
+import { Eye } from 'lucide-react';
 import type { WorkoutRoutine } from '../../../shared/types/workout.types';
 
 interface Props {
@@ -7,12 +8,17 @@ interface Props {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClone?: (id: string) => void; // Nuevo prop para clonar rutinas públicas
+  onPreview?: (id: string) => void; // Nuevo prop para ver preview
   isPublic?: boolean; // Flag para saber si es rutina pública
 }
 
-const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onClone, isPublic }) => {
+const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onClone, onPreview, isPublic }) => {
+  // Calcular stats robustamente
   const exercisesCount = routine.exercises?.length ?? 0;
-  const totalSets = routine.exercises?.reduce((sum, ex) => sum + ex.sets, 0) ?? 0;
+  const totalSets = routine.exercises?.reduce((sum, ex) => {
+    const sets = ex.sets ?? 0;
+    return sum + sets;
+  }, 0) ?? 0;
 
   const getDifficultyStyle = (level?: string) => {
     switch (level) {
@@ -89,6 +95,18 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onCl
 
         {/* Actions */}
         <div className="flex gap-2">
+          {/* Botón Preview - Siempre visible */}
+          {onPreview && (
+            <button
+              onClick={() => onPreview(routine.id)}
+              className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="Ver detalles"
+            >
+              <Eye className="w-5 h-5" />
+              <span className="hidden sm:inline">Ver</span>
+            </button>
+          )}
+          
           <button
             onClick={() => onStart?.(routine)}
             className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
