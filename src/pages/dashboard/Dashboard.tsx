@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { calculateCaloriesFromProfile } from '../../shared/utils/calorieCalculator';
 import type { CalorieCalculationResult } from '../../shared/utils/calorieCalculator';
 import BottomNavbar from '../../components/shared/BottomNavbar';
+import SwipeableLayout from '../../components/Layout/SwipeableLayout';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -181,12 +182,13 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
-      {/* Animated Header with Gradient */}
-      <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-6 pt-12 pb-8 relative overflow-hidden">
-        {/* Animated background shapes */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-10 rounded-full -ml-24 -mb-24"></div>
+    <SwipeableLayout>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
+        {/* Animated Header with Gradient */}
+        <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-6 pt-12 pb-8 relative overflow-hidden">
+          {/* Animated background shapes */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-32 -mt-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-10 rounded-full -ml-24 -mb-24"></div>
         
         <div className="max-w-md mx-auto relative z-10">
           <div className="flex items-center justify-between mb-8">
@@ -481,7 +483,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       <BottomNavbar />
-    </div>
+      </div>
+    </SwipeableLayout>
   );
 };
 

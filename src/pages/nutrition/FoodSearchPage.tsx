@@ -146,7 +146,7 @@ const FoodSearchPage: React.FC = () => {
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Busca en base de datos local y OpenFoodFacts
+            Busca en 97+ alimentos locales (rápido) y OpenFoodFacts
           </p>
         </div>
 

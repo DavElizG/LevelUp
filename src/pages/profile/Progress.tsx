@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
 import BottomNavbar from '../../components/shared/BottomNavbar';
+import SwipeableLayout from '../../components/Layout/SwipeableLayout';
 import { 
   Activity, 
   Flame, 
@@ -111,6 +112,7 @@ const Progress: React.FC = () => {
   const weekProgress = getWeightProgress();
 
   return (
+    <SwipeableLayout>
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
@@ -129,58 +131,75 @@ const Progress: React.FC = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4">
           {/* Workouts */}
-          <div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-4 text-white shadow-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Activity className="w-4 h-4" />
-              <p className="text-sm opacity-90">Entrenamientos</p>
+          <div className="relative bg-gradient-to-br from-orange-400/90 to-orange-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-1">
+                <Activity className="w-4 h-4" />
+                <p className="text-sm opacity-90">Entrenamientos</p>
+              </div>
+              <p className="text-3xl font-bold">{progressData.weeklyStats.workouts}</p>
+              <p className="text-xs opacity-75 mt-1">esta semana</p>
             </div>
-            <p className="text-3xl font-bold">{progressData.weeklyStats.workouts}</p>
-            <p className="text-xs opacity-75 mt-1">esta semana</p>
           </div>
 
           {/* Calories */}
-          <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-4 text-white shadow-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Flame className="w-4 h-4" />
-              <p className="text-sm opacity-90">Calorías</p>
+          <div className="relative bg-gradient-to-br from-green-400/90 to-green-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-1">
+                <Flame className="w-4 h-4" />
+                <p className="text-sm opacity-90">Calorías</p>
+              </div>
+              <p className="text-3xl font-bold">
+                {(progressData.weeklyStats.calories / 1000).toFixed(1)}k
+              </p>
+              <p className="text-xs opacity-75 mt-1">quemadas</p>
             </div>
-            <p className="text-3xl font-bold">
-              {(progressData.weeklyStats.calories / 1000).toFixed(1)}k
-            </p>
-            <p className="text-xs opacity-75 mt-1">quemadas</p>
           </div>
 
           {/* Active Time */}
-          <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-4 text-white shadow-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-4 h-4" />
-              <p className="text-sm opacity-90">Tiempo Activo</p>
+          <div className="relative bg-gradient-to-br from-blue-400/90 to-blue-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4" />
+                <p className="text-sm opacity-90">Tiempo Activo</p>
+              </div>
+              <p className="text-3xl font-bold">
+                {Math.round(progressData.weeklyStats.activeMinutes / 60)}h
+              </p>
+              <p className="text-xs opacity-75 mt-1">esta semana</p>
             </div>
-            <p className="text-3xl font-bold">
-              {Math.round(progressData.weeklyStats.activeMinutes / 60)}h
-            </p>
-            <p className="text-xs opacity-75 mt-1">esta semana</p>
           </div>
 
           {/* Streak */}
-          <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-4 text-white shadow-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4" />
-              <p className="text-sm opacity-90">Racha</p>
+          <div className="relative bg-gradient-to-br from-purple-400/90 to-purple-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4" />
+                <p className="text-sm opacity-90">Racha</p>
+              </div>
+              <p className="text-3xl font-bold">{progressData.weeklyStats.streak}</p>
+              <p className="text-xs opacity-75 mt-1">días seguidos</p>
             </div>
-            <p className="text-3xl font-bold">{progressData.weeklyStats.streak}</p>
-            <p className="text-xs opacity-75 mt-1">días seguidos</p>
           </div>
         </div>
 
         {/* Weight Progress Chart */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-orange-600" />
-            Evolución de Peso
-          </h3>
-          <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-50 to-purple-50 rounded-xl">
-            {progressData.weightProgress.length > 0 ? (
+        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+          {/* Decorative bubbles */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-300/20 to-pink-400/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-300/20 to-blue-400/20 rounded-full blur-2xl"></div>
+          
+          <div className="relative">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-orange-600" />
+              Evolución de Peso
+            </h3>
+            <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-50/50 to-purple-50/50 rounded-2xl">
+              {progressData.weightProgress.length > 0 ? (
               <svg viewBox="0 0 300 160" className="w-full h-full">
                 <defs>
                   <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -223,96 +242,108 @@ const Progress: React.FC = () => {
             ) : (
               <p className="text-gray-400">No hay datos suficientes</p>
             )}
-          </div>
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <div>
-              <p className="text-gray-500">Inicial</p>
-              <p className="font-semibold text-gray-800">{progressData.initialWeight} kg</p>
             </div>
-            <div className="text-center">
-              <p className="text-gray-500">Actual</p>
-              <p className="font-semibold text-orange-600">{progressData.currentWeight} kg</p>
-            </div>
-            <div className="text-right">
-              <p className="text-gray-500">Meta</p>
-              <p className="font-semibold text-purple-600">{progressData.targetWeight} kg</p>
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <div>
+                <p className="text-gray-500">Inicial</p>
+                <p className="font-semibold text-gray-800">{progressData.initialWeight} kg</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-500">Actual</p>
+                <p className="font-semibold text-orange-600">{progressData.currentWeight} kg</p>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-500">Meta</p>
+                <p className="font-semibold text-purple-600">{progressData.targetWeight} kg</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Weekly Frequency */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-purple-600" />
-            Frecuencia Semanal
-          </h3>
-          <div className="grid grid-cols-7 gap-2">
-            {[
-              { day: 'L', key: 'monday' },
-              { day: 'M', key: 'tuesday' },
-              { day: 'X', key: 'wednesday' },
-              { day: 'J', key: 'thursday' },
-              { day: 'V', key: 'friday' },
-              { day: 'S', key: 'saturday' },
-              { day: 'D', key: 'sunday' }
-            ].map(({ day, key }) => {
-              const hasWorkout = progressData.weeklyWorkouts[key as keyof typeof progressData.weeklyWorkouts];
-              return (
-                <div key={key} className="text-center">
-                  <div
-                    className={`w-full aspect-square rounded-lg flex items-center justify-center font-medium transition-all ${
-                      hasWorkout 
-                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-400'
-                    }`}
-                  >
-                    {day}
+        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+          {/* Decorative bubbles */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/20 to-blue-400/20 rounded-full blur-3xl"></div>
+          
+          <div className="relative">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-600" />
+              Frecuencia Semanal
+            </h3>
+            <div className="grid grid-cols-7 gap-2">
+              {[
+                { day: 'L', key: 'monday' },
+                { day: 'M', key: 'tuesday' },
+                { day: 'X', key: 'wednesday' },
+                { day: 'J', key: 'thursday' },
+                { day: 'V', key: 'friday' },
+                { day: 'S', key: 'saturday' },
+                { day: 'D', key: 'sunday' }
+              ].map(({ day, key }) => {
+                const hasWorkout = progressData.weeklyWorkouts[key as keyof typeof progressData.weeklyWorkouts];
+                return (
+                  <div key={key} className="text-center">
+                    <div
+                      className={`w-full aspect-square rounded-lg flex items-center justify-center font-medium transition-all ${
+                        hasWorkout 
+                          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
+                          : 'bg-gray-100 text-gray-400'
+                      }`}
+                    >
+                      {day}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Personal Records */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-yellow-500" />
-            Récords Personales
-          </h3>
-          <div className="space-y-3">
-            {progressData.personalRecords.map((record, index) => {
-              const colors = [
-                'from-orange-50 to-orange-100 text-orange-600',
-                'from-purple-50 to-purple-100 text-purple-600',
-                'from-blue-50 to-blue-100 text-blue-600',
-                'from-green-50 to-green-100 text-green-600'
-              ];
-              const colorClass = colors[index % colors.length];
-              
-              return (
-                <div 
-                  key={index}
-                  className={`flex items-center justify-between p-4 bg-gradient-to-r ${colorClass.split(' text-')[0]} rounded-xl`}
-                >
-                  <div>
-                    <p className="font-medium text-gray-800">{record.exercise}</p>
-                    <p className="text-sm text-gray-600">
-                      {record.weight} kg · {formatDate(record.date)}
-                    </p>
+        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+          {/* Decorative bubbles */}
+          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-yellow-300/20 to-orange-400/20 rounded-full blur-3xl"></div>
+          
+          <div className="relative">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-yellow-500" />
+              Récords Personales
+            </h3>
+            <div className="space-y-3">
+              {progressData.personalRecords.map((record, index) => {
+                const colors = [
+                  'from-orange-50 to-orange-100 text-orange-600',
+                  'from-purple-50 to-purple-100 text-purple-600',
+                  'from-blue-50 to-blue-100 text-blue-600',
+                  'from-green-50 to-green-100 text-green-600'
+                ];
+                const colorClass = colors[index % colors.length];
+                
+                return (
+                  <div 
+                    key={index}
+                    className={`flex items-center justify-between p-4 bg-gradient-to-r ${colorClass.split(' text-')[0]} rounded-xl backdrop-blur-sm`}
+                  >
+                    <div>
+                      <p className="font-medium text-gray-800">{record.exercise}</p>
+                      <p className="text-sm text-gray-600">
+                        {record.weight} kg · {formatDate(record.date)}
+                      </p>
+                    </div>
+                    <span className={`font-semibold ${colorClass.split(' ')[1]}`}>
+                      +{record.improvement} kg
+                    </span>
                   </div>
-                  <span className={`font-semibold ${colorClass.split(' ')[1]}`}>
-                    +{record.improvement} kg
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
       <BottomNavbar />
     </div>
+    </SwipeableLayout>
   );
 };
 

@@ -48,29 +48,33 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onCl
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-orange-300">
-      {/* Header con color */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
-        <h3 className="text-xl font-bold text-white mb-1">{routine.name}</h3>
+    <div className="relative bg-gradient-to-br from-orange-50/50 via-white to-pink-50/30 backdrop-blur-md rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-orange-100/30">
+      {/* Decorative gradient bubbles */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-pink-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-blue-500/10 rounded-full blur-2xl"></div>
+      
+      {/* Header con gradiente glass-morphism */}
+      <div className="relative bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm p-4">
+        <h3 className="text-xl font-bold text-white mb-1 drop-shadow-sm">{routine.name}</h3>
         {routine.description && (
           <p className="text-orange-50 text-sm line-clamp-2">{routine.description}</p>
         )}
       </div>
 
       {/* Body */}
-      <div className="p-4">
+      <div className="relative p-4">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="text-center bg-gray-50 rounded-lg p-3">
-            <div className="text-2xl font-bold text-orange-600">{exercisesCount}</div>
+          <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-3 border border-orange-100/30 shadow-sm">
+            <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">{exercisesCount}</div>
             <div className="text-xs text-gray-600 mt-1">Ejercicios</div>
           </div>
-          <div className="text-center bg-gray-50 rounded-lg p-3">
-            <div className="text-2xl font-bold text-orange-600">{totalSets}</div>
+          <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-3 border border-purple-100/30 shadow-sm">
+            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{totalSets}</div>
             <div className="text-xs text-gray-600 mt-1">Series</div>
           </div>
-          <div className="text-center bg-gray-50 rounded-lg p-3">
-            <div className="text-2xl font-bold text-orange-600">
+          <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-3 border border-green-100/30 shadow-sm">
+            <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
               {routine.daysPerWeek ?? '-'}
             </div>
             <div className="text-xs text-gray-600 mt-1">Días/sem</div>

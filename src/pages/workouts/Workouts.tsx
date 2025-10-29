@@ -109,13 +109,18 @@ const Workouts: React.FC = () => {
 
   // Pantalla principal
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-gray-50 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 pb-20 overflow-hidden">
+      {/* Burbujas decorativas de fondo - como Dashboard */}
+      <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-pink-400/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+      <div className="fixed top-1/4 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/30 to-blue-400/30 rounded-full blur-3xl translate-x-1/2 pointer-events-none"></div>
+      <div className="fixed bottom-0 left-1/4 w-72 h-72 bg-gradient-to-br from-pink-300/30 to-orange-400/30 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-6 mb-8">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">
                 💪 Mis Entrenamientos
               </h1>
               <p className="text-gray-600">
@@ -125,7 +130,7 @@ const Workouts: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button 
                 onClick={() => navigate('/workouts/generate')} 
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -134,7 +139,7 @@ const Workouts: React.FC = () => {
               </button>
               <button 
                 onClick={() => setShowCreate(true)} 
-                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors shadow-md hover:shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
               >
                 + Crear Rutina
               </button>
@@ -146,15 +151,15 @@ const Workouts: React.FC = () => {
         {loading ? (
           <div className="mb-12">
             <div className="mb-6">
-              <div className="h-8 bg-gray-200 rounded-lg w-48 mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+              <div className="h-8 bg-white/50 backdrop-blur-sm rounded-lg w-48 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-white/50 backdrop-blur-sm rounded w-64 animate-pulse"></div>
             </div>
             <WorkoutSkeletonGrid count={6} />
           </div>
         ) : null}
 
         {!loading && workouts.length === 0 && publicWorkouts.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-md p-12 text-center">
+          <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-12 text-center">
             <div className="text-6xl mb-4">🏋️</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               No tienes rutinas todavía
@@ -164,7 +169,7 @@ const Workouts: React.FC = () => {
             </p>
             <button 
               onClick={() => setShowCreate(true)}
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all shadow-lg"
             >
               Crear mi primera rutina
             </button>
@@ -173,7 +178,7 @@ const Workouts: React.FC = () => {
 
         {!loading && workouts.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Mis Rutinas</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">Mis Rutinas</h2>
             <p className="text-gray-600 mb-6">Rutinas personalizadas que has creado</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {workouts.map((workout) => (
@@ -194,7 +199,7 @@ const Workouts: React.FC = () => {
           <div className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Rutinas Populares</h2>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">Rutinas Populares</h2>
                 <p className="text-gray-600">
                   Rutinas profesionales diseñadas por expertos. Clónalas para empezar a entrenar.
                 </p>

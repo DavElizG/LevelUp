@@ -1,19 +1,14 @@
 /**
  * FoodPhotoAnalyzerPage
- * Análisis de comida con IA local usando TensorFlow.js + MobileNet
- * Búsqueda híbrida: base de datos local + OpenFoodFacts
+ * Análisis de comida con IA usando el microservicio
+ * Detecta múltiples alimentos en una imagen (ej: 2 huevos + 1 tortilla)
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import {
-  loadModel,
-  analyzeFoodImage,
-  createImageElement,
-  getTensorFlowInfo,
-} from '../../shared/utils/aiFoodAnalyzer';
+import { analyzeFoodImage, type DetectedFood } from '../../shared/services/foodVision';
 import { saveMealLog, type FoodItem } from '../../shared/services/foodSearch';
 
 const FoodPhotoAnalyzerPage: React.FC = () => {
@@ -23,39 +18,20 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
 
   // Estados
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [loadingModel, setLoadingModel] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
-  const [analysisResult, setAnalysisResult] = useState<{
-    detectedFood: string;
-    confidence: number;
-    nutritionData: FoodItem | null;
-  } | null>(null);
-  const [quantity, setQuantity] = useState(200); // Default 200g
+  const [detectedFoods, setDetectedFoods] = useState<DetectedFood[]>([]);
+  const [totalNutrition, setTotalNutrition] = useState({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+  });
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isNative = !!(window as { Capacitor?: unknown }).Capacitor;
-
-  /**
-   * Pre-cargar el modelo al montar el componente
-   */
-  useEffect(() => {
-    const initModel = async () => {
-      setLoadingModel(true);
-      try {
-        await loadModel();
-        console.log('TensorFlow info:', getTensorFlowInfo());
-      } catch (err) {
-        console.error('Error loading model:', err);
-        setErrorMsg('No se pudo cargar el modelo de IA. La app funcionará con estimaciones.');
-      } finally {
-        setLoadingModel(false);
-      }
-    };
-
-    initModel();
-  }, []);
 
   /**
    * Maneja la selección de imagen desde input file
@@ -66,7 +42,9 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedImage(e.target?.result as string);
-        setAnalysisResult(null);
+        setDetectedFoods([]);
+        setTotalNutrition({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+        setSuggestions([]);
         setErrorMsg('');
       };
       reader.readAsDataURL(file);
@@ -84,7 +62,9 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
         resultType: CameraResultType.DataUrl,
       });
       setSelectedImage(photo.dataUrl || null);
-      setAnalysisResult(null);
+      setDetectedFoods([]);
+      setTotalNutrition({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+      setSuggestions([]);
       setErrorMsg('');
     } catch (err) {
       console.error('Camera error:', err);
@@ -93,7 +73,8 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
   };
 
   /**
-   * Analiza la imagen con TensorFlow.js
+   * Analiza la imagen con IA (microservicio)
+   * Detecta múltiples alimentos en una sola imagen
    */
   const analyzeImage = async () => {
     if (!selectedImage) return;
@@ -102,19 +83,20 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
     setErrorMsg('');
 
     try {
-      // Crear elemento de imagen para TensorFlow
-      const img = await createImageElement(selectedImage);
-
-      // Analizar con MobileNet
-      const result = await analyzeFoodImage(img);
+      // Analizar con el microservicio de IA
+      const result = await analyzeFoodImage(selectedImage);
 
       console.log('Analysis result:', result);
 
-      setAnalysisResult({
-        detectedFood: result.detectedFood,
-        confidence: result.confidence,
-        nutritionData: result.nutritionData,
+      // Actualizar estados con los resultados
+      setDetectedFoods(result.detectedFoods);
+      setTotalNutrition({
+        calories: result.totalEstimatedCalories,
+        protein: result.totalEstimatedProtein,
+        carbs: result.totalEstimatedCarbs,
+        fat: result.totalEstimatedFat,
       });
+      setSuggestions(result.suggestions || []);
 
       // Guardar en photo_food_analyses si Supabase está configurado
       if (isSupabaseConfigured && supabase) {
@@ -147,14 +129,13 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
               image_path: fileName,
               image_url: publicData.publicUrl,
               status: 'completed',
-              estimated_calories: result.nutritionData?.calories_per_100g || 0,
-              estimated_protein: result.nutritionData?.protein_per_100g || 0,
-              estimated_carbs: result.nutritionData?.carbs_per_100g || 0,
-              estimated_fat: result.nutritionData?.fat_per_100g || 0,
+              estimated_calories: result.totalEstimatedCalories,
+              estimated_protein: result.totalEstimatedProtein,
+              estimated_carbs: result.totalEstimatedCarbs,
+              estimated_fat: result.totalEstimatedFat,
               food_items: JSON.stringify({
-                detected: result.detectedFood,
-                confidence: result.confidence,
-                predictions: result.predictions,
+                detected: result.detectedFoods,
+                suggestions: result.suggestions,
               }),
               completed_at: new Date().toISOString(),
               created_at: new Date().toISOString(),
@@ -166,20 +147,18 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Analysis error:', err);
-      setErrorMsg(err instanceof Error ? err.message : 'Error al analizar la imagen. Intenta de nuevo.');
+      setErrorMsg(err instanceof Error ? err.message : 'Error al analizar la imagen. Verifica que el microservicio esté corriendo.');
     } finally {
       setAnalyzing(false);
     }
   };
 
   /**
-   * Guarda el alimento detectado en meal_logs
+   * Guarda cada alimento detectado en meal_logs
    */
-  const handleSave = async () => {
-    if (!analysisResult || !analysisResult.nutritionData) return;
-
-    if (quantity <= 0) {
-      setErrorMsg('La cantidad debe ser mayor a 0');
+  const handleSaveAll = async () => {
+    if (detectedFoods.length === 0) {
+      setErrorMsg('No hay alimentos detectados para guardar');
       return;
     }
 
@@ -187,13 +166,22 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
     setErrorMsg('');
 
     try {
-      const result = await saveMealLog(analysisResult.nutritionData, quantity, mealType);
+      // Guardar cada alimento detectado
+      for (const food of detectedFoods) {
+        const foodItem: FoodItem = {
+          name: food.name,
+          source: 'local',
+          calories_per_100g: Math.round((totalNutrition.calories / detectedFoods.reduce((sum, f) => sum + f.estimatedGrams, 0)) * 100),
+          protein_per_100g: Math.round((totalNutrition.protein / detectedFoods.reduce((sum, f) => sum + f.estimatedGrams, 0)) * 100),
+          carbs_per_100g: Math.round((totalNutrition.carbs / detectedFoods.reduce((sum, f) => sum + f.estimatedGrams, 0)) * 100),
+          fat_per_100g: Math.round((totalNutrition.fat / detectedFoods.reduce((sum, f) => sum + f.estimatedGrams, 0)) * 100),
+        };
 
-      if (result.success) {
-        navigate('/nutrition');
-      } else {
-        setErrorMsg(result.error || 'Error al guardar');
+        await saveMealLog(foodItem, food.estimatedGrams, mealType);
       }
+
+      // Regresar a nutrición
+      navigate('/nutrition');
     } catch (err) {
       console.error('Save error:', err);
       setErrorMsg('Error al guardar. Intenta de nuevo.');
@@ -202,237 +190,197 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
     }
   };
 
-  /**
-   * Calcula valores nutricionales basados en cantidad
-   */
-  const calculateNutrition = (food: FoodItem, qty: number) => {
-    const multiplier = qty / 100;
-    return {
-      calories: Math.round(food.calories_per_100g * multiplier),
-      protein: Math.round(food.protein_per_100g * multiplier * 10) / 10,
-      carbs: Math.round(food.carbs_per_100g * multiplier * 10) / 10,
-      fat: Math.round(food.fat_per_100g * multiplier * 10) / 10,
-    };
-  };
-
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
+      <div className="flex items-center justify-between p-6 bg-white shadow-sm">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
         >
           <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 className="text-lg font-semibold">Analizar Foto con IA</h2>
+        <h2 className="text-xl font-bold text-gray-900">📸 Analizar Foto</h2>
         <div className="w-10 h-10"></div>
       </div>
 
-      {/* Loading Model State */}
-      {loadingModel && (
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-700 font-medium">Cargando modelo de IA...</p>
-            <p className="text-sm text-gray-500 mt-2">Esto puede tardar unos segundos</p>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
-      {!loadingModel && (
-        <div className="flex-1 p-4 overflow-y-auto">
-          {!selectedImage ? (
-            // Image Selection
-            <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <p className="text-gray-600 text-center mb-2 font-medium">
-                Toma una foto de tu comida
-              </p>
-              <p className="text-sm text-gray-500 text-center mb-6 max-w-sm">
-                La IA analizará automáticamente los nutrientes y buscará información detallada
-              </p>
+      <div className="p-6 max-w-md mx-auto space-y-6">
+        {!selectedImage ? (
+          // Image Selection
+          <div className="bg-white rounded-3xl p-8 shadow-xl text-center">
+            <div className="w-32 h-32 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-16 h-16 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">Analiza tu Comida</h3>
+            <p className="text-gray-600 mb-2">
+              La IA detectará todos los alimentos en la foto
+            </p>
+            <p className="text-sm text-gray-500 mb-8">
+              Ejemplo: 2 huevos + 1 tortilla + aguacate
+            </p>
+            <button
+              onClick={() => {
+                if (isNative) {
+                  handleNativeCamera();
+                } else {
+                  fileInputRef.current?.click();
+                }
+              }}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+            >
+              📷 Tomar Foto
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+          </div>
+        ) : (
+          // Image Preview & Analysis
+          <div className="space-y-6">
+            {/* Image Preview */}
+            <div className="relative bg-white rounded-3xl overflow-hidden shadow-xl">
+              <img
+                src={selectedImage}
+                alt="Food to analyze"
+                className="w-full h-64 object-cover"
+              />
               <button
                 onClick={() => {
-                  if (isNative) {
-                    handleNativeCamera();
-                  } else {
-                    fileInputRef.current?.click();
-                  }
+                  setSelectedImage(null);
+                  setDetectedFoods([]);
+                  setTotalNutrition({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+                  setSuggestions([]);
+                  setErrorMsg('');
                 }}
-                className="bg-orange-500 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-600"
+                className="absolute top-4 right-4 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 transition"
               >
-                {isNative ? '📷 Abrir Cámara' : '📷 Tomar o Seleccionar Foto'}
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
             </div>
-          ) : (
-            // Image Preview & Analysis
-            <div className="space-y-4">
-              {/* Image Preview */}
-              <div className="relative">
-                <img
-                  src={selectedImage}
-                  alt="Food to analyze"
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+
+            {/* Error Message */}
+            {errorMsg && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700">
+                <p className="font-semibold mb-1">⚠️ Error</p>
+                <p className="text-sm">{errorMsg}</p>
+              </div>
+            )}
+
+            {/* Analyzing State */}
+            {analyzing && (
+              <div className="bg-white rounded-3xl p-8 text-center shadow-xl">
+                <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-xl font-bold text-gray-900 mb-2">Analizando con IA...</p>
+                <p className="text-gray-600">Detectando alimentos y nutrientes</p>
+              </div>
+            )}
+
+            {/* Analyze Button */}
+            {!analyzing && detectedFoods.length === 0 && (
+              <button
+                onClick={analyzeImage}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+              >
+                ⚡ Analizar Imagen
+              </button>
+            )}
+
+            {/* Analysis Results */}
+            {!analyzing && detectedFoods.length > 0 && (
+              <div className="space-y-6">
+                {/* Total Nutrition Card */}
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl">
+                  <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    Total Estimado
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                      <p className="text-sm opacity-90 mb-1">Calorías</p>
+                      <p className="text-3xl font-bold">{totalNutrition.calories}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                      <p className="text-sm opacity-90 mb-1">Proteína</p>
+                      <p className="text-3xl font-bold">{totalNutrition.protein}g</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                      <p className="text-sm opacity-90 mb-1">Carbos</p>
+                      <p className="text-3xl font-bold">{totalNutrition.carbs}g</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                      <p className="text-sm opacity-90 mb-1">Grasas</p>
+                      <p className="text-3xl font-bold">{totalNutrition.fat}g</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detected Foods List */}
+                <div className="bg-white rounded-3xl p-6 shadow-xl">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">🍽️ Alimentos Detectados ({detectedFoods.length})</h3>
+                  <div className="space-y-3">
+                    {detectedFoods.map((food, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{food.name}</p>
+                          <p className="text-sm text-gray-600">{food.estimatedGrams}g estimados</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-purple-600">{Math.round(food.confidence)}%</p>
+                          <p className="text-xs text-gray-500">confianza</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Suggestions */}
+                {suggestions.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-blue-900 mb-3">💡 Sugerencias</h3>
+                    <ul className="space-y-2">
+                      {suggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start gap-2 text-blue-800">
+                          <span className="text-blue-500 font-bold">•</span>
+                          <span className="text-sm">{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Save Button */}
                 <button
-                  onClick={() => {
-                    setSelectedImage(null);
-                    setAnalysisResult(null);
-                    setErrorMsg('');
-                  }}
-                  className="absolute top-2 right-2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                  onClick={handleSaveAll}
+                  disabled={saving}
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  {saving ? '💾 Guardando...' : '💾 Guardar Todo'}
                 </button>
               </div>
-
-              {/* Error Message */}
-              {errorMsg && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                  {errorMsg}
-                </div>
-              )}
-
-              {/* Analyzing State */}
-              {analyzing && (
-                <div className="text-center py-8">
-                  <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-600 font-semibold mb-2">Analizando con IA...</p>
-                  <p className="text-gray-500 text-sm">Reconociendo alimento y buscando nutrientes</p>
-                </div>
-              )}
-
-              {/* Analysis Result */}
-              {!analyzing && analysisResult && analysisResult.nutritionData && (
-                <div className="space-y-4">
-                  {/* Detection Info */}
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                      </svg>
-                      <span className="font-semibold text-green-800">Alimento Detectado</span>
-                    </div>
-                    <p className="text-2xl font-bold text-green-900 mb-1">
-                      {analysisResult.detectedFood}
-                    </p>
-                    <p className="text-sm text-green-700">
-                      Confianza: {(analysisResult.confidence * 100).toFixed(1)}%
-                    </p>
-                    <p className="text-xs text-green-600 mt-2">
-                      Fuente: {analysisResult.nutritionData.source === 'local' ? 'Base de datos local' : 'OpenFoodFacts'}
-                    </p>
-                  </div>
-
-                  {/* Quantity Input */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Cantidad Estimada (gramos)
-                    </label>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Number.parseInt(e.target.value) || 0)}
-                      min="1"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
-                    />
-                  </div>
-
-                  {/* Nutrition Info */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-800 mb-3">Información Nutricional</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Calorías</p>
-                        <p className="text-2xl font-bold text-orange-600">
-                          {calculateNutrition(analysisResult.nutritionData, quantity).calories}
-                          <span className="text-sm text-gray-500 ml-1">kcal</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Proteína</p>
-                        <p className="text-xl font-semibold text-gray-900">
-                          {calculateNutrition(analysisResult.nutritionData, quantity).protein}g
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Carbohidratos</p>
-                        <p className="text-xl font-semibold text-gray-900">
-                          {calculateNutrition(analysisResult.nutritionData, quantity).carbs}g
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Grasa</p>
-                        <p className="text-xl font-semibold text-gray-900">
-                          {calculateNutrition(analysisResult.nutritionData, quantity).fat}g
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <button
-                    onClick={handleSave}
-                    disabled={saving || quantity <= 0}
-                    className="w-full bg-orange-500 text-white py-4 rounded-lg font-semibold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {saving ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                        <span>Guardando...</span>
-                      </div>
-                    ) : (
-                      `Agregar a ${
-                        mealType === 'breakfast'
-                          ? 'Desayuno'
-                          : mealType === 'lunch'
-                            ? 'Almuerzo'
-                            : mealType === 'snack'
-                              ? 'Merienda'
-                              : 'Cena'
-                      }`
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Analyze Button */}
-              {!analyzing && !analysisResult && (
-                <button
-                  onClick={analyzeImage}
-                  className="w-full bg-orange-500 text-white py-4 rounded-lg font-semibold hover:bg-orange-600"
-                >
-                  🤖 Analizar con IA
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -21,32 +21,29 @@ export interface FoodItem {
 }
 
 /**
- * Busca alimentos primero en OpenFoodFacts,
- * luego en base de datos local si no hay resultados.
+ * Busca alimentos PRIMERO en base de datos local (Supabase) - RÁPIDO,
+ * luego en OpenFoodFacts API si no hay resultados locales - LENTO.
+ * 
+ * Estrategia optimizada:
+ * 1. Supabase local (instantáneo, 97+ alimentos comunes)
+ * 2. OpenFoodFacts (lento, millones de productos)
+ * 3. Estimación genérica (fallback)
  */
 export async function searchFood(query: string): Promise<FoodItem[]> {
   const results: FoodItem[] = [];
 
-  // 1. Buscar primero en OpenFoodFacts (base de datos más amplia)
-  try {
-    const openFoodResults = await searchOpenFoodFacts(query);
-    if (openFoodResults.length > 0) {
-      return openFoodResults;
-    }
-  } catch (err) {
-    console.error('Error searching OpenFoodFacts:', err);
-  }
-
-  // 2. Si no hay resultados en OpenFoodFacts, buscar en base de datos local (Supabase)
+  // 1. 🚀 Buscar PRIMERO en base de datos local (Supabase) - MUY RÁPIDO
   try {
     if (isSupabaseConfigured && supabase) {
       const { data: localFoods, error } = await supabase
         .from('foods')
         .select('*')
         .ilike('name', `%${query}%`)
-        .limit(10);
+        .eq('is_common', true) // Priorizar alimentos comunes
+        .order('name')
+        .limit(15);
 
-      if (!error && localFoods) {
+      if (!error && localFoods && localFoods.length > 0) {
         // Mapear resultados locales
         for (const food of localFoods) {
           results.push({
@@ -60,18 +57,30 @@ export async function searchFood(query: string): Promise<FoodItem[]> {
             fiber_per_100g: Number.parseFloat(food.fiber_per_100g) || 0,
           });
         }
+        
+        // Si encontramos resultados locales, retornarlos inmediatamente
+        console.log(`✅ Encontrados ${results.length} alimentos en base de datos local`);
+        return results;
       }
     }
   } catch (err) {
     console.error('Error searching local foods:', err);
   }
 
-  // 3. Si hay resultados locales, retornarlos
-  if (results.length > 0) {
-    return results;
+  // 2. 🐌 Si NO hay resultados locales, buscar en OpenFoodFacts (LENTO)
+  console.log('⏳ No hay resultados locales, buscando en OpenFoodFacts...');
+  try {
+    const openFoodResults = await searchOpenFoodFacts(query);
+    if (openFoodResults.length > 0) {
+      console.log(`✅ Encontrados ${openFoodResults.length} alimentos en OpenFoodFacts`);
+      return openFoodResults;
+    }
+  } catch (err) {
+    console.error('Error searching OpenFoodFacts:', err);
   }
 
-  // 4. Si no hay resultados en ninguna fuente, generar estimación genérica
+  // 3. ⚠️ Si no hay resultados en ninguna fuente, generar estimación genérica
+  console.log('⚠️ No se encontraron resultados, generando estimación genérica');
   const genericFood = generateGenericNutrition(query);
   return [genericFood];
 }

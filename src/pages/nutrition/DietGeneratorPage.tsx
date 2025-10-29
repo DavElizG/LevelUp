@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
-import { aiService } from '../../shared/services/ai/microservice';
+import { serviceAdapter } from '../../shared/services/adapters/service-adapter';
 import { UtensilsCrossed, Target, Clock, Zap, AlertCircle, CheckCircle, Apple } from 'lucide-react';
 import DietGenerationSkeleton from '../../components/shared/DietGenerationSkeleton';
 
@@ -95,14 +95,15 @@ const DietGeneratorPage: React.FC = () => {
     setSuccess(false);
 
     try {
-      const response = await aiService.generateDietPlan({
+      // Use service adapter to generate AI diet AND save to Supabase
+      const response = await serviceAdapter.generateAndSaveDietPlan({
         userId: user.id,
         goal: formData.goal,
         calories: formData.calories,
         restrictions: formData.restrictions,
-        mealsPerDay: formData.meals,
-        avoidFoods: formData.allergies,
-        preferences: formData.preferences
+        meals: formData.meals,
+        dietType: formData.dietType,
+        allergies: formData.allergies
       });
 
       if (response.success && response.data) {

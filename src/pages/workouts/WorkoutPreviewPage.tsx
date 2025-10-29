@@ -138,28 +138,32 @@ const WorkoutPreviewPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-gray-50 pb-24">
+      <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 pb-24 overflow-hidden">
+        {/* Burbujas decorativas */}
+        <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/20 to-pink-400/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="fixed bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/20 to-blue-400/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+        
         {/* Header Skeleton */}
-        <div className="sticky top-0 bg-white shadow-md z-10">
+        <div className="sticky top-0 bg-white/70 backdrop-blur-md shadow-lg z-10 border-b border-white/50">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div className="w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl animate-pulse"></div>
               <div className="flex-1">
-                <div className="h-8 bg-gray-200 rounded-lg w-3/4 animate-pulse mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-3/4 animate-pulse mb-2"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-full animate-pulse"></div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Content Skeleton */}
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-6">
           {/* Stats Grid Skeleton */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
-                <div className="h-10 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
+              <div key={i} className="bg-white/70 backdrop-blur-sm rounded-3xl p-4 animate-pulse border border-white/50">
+                <div className="h-10 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+                <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-full"></div>
               </div>
             ))}
           </div>
@@ -170,11 +174,11 @@ const WorkoutPreviewPage: React.FC = () => {
           </div>
 
           {/* Day Selector Skeleton */}
-          <div className="bg-white rounded-xl p-4 mb-4">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4 animate-pulse"></div>
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-4 mb-4 border border-white/50">
+            <div className="h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-1/4 mb-4 animate-pulse"></div>
             <div className="flex gap-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-10 w-16 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div key={i} className="h-10 w-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl animate-pulse"></div>
               ))}
             </div>
           </div>
@@ -182,13 +186,13 @@ const WorkoutPreviewPage: React.FC = () => {
           {/* Exercises Skeleton */}
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
-                <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+              <div key={i} className="bg-white/70 backdrop-blur-sm rounded-3xl p-4 animate-pulse shadow-xl border border-white/50">
+                <div className="h-5 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-1/2 mb-3"></div>
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="h-8 bg-gray-200 rounded"></div>
-                  <div className="h-8 bg-gray-200 rounded"></div>
-                  <div className="h-8 bg-gray-200 rounded"></div>
+                  <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
+                  <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
+                  <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
                 </div>
               </div>
             ))}
@@ -201,8 +205,12 @@ const WorkoutPreviewPage: React.FC = () => {
 
   if (!routine || error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20">
-        <div className="text-center px-4">
+      <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 flex items-center justify-center pb-20 overflow-hidden">
+        {/* Burbujas decorativas */}
+        <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-pink-400/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="fixed bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/30 to-blue-400/30 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+        
+        <div className="relative z-10 text-center px-4">
           <div className="text-6xl mb-4">😕</div>
           <p className="text-gray-800 font-semibold mb-2">
             {error || 'Rutina no encontrada'}
@@ -212,7 +220,7 @@ const WorkoutPreviewPage: React.FC = () => {
           </p>
           <button
             onClick={() => navigate('/workouts')}
-            className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-6 py-3 bg-gradient-to-br from-orange-500 to-pink-500 text-white rounded-2xl hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105"
           >
             Volver a Rutinas
           </button>
@@ -231,19 +239,24 @@ const WorkoutPreviewPage: React.FC = () => {
   const currentDayExercises = exercisesByDay[selectedDay] || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-gray-50 pb-24">
+    <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 pb-24 overflow-hidden">
+      {/* Burbujas decorativas */}
+      <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-pink-400/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+      <div className="fixed top-1/3 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/30 to-blue-400/30 rounded-full blur-3xl translate-x-1/2 pointer-events-none"></div>
+      <div className="fixed bottom-0 left-1/4 w-72 h-72 bg-gradient-to-br from-pink-300/30 to-orange-400/30 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+      
       {/* Header Sticky */}
-      <div className="sticky top-0 bg-white shadow-md z-10">
+      <div className="sticky top-0 bg-white/70 backdrop-blur-md shadow-xl z-10 border-b border-white/50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-start gap-4">
             <button
               onClick={() => navigate('/workouts')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 mt-1"
+              className="p-2 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 text-white hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 flex-shrink-0 mt-1"
             >
-              <ArrowLeft className="w-6 h-6 text-gray-700" />
+              <ArrowLeft className="w-6 h-6" />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 truncate">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600 bg-clip-text text-transparent truncate">
                 {routine.name}
               </h1>
               {routine.description && (
@@ -257,23 +270,23 @@ const WorkoutPreviewPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border-2 border-orange-100">
-            <div className="text-3xl font-bold text-orange-600">
+          <div className="bg-white/70 backdrop-blur-md rounded-3xl p-4 text-center shadow-xl border border-white/50">
+            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
               {routine.daysPerWeek || availableDays.length}
             </div>
             <div className="text-xs text-gray-600 mt-1">Días/semana</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border-2 border-orange-100">
-            <div className="text-3xl font-bold text-orange-600">
+          <div className="bg-white/70 backdrop-blur-md rounded-3xl p-4 text-center shadow-xl border border-white/50">
+            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
               {totalExercises}
             </div>
             <div className="text-xs text-gray-600 mt-1">Ejercicios</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border-2 border-orange-100">
-            <div className="text-3xl font-bold text-orange-600">
+          <div className="bg-white/70 backdrop-blur-md rounded-3xl p-4 text-center shadow-xl border border-white/50">
+            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
               {totalSets}
             </div>
             <div className="text-xs text-gray-600 mt-1">Series totales</div>
@@ -281,9 +294,9 @@ const WorkoutPreviewPage: React.FC = () => {
         </div>
 
         {/* Nivel */}
-        <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl p-4 mb-6 shadow-xl border border-white/50">
           <span className="text-sm font-semibold text-gray-700">Nivel: </span>
-          <span className="text-sm font-bold text-orange-600">
+          <span className="text-sm font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
             {getDifficultyLabel(routine.difficultyLevel)}
           </span>
         </div>
@@ -295,13 +308,13 @@ const WorkoutPreviewPage: React.FC = () => {
               <button
                 onClick={() => setSelectedDay(Math.max(1, selectedDay - 1))}
                 disabled={selectedDay === availableDays[0]}
-                className="p-3 rounded-lg bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                className="p-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/90 transition-all duration-300 border border-white/50"
               >
                 <ChevronLeft className="w-6 h-6 text-gray-700" />
               </button>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
                   Día {selectedDay}
                 </div>
                 <div className="text-sm text-gray-600">
@@ -312,7 +325,7 @@ const WorkoutPreviewPage: React.FC = () => {
               <button
                 onClick={() => setSelectedDay(Math.min(routine.daysPerWeek || availableDays.length, selectedDay + 1))}
                 disabled={selectedDay === (routine.daysPerWeek || availableDays.at(-1))}
-                className="p-3 rounded-lg bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                className="p-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/90 transition-all duration-300 border border-white/50"
               >
                 <ChevronRight className="w-6 h-6 text-gray-700" />
               </button>
@@ -325,10 +338,10 @@ const WorkoutPreviewPage: React.FC = () => {
                   key={day}
                   onClick={() => setSelectedDay(day)}
                   className={`
-                    px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap transition-all flex-shrink-0
+                    px-5 py-2.5 rounded-2xl font-semibold whitespace-nowrap transition-all flex-shrink-0 border
                     ${selectedDay === day 
-                      ? 'bg-orange-500 text-white shadow-md scale-105' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50 shadow-sm'
+                      ? 'bg-gradient-to-br from-orange-500 to-pink-500 text-white shadow-xl shadow-orange-500/30 scale-105 border-transparent' 
+                      : 'bg-white/70 backdrop-blur-sm text-gray-600 hover:bg-white/90 shadow-lg border-white/50'
                     }
                   `}
                 >
@@ -341,12 +354,12 @@ const WorkoutPreviewPage: React.FC = () => {
 
         {/* Exercise List */}
         <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
+          <h2 className="text-lg font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Ejercicios - Día {selectedDay}
           </h2>
           
           {currentDayExercises.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+            <div className="text-center py-12 bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/50">
               <Dumbbell className="w-16 h-16 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">
                 No hay ejercicios para este día
@@ -357,12 +370,12 @@ const WorkoutPreviewPage: React.FC = () => {
               {currentDayExercises.map((exercise, idx) => (
                 <div 
                   key={exercise.id}
-                  className="bg-white border-2 border-gray-100 rounded-xl p-4 hover:border-orange-200 transition-colors shadow-sm"
+                  className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-4 hover:shadow-xl hover:border-orange-300/30 transition-all duration-300 shadow-lg"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="w-7 h-7 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <span className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-md">
                           {idx + 1}
                         </span>
                         <h3 className="font-semibold text-gray-900 text-lg">
@@ -376,7 +389,7 @@ const WorkoutPreviewPage: React.FC = () => {
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <div className="text-lg font-bold text-orange-600">
+                      <div className="text-lg font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
                         {exercise.sets} series
                       </div>
                       <div className="text-sm text-gray-600">
@@ -397,12 +410,12 @@ const WorkoutPreviewPage: React.FC = () => {
       </div>
 
       {/* Footer Sticky */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 pb-20 sm:pb-3 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md border-t border-white/50 px-4 py-3 pb-20 sm:pb-3 z-10 shadow-xl">
         <div className="max-w-4xl mx-auto flex gap-3">
           {routine.isPublic ? (
             <button
               onClick={handleCloneRoutine}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="flex-1 bg-gradient-to-br from-orange-500 to-pink-500 hover:shadow-xl hover:shadow-orange-500/30 text-white py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center justify-center gap-2"
             >
               <Copy className="w-5 h-5" />
               Clonar y Usar
@@ -411,14 +424,14 @@ const WorkoutPreviewPage: React.FC = () => {
             <>
               <button
                 onClick={() => navigate(`/workouts/${routine.id}`)}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-br from-orange-500 to-pink-500 hover:shadow-xl hover:shadow-orange-500/30 text-white py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Play className="w-5 h-5" />
                 Iniciar Rutina
               </button>
               <button
                 onClick={() => navigate(`/workouts/${routine.id}/edit`)}
-                className="flex-1 bg-gray-700 hover:bg-gray-800 text-white py-4 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-br from-gray-700 to-gray-900 hover:shadow-xl text-white py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Edit className="w-5 h-5" />
                 Editar

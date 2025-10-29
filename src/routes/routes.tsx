@@ -19,7 +19,6 @@ import {
   WorkoutEditPage, 
   WorkoutGeneratorPage,
   WorkoutExecutionPage,
-  Diet, 
   DietGeneratorPage,
   Nutrition,
   FoodSearchPage,
@@ -131,12 +130,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/food-photo-analyzer" element={
         <ProtectedRoute>
           <FoodPhotoAnalyzerPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/diet" element={
-        <ProtectedRoute>
-          <Diet />
         </ProtectedRoute>
       } />
       
