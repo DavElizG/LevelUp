@@ -8,6 +8,7 @@ import WorkoutExecutionScreen from '../../modules/workouts/components/execution/
 import workoutService from '../../modules/workouts/services/workoutService';
 import type { WorkoutRoutine, CreateWorkoutData } from '../../shared/types/workout.types';
 import { toast } from '../../hooks/useNotification';
+import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
@@ -86,7 +87,10 @@ const Workouts: React.FC = () => {
   // Pantalla de creación de rutina
   if (showCreate) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div className={cn(
+        "min-h-screen pb-20",
+        "bg-gray-50 dark:bg-gray-900 high-contrast:bg-black"
+      )}>
         <CreateWorkoutFormImproved 
           onCreated={async (data: CreateWorkoutData) => {
             // Crear la rutina usando el servicio
@@ -109,21 +113,45 @@ const Workouts: React.FC = () => {
 
   // Pantalla principal
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 pb-20 overflow-hidden">
+    <div className={cn(
+      "relative min-h-screen pb-20 overflow-hidden",
+      "bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30",
+      "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+      "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+    )}>
       {/* Burbujas decorativas de fondo - como Dashboard */}
-      <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-pink-400/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-      <div className="fixed top-1/4 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/30 to-blue-400/30 rounded-full blur-3xl translate-x-1/2 pointer-events-none"></div>
-      <div className="fixed bottom-0 left-1/4 w-72 h-72 bg-gradient-to-br from-pink-300/30 to-orange-400/30 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+      <div className={cn(
+        "absolute top-0 left-0 w-96 h-96 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none",
+        "bg-gradient-to-br from-orange-200 to-pink-300 opacity-30",
+        "dark:from-orange-900/40 dark:to-pink-900/40",
+        "high-contrast:from-orange-800 high-contrast:to-pink-800 high-contrast:opacity-20"
+      )}></div>
+      <div className={cn(
+        "absolute top-1/4 right-0 w-80 h-80 rounded-full blur-3xl translate-x-1/2 pointer-events-none",
+        "bg-gradient-to-br from-purple-200 to-blue-300 opacity-30",
+        "dark:from-purple-900/40 dark:to-blue-900/40",
+        "high-contrast:from-purple-800 high-contrast:to-blue-800 high-contrast:opacity-20"
+      )}></div>
+      <div className={cn(
+        "absolute bottom-0 left-1/4 w-72 h-72 rounded-full blur-3xl translate-y-1/2 pointer-events-none",
+        "bg-gradient-to-br from-pink-200 to-orange-300 opacity-30",
+        "dark:from-pink-900/40 dark:to-orange-900/40",
+        "high-contrast:from-pink-800 high-contrast:to-orange-800 high-contrast:opacity-20"
+      )}></div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-6 mb-8">
+        <div className={cn(
+          "backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8",
+          "bg-white/70 dark:bg-gray-800/70 high-contrast:bg-black/90",
+          "border border-white/50 dark:border-gray-700/50 high-contrast:border-white/30 high-contrast:border-2"
+        )}>
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">
                 💪 Mis Entrenamientos
               </h1>
-              <p className="text-gray-600">
+              <p className={cn(themeText.secondary)}>
                 Gestiona y ejecuta tus rutinas personalizadas
               </p>
             </div>
@@ -159,12 +187,16 @@ const Workouts: React.FC = () => {
         ) : null}
 
         {!loading && workouts.length === 0 && publicWorkouts.length === 0 ? (
-          <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-12 text-center">
+          <div className={cn(
+            "backdrop-blur-md rounded-3xl shadow-xl p-12 text-center",
+            "bg-white/70 dark:bg-gray-800/70 high-contrast:bg-black/90",
+            "border border-white/50 dark:border-gray-700/50 high-contrast:border-white/30 high-contrast:border-2"
+          )}>
             <div className="text-6xl mb-4">🏋️</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className={cn("text-xl font-semibold mb-2", themeText.primary)}>
               No tienes rutinas todavía
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className={cn("mb-6", themeText.secondary)}>
               Crea tu primera rutina o usa una de las rutinas populares
             </p>
             <button 
@@ -179,7 +211,7 @@ const Workouts: React.FC = () => {
         {!loading && workouts.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">Mis Rutinas</h2>
-            <p className="text-gray-600 mb-6">Rutinas personalizadas que has creado</p>
+            <p className={cn("mb-6", themeText.secondary)}>Rutinas personalizadas que has creado</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {workouts.map((workout) => (
                 <WorkoutCard 
@@ -200,7 +232,7 @@ const Workouts: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">Rutinas Populares</h2>
-                <p className="text-gray-600">
+                <p className={cn(themeText.secondary)}>
                   Rutinas profesionales diseñadas por expertos. Clónalas para empezar a entrenar.
                 </p>
               </div>

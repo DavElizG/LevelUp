@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Configure dark mode for Tailwind v4 */
+@theme {
+  --color-scheme: light dark;
+}
+
+@variant dark (&:where(.dark, .dark *));
+@variant high-contrast (&:where(.high-contrast, .high-contrast *));
+
 /* Hide scrollbar for age picker */
 .scrollbar-hide {
   -ms-overflow-style: none;

@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import { aiService } from '../../shared/services/ai/microservice';
-import { Dumbbell, Target, Clock, TrendingUp, Zap, AlertCircle, CheckCircle } from 'lucide-react';
+import { Dumbbell, Clock, User, Ruler, Weight, AlertCircle, CheckCircle, ArrowLeft, TrendingUp } from 'lucide-react';
 import WorkoutGenerationSkeleton from '../../components/shared/WorkoutGenerationSkeleton';
+import { cn } from '../../lib/utils';
 
 interface WorkoutFormData {
   goal: string;
@@ -15,6 +16,14 @@ interface WorkoutFormData {
   targetMuscles: string[];
   preferences: string;
 }
+
+interface ValidationErrors {
+  goal?: string;
+  difficulty?: string;
+  preferences?: string;
+}
+
+const MAX_PREFERENCES_LENGTH = 500;
 
 const WorkoutGeneratorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +43,8 @@ const WorkoutGeneratorPage: React.FC = () => {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   // Cargar datos del perfil del usuario
   useEffect(() => {
@@ -49,6 +60,63 @@ const WorkoutGeneratorPage: React.FC = () => {
   const handleInputChange = (field: keyof WorkoutFormData, value: string | number | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError(null);
+    setTouched(prev => ({ ...prev, [field]: true }));
+    
+    // Validar en tiempo real
+    validateField(field, value);
+  };
+
+  const validateField = (field: keyof WorkoutFormData, value: string | number | string[]) => {
+    const errors: ValidationErrors = { ...validationErrors };
+
+    switch (field) {
+      case 'goal':
+        if (!value || value === '') {
+          errors.goal = 'Debes seleccionar un objetivo';
+        } else {
+          delete errors.goal;
+        }
+        break;
+      
+      case 'difficulty':
+        if (!value || value === '') {
+          errors.difficulty = 'Debes seleccionar un nivel de dificultad';
+        } else {
+          delete errors.difficulty;
+        }
+        break;
+      
+      case 'preferences': {
+        const text = value as string;
+        if (text.length > MAX_PREFERENCES_LENGTH) {
+          errors.preferences = `Máximo ${MAX_PREFERENCES_LENGTH} caracteres`;
+        } else {
+          delete errors.preferences;
+        }
+        break;
+      }
+    }
+
+    setValidationErrors(errors);
+  };
+
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    if (!formData.goal) {
+      errors.goal = 'Debes seleccionar un objetivo';
+    }
+
+    if (!formData.difficulty) {
+      errors.difficulty = 'Debes seleccionar un nivel de dificultad';
+    }
+
+    if (formData.preferences.length > MAX_PREFERENCES_LENGTH) {
+      errors.preferences = `Máximo ${MAX_PREFERENCES_LENGTH} caracteres`;
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleArrayToggle = (field: 'equipment' | 'targetMuscles', value: string) => {
@@ -67,8 +135,15 @@ const WorkoutGeneratorPage: React.FC = () => {
       return;
     }
 
-    if (!formData.goal || !formData.difficulty) {
-      setError('Por favor completa los campos obligatorios');
+    // Validar formulario
+    if (!validateForm()) {
+      setError('Por favor completa los campos obligatorios correctamente');
+      // Marcar todos los campos como touched para mostrar errores
+      setTouched({
+        goal: true,
+        difficulty: true,
+        preferences: true
+      });
       return;
     }
 
@@ -138,87 +213,116 @@ const WorkoutGeneratorPage: React.FC = () => {
       {/* Show skeleton during AI generation */}
       {generating && <WorkoutGenerationSkeleton />}
       
-      <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center mb-4">
-            <button
-              onClick={() => navigate('/workouts')}
-              className="mr-4 text-gray-600 hover:text-gray-900"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Generar Rutina con IA</h1>
-              <p className="text-gray-600 mt-1">Crea una rutina personalizada basada en tus objetivos</p>
+      <div className="relative min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-purple-50/30 pb-24 overflow-hidden">
+        {/* Burbujas decorativas */}
+        <div className="fixed top-0 left-0 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-pink-400/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="fixed top-1/3 right-0 w-80 h-80 bg-gradient-to-br from-purple-300/30 to-blue-400/30 rounded-full blur-3xl translate-x-1/2 pointer-events-none"></div>
+        <div className="fixed bottom-0 left-1/4 w-72 h-72 bg-gradient-to-br from-pink-300/30 to-orange-400/30 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+
+        {/* Header Sticky */}
+        <div className="sticky top-0 z-10 bg-white/70 backdrop-blur-md shadow-xl border-b border-white/50">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-start gap-4">
+              <button
+                onClick={() => navigate('/workouts')}
+                className="p-2 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 text-white hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 flex-shrink-0 mt-1"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+                  Generar Rutina con IA
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  Crea una rutina personalizada basada en tus objetivos
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-6">
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-2xl bg-red-50/80 backdrop-blur-md border border-red-200/50 shadow-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-red-800 font-medium">Error</p>
+                  <p className="text-red-700 text-sm mt-1">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
         {/* Profile Info Banner */}
-        {profile && (
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-6 mb-6 text-white">
-            <div className="flex items-center mb-3">
-              <Zap className="w-6 h-6 mr-2" />
-              <h3 className="font-semibold text-lg">Tu Perfil</h3>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="opacity-80">Objetivo</p>
-                <p className="font-semibold">{profile.fitness_goal === 'gain_muscle' ? 'Ganar músculo' : profile.fitness_goal === 'lose_weight' ? 'Perder peso' : 'Mantener'}</p>
+          {profile && (
+          <div className="mb-6 p-6 rounded-3xl bg-white/70 backdrop-blur-md shadow-xl border border-white/50">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                {profile.name?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <div>
-                <p className="opacity-80">Nivel</p>
-                <p className="font-semibold">Personalizado</p>
-              </div>
-              <div>
-                <p className="opacity-80">Peso</p>
-                <p className="font-semibold">{profile.current_weight_kg} kg</p>
-              </div>
-              <div>
-                <p className="opacity-80">Días/semana</p>
-                <p className="font-semibold">{profile.workout_days_per_week || 3} días</p>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-gray-900">{profile.name || 'Usuario'}</h2>
+                <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-600">
+                  {profile.height_cm && (
+                    <span className="flex items-center gap-1">
+                      <Ruler className="w-4 h-4" />
+                      {profile.height_cm} cm
+                    </span>
+                  )}
+                  {profile.current_weight_kg && (
+                    <span className="flex items-center gap-1">
+                      <Weight className="w-4 h-4" />
+                      {profile.current_weight_kg} kg
+                    </span>
+                  )}
+                  {profile.fitness_goal && (
+                    <span className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      {profile.fitness_goal === 'gain_muscle' ? 'Ganar músculo' : 
+                       profile.fitness_goal === 'lose_weight' ? 'Perder peso' :
+                       profile.fitness_goal === 'maintain' ? 'Mantener' :
+                       'Mejorar resistencia'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Success Message */}
+        )}        {/* Success Message */}
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center">
-            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-            <p className="text-green-800">¡Rutina generada exitosamente! Redirigiendo...</p>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
-            <p className="text-red-800">{error}</p>
+          <div className="mb-6 p-4 rounded-2xl bg-green-50/80 backdrop-blur-md border border-green-200/50 shadow-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-green-800 font-medium">¡Éxito!</p>
+                <p className="text-green-700 text-sm mt-1">Rutina generada exitosamente. Redirigiendo...</p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-            <Target className="w-5 h-5 mr-2 text-orange-500" />
-            Configuración de la Rutina
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 sm:p-8 border border-white/50">
+          <h2 className="text-xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+            Configura tu rutina
           </h2>
 
           {/* Goal */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Objetivo Principal *
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              ¿Cuál es tu objetivo principal? *
             </label>
             <select
               value={formData.goal}
               onChange={(e) => handleInputChange('goal', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              required
+              className={cn(
+                "w-full px-4 py-3 border rounded-2xl bg-white/50 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 transition-all",
+                touched.goal && validationErrors.goal
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-200 focus:ring-orange-500"
+              )}
             >
               <option value="">Selecciona un objetivo</option>
               <option value="lose_weight">Perder peso</option>
@@ -228,23 +332,33 @@ const WorkoutGeneratorPage: React.FC = () => {
               <option value="maintain_fitness">Mantener condición física</option>
               <option value="flexibility">Mejorar flexibilidad</option>
             </select>
+            {touched.goal && validationErrors.goal && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {validationErrors.goal}
+              </p>
+            )}
           </div>
 
           {/* Difficulty */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nivel de Dificultad *
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              ¿Cuál es tu nivel de experiencia? *
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {['beginner', 'intermediate', 'advanced', 'expert'].map((level) => (
                 <button
                   key={level}
+                  type="button"
                   onClick={() => handleInputChange('difficulty', level)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                  className={cn(
+                    "px-4 py-3 rounded-2xl border-2 transition-all duration-300 font-medium",
                     formData.difficulty === level
-                      ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                      ? 'border-transparent bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/30'
+                      : touched.difficulty && validationErrors.difficulty
+                      ? 'border-red-500 text-red-700 hover:bg-red-50'
+                      : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                  )}
                 >
                   {level === 'beginner' ? 'Principiante' : 
                    level === 'intermediate' ? 'Intermedio' : 
@@ -252,63 +366,75 @@ const WorkoutGeneratorPage: React.FC = () => {
                 </button>
               ))}
             </div>
+            {touched.difficulty && validationErrors.difficulty && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {validationErrors.difficulty}
+              </p>
+            )}
           </div>
 
           {/* Days per Week */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Días por Semana: {formData.daysPerWeek}
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Días por semana: <span className="text-orange-600 font-bold">{formData.daysPerWeek}</span>
             </label>
-            <input
-              type="range"
-              min="1"
-              max="7"
-              value={formData.daysPerWeek}
-              onChange={(e) => handleInputChange('daysPerWeek', parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>1 día</span>
-              <span>7 días</span>
+            <div className="relative">
+              <input
+                type="range"
+                min="1"
+                max="7"
+                value={formData.daysPerWeek}
+                onChange={(e) => handleInputChange('daysPerWeek', parseInt(e.target.value))}
+                className="w-full h-3 bg-gradient-to-r from-orange-200 to-pink-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-orange-500 [&::-webkit-slider-thumb]:to-pink-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>1 día</span>
+                <span>7 días</span>
+              </div>
             </div>
           </div>
 
           {/* Duration */}
           <div className="mb-6">
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Clock className="w-4 h-4 mr-2" />
-              Duración por Sesión: {formData.duration} min
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <Clock className="w-4 h-4 mr-2 text-orange-500" />
+              Duración por sesión: <span className="text-orange-600 font-bold ml-1">{formData.duration} min</span>
             </label>
-            <input
-              type="range"
-              min="30"
-              max="120"
-              step="15"
-              value={formData.duration}
-              onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>30 min</span>
-              <span>120 min</span>
+            <div className="relative">
+              <input
+                type="range"
+                min="30"
+                max="120"
+                step="15"
+                value={formData.duration}
+                onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
+                className="w-full h-3 bg-gradient-to-r from-orange-200 to-pink-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-orange-500 [&::-webkit-slider-thumb]:to-pink-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>30 min</span>
+                <span>120 min</span>
+              </div>
             </div>
           </div>
 
           {/* Equipment */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Equipamiento Disponible
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Equipamiento disponible
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {equipmentOptions.map((equipment) => (
                 <button
                   key={equipment}
+                  type="button"
                   onClick={() => handleArrayToggle('equipment', equipment)}
-                  className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                  className={cn(
+                    "px-3 py-2 rounded-2xl border-2 text-sm transition-all duration-300 font-medium",
                     formData.equipment.includes(equipment)
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                      ? 'border-transparent bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/20'
+                      : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                  )}
                 >
                   {equipment}
                 </button>
@@ -318,20 +444,22 @@ const WorkoutGeneratorPage: React.FC = () => {
 
           {/* Target Muscles */}
           <div className="mb-6">
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
-              <Dumbbell className="w-4 h-4 mr-2" />
-              Grupos Musculares a Enfocar
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <Dumbbell className="w-4 h-4 mr-2 text-orange-500" />
+              Grupos musculares a enfocar
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {muscleGroups.map((muscle) => (
                 <button
                   key={muscle}
+                  type="button"
                   onClick={() => handleArrayToggle('targetMuscles', muscle)}
-                  className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                  className={cn(
+                    "px-3 py-2 rounded-2xl border-2 text-sm transition-all duration-300 font-medium",
                     formData.targetMuscles.includes(muscle)
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                      ? 'border-transparent bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/20'
+                      : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                  )}
                 >
                   {muscle}
                 </button>
@@ -340,17 +468,34 @@ const WorkoutGeneratorPage: React.FC = () => {
           </div>
 
           {/* Preferences */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Preferencias Adicionales (Opcional)
+          <div className="mb-0">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Preferencias adicionales (opcional)
             </label>
-            <textarea
-              value={formData.preferences}
-              onChange={(e) => handleInputChange('preferences', e.target.value)}
-              placeholder="Ej: Enfoque en ejercicios compuestos, evitar ejercicios de impacto, incluir estiramientos..."
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-            />
+            <div className="relative">
+              <textarea
+                value={formData.preferences}
+                onChange={(e) => handleInputChange('preferences', e.target.value)}
+                placeholder="Ej: Enfoque en ejercicios compuestos, evitar ejercicios de impacto, incluir estiramientos..."
+                rows={4}
+                maxLength={MAX_PREFERENCES_LENGTH}
+                className={cn(
+                  "w-full px-4 py-3 border rounded-2xl bg-white/50 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 transition-all resize-none",
+                  touched.preferences && validationErrors.preferences
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-200 focus:ring-orange-500"
+                )}
+              />
+              <div className="absolute bottom-3 right-3 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded-lg backdrop-blur-sm">
+                {formData.preferences.length}/{MAX_PREFERENCES_LENGTH}
+              </div>
+            </div>
+            {touched.preferences && validationErrors.preferences && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {validationErrors.preferences}
+              </p>
+            )}
           </div>
         </div>
 
@@ -358,11 +503,12 @@ const WorkoutGeneratorPage: React.FC = () => {
         <button
           onClick={handleGenerateWorkout}
           disabled={generating || success}
-          className={`w-full py-4 rounded-xl font-semibold text-white transition-all flex items-center justify-center ${
+          className={cn(
+            "w-full mt-6 py-4 rounded-2xl font-bold text-white transition-all duration-300 flex items-center justify-center shadow-xl",
             generating || success
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg'
-          }`}
+              : 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98]'
+          )}
         >
           {generating ? (
             <>

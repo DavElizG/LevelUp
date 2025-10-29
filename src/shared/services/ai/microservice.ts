@@ -51,16 +51,8 @@ export class AIService {
     avoidFoods?: string[];
     preferences?: string;
   }): Promise<ApiResponse<DietPlan>> {
-    try {
-      const response = await aiClient.post<DietPlan>('/diet', preferences);
-      return response;
-    } catch (error) {
-      return {
-        success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to generate AI diet plan',
-      };
-    }
+    // El HttpClient ahora maneja los errores y devuelve ApiResponse con error incluido
+    return await aiClient.post<DietPlan>('/diet', preferences);
   }
 
   /**
