@@ -17,15 +17,17 @@ export class AIService {
    * Generate AI-powered workout routine
    */
   async generateWorkout(preferences: {
+    userId: string;
     goal: string;
-    level: string;
+    difficulty: string;
+    daysPerWeek: number;
     duration: number;
-    equipment: string[];
-    muscleGroups?: string[];
-    workoutType?: string;
+    equipment?: string[];
+    targetMuscles?: string[];
+    preferences?: string;
   }): Promise<ApiResponse<Workout>> {
     try {
-      const response = await aiClient.post<Workout>('/workouts/generate', preferences);
+      const response = await aiClient.post<Workout>('/workout', preferences);
       return response;
     } catch (error) {
       return {
@@ -40,15 +42,17 @@ export class AIService {
    * Generate AI-powered diet plan
    */
   async generateDietPlan(preferences: {
+    userId: string;
     goal: string;
     calories: number;
-    restrictions: string[];
-    meals: number;
-    dietType?: string;
-    allergies?: string[];
+    restrictions?: string[];
+    mealsPerDay?: number;
+    preferredFoods?: string[];
+    avoidFoods?: string[];
+    preferences?: string;
   }): Promise<ApiResponse<DietPlan>> {
     try {
-      const response = await aiClient.post<DietPlan>('/diet-plans/generate', preferences);
+      const response = await aiClient.post<DietPlan>('/diet', preferences);
       return response;
     } catch (error) {
       return {

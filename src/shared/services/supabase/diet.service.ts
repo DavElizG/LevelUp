@@ -264,7 +264,8 @@ export class SupabaseDietService implements DietService {
     }
   }
 
-  async generateAIDietPlan(_preferences: any): Promise<ApiResponse<DietPlan>> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async generateAIDietPlan(_preferences: Record<string, unknown>): Promise<ApiResponse<DietPlan>> {
     // This method will call the AI microservice
     // For now, return a placeholder response
     return {

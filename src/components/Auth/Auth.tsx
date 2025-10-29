@@ -4,23 +4,27 @@ import Register from './Register';
 import EmailConfirmation from './EmailConfirmation';
 import ResetPassword from './ResetPassword';
 import ResetPasswordError from './ResetPasswordError';
+import ForgotPassword from './ForgotPassword';
 
-type AuthMode = 'login' | 'register' | 'email-confirmation' | 'reset-password' | 'reset-password-error';
+type AuthMode = 'login' | 'register' | 'email-confirmation' | 'reset-password' | 'reset-password-error' | 'forgot-password';
 
 const Auth: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [pendingEmail, setPendingEmail] = useState<string>('');
-  const [accessToken, setAccessToken] = useState<string>('');
   const [errorType, setErrorType] = useState<'expired' | 'invalid' | 'access_denied'>('expired');
 
   useEffect(() => {
     // Check URL parameters for auth-related actions
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('access_token');
-    const type = urlParams.get('type');
-    const error = urlParams.get('error');
-    const errorCode = urlParams.get('error_code');
-    const errorDescription = urlParams.get('error_description');
+    const hashParams = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : null;
+    
+    // Try to get token/code from both query and hash params
+    const token = urlParams.get('access_token') || hashParams?.get('access_token');
+    const code = urlParams.get('code') || hashParams?.get('code');
+    const type = urlParams.get('type') || hashParams?.get('type');
+    const error = urlParams.get('error') || hashParams?.get('error');
+    const errorCode = urlParams.get('error_code') || hashParams?.get('error_code');
+    const errorDescription = urlParams.get('error_description') || hashParams?.get('error_description');
     
     // Handle password reset errors
     if (error || errorCode) {
@@ -36,37 +40,10 @@ const Auth: React.FC = () => {
     }
     
     // Handle successful password reset link
-    if (token && type === 'recovery') {
-      setAccessToken(token);
+    // PKCE flow sends code, Implicit flow sends access_token
+    if (code || (token && type === 'recovery')) {
       setMode('reset-password');
       return;
-    }
-
-    // Check for hash parameters (sometimes auth providers use hash instead of query)
-    if (window.location.hash) {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const hashError = hashParams.get('error');
-      const hashErrorCode = hashParams.get('error_code');
-      const hashToken = hashParams.get('access_token');
-      const hashType = hashParams.get('type');
-      
-      if (hashError || hashErrorCode) {
-        if (hashErrorCode === 'otp_expired' || hashParams.get('error_description')?.includes('expired')) {
-          setErrorType('expired');
-        } else if (hashError === 'access_denied') {
-          setErrorType('access_denied');
-        } else {
-          setErrorType('invalid');
-        }
-        setMode('reset-password-error');
-        return;
-      }
-      
-      if (hashToken && hashType === 'recovery') {
-        setAccessToken(hashToken);
-        setMode('reset-password');
-        return;
-      }
     }
   }, []);
 
@@ -78,6 +55,8 @@ const Auth: React.FC = () => {
   
   const switchToRegister = () => setMode('register');
   
+  const switchToForgotPassword = () => setMode('forgot-password');
+  
   const switchToEmailConfirmation = (email: string) => {
     setPendingEmail(email);
     setMode('email-confirmation');
@@ -86,7 +65,10 @@ const Auth: React.FC = () => {
   return (
     <>
       {mode === 'login' && (
-        <Login onSwitchToRegister={switchToRegister} />
+        <Login 
+          onSwitchToRegister={switchToRegister}
+          onSwitchToForgotPassword={switchToForgotPassword}
+        />
       )}
       {mode === 'register' && (
         <Register 
@@ -100,10 +82,14 @@ const Auth: React.FC = () => {
           onBackToLogin={switchToLogin}
         />
       )}
+      {mode === 'forgot-password' && (
+        <ForgotPassword 
+          onBackToLogin={switchToLogin}
+        />
+      )}
       {mode === 'reset-password' && (
         <ResetPassword 
           onBackToLogin={switchToLogin}
-          accessToken={accessToken}
         />
       )}
       {mode === 'reset-password-error' && (

@@ -1,0 +1,1 @@
+export { WorkoutDaySection } from './WorkoutDaySection';
