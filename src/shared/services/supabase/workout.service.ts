@@ -227,6 +227,7 @@ export class SupabaseWorkoutService implements WorkoutService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async generateAIWorkout(_preferences: Record<string, unknown>): Promise<ApiResponse<WorkoutRoutine>> {
     // This method will call the AI microservice
     // For now, return a placeholder response
@@ -692,6 +693,319 @@ export class SupabaseWorkoutService implements WorkoutService {
         success: false,
         data: null,
         error: error instanceof Error ? error.message : 'Failed to clone routine',
+      };
+    }
+  }
+
+  /**
+   * Update basic workout information
+   */
+  async updateWorkoutBasicInfo(
+    routineId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      goal?: string;
+      difficultyLevel?: string;
+      daysPerWeek?: number;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      const { error } = await supabase
+        .from('workout_routines')
+        .update({
+          name: updates.name,
+          description: updates.description,
+          goal: updates.goal,
+          difficulty_level: updates.difficultyLevel,
+          days_per_week: updates.daysPerWeek,
+        })
+        .eq('id', routineId)
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return this.getWorkout(routineId);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to update workout',
+      };
+    }
+  }
+
+  /**
+   * Move an exercise to a different day
+   */
+  async moveExerciseToDay(
+    routineExerciseId: string,
+    newDayOfWeek: number,
+    newOrderInDay?: number
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      // Get the exercise to find its routine
+      const { data: exercise, error: fetchError } = await supabase
+        .from('routine_exercises')
+        .select('routine_id')
+        .eq('id', routineExerciseId)
+        .single();
+
+      if (fetchError || !exercise) {
+        return {
+          success: false,
+          data: null,
+          error: 'Exercise not found',
+        };
+      }
+
+      const updateData: { day_of_week: number; order_in_day?: number } = {
+        day_of_week: newDayOfWeek,
+      };
+
+      if (newOrderInDay !== undefined) {
+        updateData.order_in_day = newOrderInDay;
+      }
+
+      const { error } = await supabase
+        .from('routine_exercises')
+        .update(updateData)
+        .eq('id', routineExerciseId);
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return this.getWorkout(exercise.routine_id);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to move exercise',
+      };
+    }
+  }
+
+  /**
+   * Update exercise details in a routine
+   */
+  async updateRoutineExercise(
+    routineExerciseId: string,
+    updates: {
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      // Get the exercise to find its routine
+      const { data: exercise, error: fetchError } = await supabase
+        .from('routine_exercises')
+        .select('routine_id')
+        .eq('id', routineExerciseId)
+        .single();
+
+      if (fetchError || !exercise) {
+        return {
+          success: false,
+          data: null,
+          error: 'Exercise not found',
+        };
+      }
+
+      const { error } = await supabase
+        .from('routine_exercises')
+        .update({
+          sets: updates.sets,
+          reps_min: updates.repsMin,
+          reps_max: updates.repsMax,
+          rest_seconds: updates.restSeconds,
+          weight_kg: updates.weightKg,
+          notes: updates.notes,
+        })
+        .eq('id', routineExerciseId);
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return this.getWorkout(exercise.routine_id);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to update exercise',
+      };
+    }
+  }
+
+  /**
+   * Remove an exercise from a routine
+   */
+  async removeExerciseFromRoutine(routineExerciseId: string): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      // Get the exercise to find its routine before deleting
+      const { data: exercise, error: fetchError } = await supabase
+        .from('routine_exercises')
+        .select('routine_id')
+        .eq('id', routineExerciseId)
+        .single();
+
+      if (fetchError || !exercise) {
+        return {
+          success: false,
+          data: null,
+          error: 'Exercise not found',
+        };
+      }
+
+      const routineId = exercise.routine_id;
+
+      const { error } = await supabase
+        .from('routine_exercises')
+        .delete()
+        .eq('id', routineExerciseId);
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return this.getWorkout(routineId);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to remove exercise',
+      };
+    }
+  }
+
+  /**
+   * Add an exercise to a routine
+   */
+  async addExerciseToRoutine(
+    routineId: string,
+    exerciseId: string,
+    dayOfWeek: number,
+    options?: {
+      orderInDay?: number;
+      sets?: number;
+      repsMin?: number;
+      repsMax?: number;
+      restSeconds?: number;
+      weightKg?: number;
+      notes?: string;
+    }
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      let orderInDay = options?.orderInDay;
+
+      // If no order specified, get the max order for the day
+      if (orderInDay === undefined) {
+        const { data: existingExercises } = await supabase
+          .from('routine_exercises')
+          .select('order_in_day')
+          .eq('routine_id', routineId)
+          .eq('day_of_week', dayOfWeek)
+          .order('order_in_day', { ascending: false })
+          .limit(1);
+
+        orderInDay = existingExercises && existingExercises.length > 0 
+          ? (existingExercises[0].order_in_day || 0) + 1 
+          : 1;
+      }
+
+      const { error } = await supabase
+        .from('routine_exercises')
+        .insert({
+          routine_id: routineId,
+          exercise_id: exerciseId,
+          day_of_week: dayOfWeek,
+          order_in_day: orderInDay,
+          sets: options?.sets || 3,
+          reps_min: options?.repsMin || 8,
+          reps_max: options?.repsMax || options?.repsMin || 12,
+          rest_seconds: options?.restSeconds,
+          weight_kg: options?.weightKg,
+          notes: options?.notes,
+        });
+
+      if (error) {
+        return {
+          success: false,
+          data: null,
+          error: error.message,
+        };
+      }
+
+      return this.getWorkout(routineId);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to add exercise',
+      };
+    }
+  }
+
+  /**
+   * Reorder exercises within a day
+   */
+  async reorderExercisesInDay(
+    routineId: string,
+    dayOfWeek: number,
+    exerciseOrders: Array<{ id: string; order: number }>
+  ): Promise<ApiResponse<WorkoutRoutine>> {
+    try {
+      // Update each exercise with its new order
+      const updates = exerciseOrders.map(({ id, order }) =>
+        supabase
+          .from('routine_exercises')
+          .update({ order_in_day: order })
+          .eq('id', id)
+          .eq('routine_id', routineId)
+          .eq('day_of_week', dayOfWeek)
+      );
+
+      const results = await Promise.all(updates);
+      const errors = results.filter(r => r.error);
+
+      if (errors.length > 0) {
+        return {
+          success: false,
+          data: null,
+          error: 'Failed to reorder some exercises',
+        };
+      }
+
+      return this.getWorkout(routineId);
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to reorder exercises',
       };
     }
   }

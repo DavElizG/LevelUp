@@ -68,45 +68,31 @@ const BottomNavbar: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-pb">
-      {/* Glassmorphism background with blur */}
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-lg border-t border-gray-200/50"></div>
+      {/* Glassmorphism background with blur - más suave */}
+      <div className="absolute inset-0 bg-white/95 backdrop-blur-xl border-t border-gray-100/50 shadow-2xl"></div>
       
-      {/* Gradient accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600"></div>
+      {/* Gradient accent line - muy sutil */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/20 to-transparent"></div>
       
-      <div className="relative flex justify-around items-center px-2 py-3">
+      <div className="relative flex justify-around items-center px-6 py-3">
         {navItems.map((item) => {
           const isActive = isActivePath(item.path);
           return (
             <button
               key={item.id}
               onClick={() => handleNavigation(item.path)}
-              className={`relative flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-300 ${
-                isActive 
-                  ? 'text-orange-500' 
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-              }`}
+              className="relative flex items-center justify-center transition-all duration-300 p-2"
             >
-              {/* Active indicator - gradient background */}
-              {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl opacity-50"></div>
-              )}
-              
-              {/* Icon container with scale animation */}
-              <div className={`relative transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
+              {/* Icon - Simple y limpio, sin cuadro */}
+              <div className={`transition-all duration-300 ${
+                isActive ? 'scale-110' : 'scale-100'
+              }`}>
                 {item.icon(isActive)}
               </div>
               
-              {/* Label */}
-              <span className={`relative text-xs mt-1 transition-all duration-300 ${
-                isActive ? 'font-semibold' : 'font-medium'
-              }`}>
-                {item.label}
-              </span>
-              
-              {/* Active dot indicator */}
+              {/* Indicador activo - línea debajo */}
               {isActive && (
-                <div className="absolute -top-1 w-1.5 h-1.5 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full animate-pulse"></div>
+                <div className="absolute -bottom-1 w-8 h-1 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full"></div>
               )}
             </button>
           );

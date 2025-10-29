@@ -4,14 +4,10 @@ export { useWorkoutTimer } from './hooks/useWorkoutTimer';
 export { useWorkoutSession } from './hooks/useWorkoutSession';
 
 // Components
-export { CreateWorkoutFormNew } from './components/CreateWorkoutFormNew';
-export { WorkoutDaySection } from './components/WorkoutDaySection';
-export { WorkoutExerciseCard } from './components/WorkoutExerciseCard';
-export { WorkoutTimerDisplay } from './components/WorkoutTimerDisplay';
-
-// Legacy components (mantener para compatibilidad)
-export { default as CreateWorkoutForm } from './components/CreateWorkoutForm';
-export { default as WorkoutCard } from './components/WorkoutCard';
+export { CreateWorkoutFormImproved } from './components/forms';
+export { WorkoutCard, WorkoutExerciseCard, SeriesCard } from './components/cards';
+export { WorkoutDaySection } from './components/sections';
+export { WorkoutExecutionScreen, WorkoutTimerDisplay, RestTimerScreen } from './components/execution';
 
 // Pages
 export { WorkoutManagementPage } from './pages/WorkoutManagementPage';

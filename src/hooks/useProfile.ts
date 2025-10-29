@@ -106,7 +106,7 @@ export const useProfile = (userId?: string) => {
     }
   }, [userId]);
 
-  const updateFormData = useCallback((field: keyof ProfileFormData, value: any) => {
+  const updateFormData = useCallback((field: keyof ProfileFormData, value: ProfileFormData[keyof ProfileFormData]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

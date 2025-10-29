@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { CreateWorkoutFormNew } from '../components/CreateWorkoutFormNew';
-import { WorkoutTimerDisplay } from '../components/WorkoutTimerDisplay';
+import { CreateWorkoutFormImproved } from '../components/forms/CreateWorkoutFormImproved';
+import { WorkoutTimerDisplay } from '../components/execution/WorkoutTimerDisplay';
 import { useWorkouts } from '../hooks/useWorkouts';
 import type { CreateWorkoutData, WorkoutRoutine } from '../../../shared/types/workout.types';
+import { toast } from '../../../hooks/useNotification';
 
 export const WorkoutManagementPage: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -18,7 +19,7 @@ export const WorkoutManagementPage: React.FC = () => {
 
   const handleStartWorkout = (routine: WorkoutRoutine) => {
     if (!routine.exercises || routine.exercises.length === 0) {
-      alert('Esta rutina no tiene ejercicios configurados');
+      toast.warning('Esta rutina no tiene ejercicios configurados');
       return;
     }
     setActiveRoutine(routine);
@@ -66,7 +67,7 @@ export const WorkoutManagementPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {showCreateForm ? (
         <div className="h-screen">
-          <CreateWorkoutFormNew
+          <CreateWorkoutFormImproved
             onClose={() => setShowCreateForm(false)}
             onCreated={handleCreateRoutine}
           />
