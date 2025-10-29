@@ -1,158 +1,312 @@
 import React from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { useProgress } from '../../hooks/useProgress';
 import BottomNavbar from '../../components/shared/BottomNavbar';
+import { 
+  Activity, 
+  Flame, 
+  Clock, 
+  TrendingUp, 
+  Award,
+  Calendar
+} from 'lucide-react';
+
+// Skeleton component for loading states
+const StatCardSkeleton = () => (
+  <div className="bg-white rounded-2xl p-4 animate-pulse">
+    <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+    <div className="h-8 bg-gray-200 rounded w-16"></div>
+  </div>
+);
+
+const ChartSkeleton = () => (
+  <div className="bg-white rounded-2xl p-6 animate-pulse">
+    <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
+    <div className="h-48 bg-gray-200 rounded"></div>
+  </div>
+);
 
 const Progress: React.FC = () => {
+  const { user } = useAuth();
+  const { progressData, loading } = useProgress(user?.id);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+  };
+
+  const getWeightProgress = () => {
+    if (!progressData) return 0;
+    const { initialWeight, currentWeight, targetWeight } = progressData;
+    if (initialWeight === targetWeight) return 100;
+    const totalChange = Math.abs(initialWeight - targetWeight);
+    const currentChange = Math.abs(initialWeight - currentWeight);
+    return Math.min(Math.round((currentChange / totalChange) * 100), 100);
+  };
+
+  // Generate chart points from weight data
+  const generateChartPath = () => {
+    if (!progressData?.weightProgress || progressData.weightProgress.length === 0) return '';
+    
+    const data = progressData.weightProgress;
+    const width = 300;
+    const height = 160;
+    const padding = 20;
+
+    const minWeight = Math.min(...data.map(d => d.weight));
+    const maxWeight = Math.max(...data.map(d => d.weight));
+    const range = maxWeight - minWeight || 1;
+
+    const points = data.map((point, index) => {
+      const x = padding + (index / (data.length - 1 || 1)) * (width - 2 * padding);
+      const y = height - padding - ((point.weight - minWeight) / range) * (height - 2 * padding);
+      return `${x},${y}`;
+    });
+
+    return `M ${points.join(' L ')}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
+        {/* Header */}
+        <div className="bg-white/80 backdrop-blur-sm px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
+          <div className="flex items-center justify-between">
+            <div className="h-7 bg-gray-200 rounded w-24 animate-pulse"></div>
+            <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 gap-4">
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </div>
+
+          {/* Chart Skeleton */}
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+
+        <BottomNavbar />
+      </div>
+    );
+  }
+
+  if (!progressData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24 flex items-center justify-center">
+        <div className="text-center p-6">
+          <p className="text-gray-600">No hay datos de progreso disponibles</p>
+        </div>
+        <BottomNavbar />
+      </div>
+    );
+  }
+
+  const weekProgress = getWeightProgress();
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
       {/* Header */}
-      <div className="bg-white px-4 py-3 border-b border-gray-200">
+      <div className="bg-white/80 backdrop-blur-sm px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-medium text-gray-900">Progreso</h1>
-          <div className="text-sm text-gray-500">19:02</div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
+            Mi Progreso
+          </h1>
+          <span className="text-sm text-purple-600 font-medium">
+            {weekProgress}% completado
+          </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        {/* Weekly Overview */}
-        <div className="bg-white rounded-2xl p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Resumen Semanal</h2>
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-500">12</div>
-              <div className="text-sm text-gray-600">Entrenamientos</div>
+      <div className="p-6 space-y-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Workouts */}
+          <div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className="w-4 h-4" />
+              <p className="text-sm opacity-90">Entrenamientos</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">2.4k</div>
-              <div className="text-sm text-gray-600">Calorías</div>
+            <p className="text-3xl font-bold">{progressData.weeklyStats.workouts}</p>
+            <p className="text-xs opacity-75 mt-1">esta semana</p>
+          </div>
+
+          {/* Calories */}
+          <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Flame className="w-4 h-4" />
+              <p className="text-sm opacity-90">Calorías</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">15h</div>
-              <div className="text-sm text-gray-600">Tiempo activo</div>
+            <p className="text-3xl font-bold">
+              {(progressData.weeklyStats.calories / 1000).toFixed(1)}k
+            </p>
+            <p className="text-xs opacity-75 mt-1">quemadas</p>
+          </div>
+
+          {/* Active Time */}
+          <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-4 h-4" />
+              <p className="text-sm opacity-90">Tiempo Activo</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-500">7</div>
-              <div className="text-sm text-gray-600">Días seguidos</div>
+            <p className="text-3xl font-bold">
+              {Math.round(progressData.weeklyStats.activeMinutes / 60)}h
+            </p>
+            <p className="text-xs opacity-75 mt-1">esta semana</p>
+          </div>
+
+          {/* Streak */}
+          <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4" />
+              <p className="text-sm opacity-90">Racha</p>
             </div>
+            <p className="text-3xl font-bold">{progressData.weeklyStats.streak}</p>
+            <p className="text-xs opacity-75 mt-1">días seguidos</p>
           </div>
         </div>
 
-        {/* Weight Progress */}
-        <div className="bg-white rounded-2xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Evolución de Peso</h3>
-          
-          {/* Chart Placeholder */}
-          <div className="relative h-48 mb-4">
-            <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-              <span>80kg</span>
-              <span>75kg</span>
-              <span>70kg</span>
-              <span>65kg</span>
-              <span>60kg</span>
-            </div>
-            
-            <div className="ml-12 h-full relative">
-              <div className="absolute inset-0 flex flex-col justify-between">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="border-t border-gray-200"></div>
-                ))}
-              </div>
-              
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200">
+        {/* Weight Progress Chart */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-600" />
+            Evolución de Peso
+          </h3>
+          <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-50 to-purple-50 rounded-xl">
+            {progressData.weightProgress.length > 0 ? (
+              <svg viewBox="0 0 300 160" className="w-full h-full">
                 <defs>
-                  <linearGradient id="weightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1"/>
+                  <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f97316" />
+                    <stop offset="100%" stopColor="#a855f7" />
                   </linearGradient>
                 </defs>
                 <path
-                  d="M 20 120 Q 80 110 140 100 Q 200 95 260 90"
-                  stroke="#3b82f6"
-                  strokeWidth="3"
                   fill="none"
+                  stroke="url(#lineGradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  d={generateChartPath()}
                 />
-                <path
-                  d="M 20 120 Q 80 110 140 100 Q 200 95 260 90 L 260 200 L 20 200 Z"
-                  fill="url(#weightGradient)"
-                />
+                {/* Data points */}
+                {progressData.weightProgress.map((point, index) => {
+                  const data = progressData.weightProgress;
+                  const width = 300;
+                  const height = 160;
+                  const padding = 20;
+                  const minWeight = Math.min(...data.map(d => d.weight));
+                  const maxWeight = Math.max(...data.map(d => d.weight));
+                  const range = maxWeight - minWeight || 1;
+                  const x = padding + (index / (data.length - 1 || 1)) * (width - 2 * padding);
+                  const y = height - padding - ((point.weight - minWeight) / range) * (height - 2 * padding);
+                  
+                  return (
+                    <circle
+                      key={index}
+                      cx={x}
+                      cy={y}
+                      r="4"
+                      fill="white"
+                      stroke="#f97316"
+                      strokeWidth="2"
+                    />
+                  );
+                })}
               </svg>
-            </div>
-            
-            <div className="ml-12 mt-2 flex justify-between text-xs text-gray-500">
-              <span>Ene</span>
-              <span>Feb</span>
-              <span>Mar</span>
-              <span>Abr</span>
-              <span>May</span>
-              <span>Jun</span>
-            </div>
+            ) : (
+              <p className="text-gray-400">No hay datos suficientes</p>
+            )}
           </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Peso inicial: <span className="font-semibold">75kg</span></span>
-            <span className="text-gray-600">Peso actual: <span className="font-semibold text-blue-600">72kg</span></span>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <div>
+              <p className="text-gray-500">Inicial</p>
+              <p className="font-semibold text-gray-800">{progressData.initialWeight} kg</p>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-500">Actual</p>
+              <p className="font-semibold text-orange-600">{progressData.currentWeight} kg</p>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-500">Meta</p>
+              <p className="font-semibold text-purple-600">{progressData.targetWeight} kg</p>
+            </div>
           </div>
         </div>
 
-        {/* Workout Frequency */}
-        <div className="bg-white rounded-2xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Frecuencia de Entrenamientos</h3>
-          
-          <div className="grid grid-cols-7 gap-2 mb-4">
-            {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, index) => (
-              <div key={index} className="text-center">
-                <div className="text-xs text-gray-500 mb-2">{day}</div>
-                <div className={`h-8 rounded-lg ${
-                  index < 5 ? 'bg-orange-500' : 'bg-gray-200'
-                }`}></div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center text-sm text-gray-600">
-            5 de 7 días esta semana
+        {/* Weekly Frequency */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-purple-600" />
+            Frecuencia Semanal
+          </h3>
+          <div className="grid grid-cols-7 gap-2">
+            {[
+              { day: 'L', key: 'monday' },
+              { day: 'M', key: 'tuesday' },
+              { day: 'X', key: 'wednesday' },
+              { day: 'J', key: 'thursday' },
+              { day: 'V', key: 'friday' },
+              { day: 'S', key: 'saturday' },
+              { day: 'D', key: 'sunday' }
+            ].map(({ day, key }) => {
+              const hasWorkout = progressData.weeklyWorkouts[key as keyof typeof progressData.weeklyWorkouts];
+              return (
+                <div key={key} className="text-center">
+                  <div
+                    className={`w-full aspect-square rounded-lg flex items-center justify-center font-medium transition-all ${
+                      hasWorkout 
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    {day}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Personal Records */}
-        <div className="bg-white rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Records Personales</h3>
-          
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Award className="w-5 h-5 text-yellow-500" />
+            Récords Personales
+          </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <div className="font-medium text-gray-900">Press de banca</div>
-                <div className="text-sm text-gray-600">Hace 3 días</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-orange-500">80kg</div>
-                <div className="text-sm text-gray-500">+5kg</div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <div className="font-medium text-gray-900">Sentadillas</div>
-                <div className="text-sm text-gray-600">Hace 1 semana</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-green-500">100kg</div>
-                <div className="text-sm text-gray-500">+10kg</div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <div className="font-medium text-gray-900">Peso muerto</div>
-                <div className="text-sm text-gray-600">Hace 2 semanas</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-blue-500">120kg</div>
-                <div className="text-sm text-gray-500">+15kg</div>
-              </div>
-            </div>
+            {progressData.personalRecords.map((record, index) => {
+              const colors = [
+                'from-orange-50 to-orange-100 text-orange-600',
+                'from-purple-50 to-purple-100 text-purple-600',
+                'from-blue-50 to-blue-100 text-blue-600',
+                'from-green-50 to-green-100 text-green-600'
+              ];
+              const colorClass = colors[index % colors.length];
+              
+              return (
+                <div 
+                  key={index}
+                  className={`flex items-center justify-between p-4 bg-gradient-to-r ${colorClass.split(' text-')[0]} rounded-xl`}
+                >
+                  <div>
+                    <p className="font-medium text-gray-800">{record.exercise}</p>
+                    <p className="text-sm text-gray-600">
+                      {record.weight} kg · {formatDate(record.date)}
+                    </p>
+                  </div>
+                  <span className={`font-semibold ${colorClass.split(' ')[1]}`}>
+                    +{record.improvement} kg
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
