@@ -8,6 +8,8 @@ import { calculateCaloriesFromProfile } from '../../shared/utils/calorieCalculat
 import type { CalorieCalculationResult } from '../../shared/utils/calorieCalculator';
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
+import DashboardSkeleton from './components/DashboardSkeleton';
+import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -163,17 +165,7 @@ const Dashboard: React.FC = () => {
 
   // Show loading while checking profile
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-orange-200"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-          </div>
-          <p className="text-gray-600 font-medium">Verificando perfil...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Redirect to setup if profile doesn't exist
@@ -183,7 +175,12 @@ const Dashboard: React.FC = () => {
 
   return (
     <SwipeableLayout>
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
+      <div className={cn(
+        "min-h-screen pb-24",
+        "bg-gradient-to-br from-orange-50 via-white to-purple-50",
+        "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+        "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+      )}>
         {/* Animated Header with Gradient */}
         <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-6 pt-12 pb-8 relative overflow-hidden">
           {/* Animated background shapes */}
@@ -240,15 +237,28 @@ const Dashboard: React.FC = () => {
           {/* Today's Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
             {/* Calories Card */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-orange-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-50 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className={cn(
+              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
+              "bg-white dark:bg-gray-800 high-contrast:bg-black",
+              "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
+            )}>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 high-contrast:from-orange-900/50 high-contrast:to-orange-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
               <div className="relative z-10">
-                <div className="text-orange-500 text-sm font-semibold mb-1">🔥 Calorías</div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{todayStats.calories}</div>
+                <div className={cn(
+                  "text-sm font-semibold mb-1",
+                  "text-orange-500 dark:text-orange-400 high-contrast:text-orange-500"
+                )}>🔥 Calorías</div>
+                <div className={cn(
+                  "text-2xl font-bold mb-1",
+                  themeText.primary
+                )}>{todayStats.calories}</div>
                 {calorieData && (
                   <>
-                    <div className="text-xs text-gray-500">de {calorieData.targetCalories}</div>
-                    <div className="w-full bg-orange-100 rounded-full h-1.5 mt-2">
+                    <div className={cn("text-xs", themeText.muted)}>de {calorieData.targetCalories}</div>
+                    <div className={cn(
+                      "w-full rounded-full h-1.5 mt-2",
+                      "bg-orange-100 dark:bg-orange-900/30 high-contrast:bg-orange-900/50"
+                    )}>
                       <div 
                         className="bg-gradient-to-r from-orange-400 to-orange-600 h-1.5 rounded-full transition-all duration-500"
                         style={{ width: `${calorieProgress}%` }}
@@ -260,13 +270,26 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Workouts Card */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-blue-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className={cn(
+              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
+              "bg-white dark:bg-gray-800 high-contrast:bg-black",
+              "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600 high-contrast:border-2"
+            )}>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 high-contrast:from-blue-900/50 high-contrast:to-blue-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
               <div className="relative z-10">
-                <div className="text-blue-500 text-sm font-semibold mb-1">💪 Entrenos</div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{completedDays}</div>
-                <div className="text-xs text-gray-500">de 7 días</div>
-                <div className="w-full bg-blue-100 rounded-full h-1.5 mt-2">
+                <div className={cn(
+                  "text-sm font-semibold mb-1",
+                  "text-blue-500 dark:text-blue-400 high-contrast:text-blue-500"
+                )}>💪 Entrenos</div>
+                <div className={cn(
+                  "text-2xl font-bold mb-1",
+                  themeText.primary
+                )}>{completedDays}</div>
+                <div className={cn("text-xs", themeText.muted)}>de 7 días</div>
+                <div className={cn(
+                  "w-full rounded-full h-1.5 mt-2",
+                  "bg-blue-100 dark:bg-blue-900/30 high-contrast:bg-blue-900/50"
+                )}>
                   <div 
                     className="bg-gradient-to-r from-blue-400 to-blue-600 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${weekProgressPercentage}%` }}
@@ -276,13 +299,26 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Water Card */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-cyan-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-100 to-cyan-50 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <div className={cn(
+              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
+              "bg-white dark:bg-gray-800 high-contrast:bg-black",
+              "border border-cyan-100 dark:border-cyan-900 high-contrast:border-cyan-600 high-contrast:border-2"
+            )}>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-900/30 dark:to-cyan-800/20 high-contrast:from-cyan-900/50 high-contrast:to-cyan-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
               <div className="relative z-10">
-                <div className="text-cyan-500 text-sm font-semibold mb-1">💧 Agua</div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{(todayStats.water / 1000).toFixed(1)}</div>
-                <div className="text-xs text-gray-500">de 2.5 L</div>
-                <div className="w-full bg-cyan-100 rounded-full h-1.5 mt-2">
+                <div className={cn(
+                  "text-sm font-semibold mb-1",
+                  "text-cyan-500 dark:text-cyan-400 high-contrast:text-cyan-500"
+                )}>💧 Agua</div>
+                <div className={cn(
+                  "text-2xl font-bold mb-1",
+                  themeText.primary
+                )}>{(todayStats.water / 1000).toFixed(1)}</div>
+                <div className={cn("text-xs", themeText.muted)}>de 2.5 L</div>
+                <div className={cn(
+                  "w-full rounded-full h-1.5 mt-2",
+                  "bg-cyan-100 dark:bg-cyan-900/30 high-contrast:bg-cyan-900/50"
+                )}>
                   <div 
                     className="bg-gradient-to-r from-cyan-400 to-cyan-600 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, (todayStats.water / 2500) * 100)}%` }}
@@ -293,26 +329,37 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Goal Card with Animation */}
-          <div className="bg-gradient-to-br from-white to-orange-50 rounded-3xl p-6 shadow-xl border border-orange-100 relative overflow-hidden">
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-orange-200 to-pink-200 rounded-full opacity-20 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-20 blur-2xl"></div>
+          <div className={cn(
+            "rounded-3xl p-6 shadow-xl relative overflow-hidden",
+            "bg-gradient-to-br from-white to-orange-50 dark:from-gray-800 dark:to-gray-800/50 high-contrast:from-black high-contrast:to-black",
+            "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
+          )}>
+            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-orange-200 to-pink-200 dark:from-orange-900/30 dark:to-pink-900/30 high-contrast:from-orange-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
+            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-900/30 dark:to-pink-900/30 high-contrast:from-purple-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-gray-900 text-lg font-bold mb-1">Tu Objetivo Actual</h3>
-                  <p className="text-gray-500 text-sm">Enfócate en lo que importa</p>
+                  <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Tu Objetivo Actual</h3>
+                  <p className={cn("text-sm", themeText.muted)}>Enfócate en lo que importa</p>
                 </div>
                 <div className="text-4xl animate-pulse">{getGoalIcon()}</div>
               </div>
 
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 mb-4 border border-orange-100">
-                <h4 className="text-gray-900 text-2xl font-bold mb-2">{formatGoal()}</h4>
+              <div className={cn(
+                "backdrop-blur-sm rounded-2xl p-5 mb-4",
+                "bg-white/80 dark:bg-gray-900/50 high-contrast:bg-black/50",
+                "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600"
+              )}>
+                <h4 className={cn("text-2xl font-bold mb-2", themeText.primary)}>{formatGoal()}</h4>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Progreso semanal</span>
-                  <span className="font-bold text-orange-600">{weekProgressPercentage}%</span>
+                  <span className={themeText.secondary}>Progreso semanal</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{weekProgressPercentage}%</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-3 mt-3 overflow-hidden">
+                <div className={cn(
+                  "w-full rounded-full h-3 mt-3 overflow-hidden",
+                  "bg-gray-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+                )}>
                   <div 
                     className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 h-3 rounded-full transition-all duration-700 relative"
                     style={{ width: `${weekProgressPercentage}%` }}
@@ -335,9 +382,13 @@ const Dashboard: React.FC = () => {
           <div className="space-y-3">
             <div
               onClick={() => navigate('/workouts')}
-              className="bg-white rounded-2xl p-5 shadow-lg border border-blue-100 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+              className={cn(
+                "rounded-2xl p-5 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group",
+                "bg-white dark:bg-gray-800 high-contrast:bg-black",
+                "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600 high-contrast:border-2"
+              )}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/10 high-contrast:from-blue-900/30 high-contrast:to-blue-800/20 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
               <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -346,13 +397,16 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-gray-900 text-base font-bold mb-1">Entrenamientos</h3>
-                    <p className="text-gray-500 text-sm">Rutinas personalizadas</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Entrenamientos</h3>
+                    <p className={cn("text-sm", themeText.muted)}>Rutinas personalizadas</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn(
+                    "w-5 h-5 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300",
+                    "text-gray-400 dark:text-gray-500 high-contrast:text-gray-400"
+                  )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -361,9 +415,13 @@ const Dashboard: React.FC = () => {
 
             <div
               onClick={() => navigate('/nutrition')}
-              className="bg-white rounded-2xl p-5 shadow-lg border border-green-100 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+              className={cn(
+                "rounded-2xl p-5 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group",
+                "bg-white dark:bg-gray-800 high-contrast:bg-black",
+                "border border-green-100 dark:border-green-900 high-contrast:border-green-600 high-contrast:border-2"
+              )}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-green-100 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/10 high-contrast:from-green-900/30 high-contrast:to-green-800/20 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
               <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -372,13 +430,16 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-gray-900 text-base font-bold mb-1">Nutrición</h3>
-                    <p className="text-gray-500 text-sm">Plan alimenticio diario</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Nutrición</h3>
+                    <p className={cn("text-sm", themeText.muted)}>Plan alimenticio diario</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-green-500 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn(
+                    "w-5 h-5 group-hover:text-green-500 group-hover:translate-x-1 transition-all duration-300",
+                    "text-gray-400 dark:text-gray-500 high-contrast:text-gray-400"
+                  )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -387,7 +448,11 @@ const Dashboard: React.FC = () => {
 
             <div
               onClick={() => navigate('/progress')}
-              className="bg-white rounded-2xl p-5 shadow-lg border border-purple-100 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+              className={cn(
+                "rounded-2xl p-5 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group",
+                "bg-white dark:bg-gray-800 high-contrast:bg-black",
+                "border border-purple-100 dark:border-purple-900 high-contrast:border-purple-600 high-contrast:border-2"
+              )}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-purple-100 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
               <div className="flex items-center justify-between relative z-10">
@@ -413,13 +478,17 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Weekly Progress with Enhanced Design */}
-          <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl p-6 shadow-xl border border-blue-100 relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-20 blur-2xl"></div>
+          <div className={cn(
+            "rounded-3xl p-6 shadow-xl relative overflow-hidden",
+            "bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-800/50 high-contrast:from-black high-contrast:to-black",
+            "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600 high-contrast:border-2"
+          )}>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900/30 dark:to-purple-900/30 high-contrast:from-blue-900/50 high-contrast:to-purple-900/50 rounded-full opacity-20 blur-2xl"></div>
             
             <div className="relative z-10">
               <div className="text-center mb-6">
-                <h3 className="text-gray-900 text-lg font-bold mb-1">Esta Semana</h3>
-                <p className="text-gray-500 text-sm">Desafío de 7 días</p>
+                <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Esta Semana</h3>
+                <p className={cn("text-sm", themeText.muted)}>Desafío de 7 días</p>
               </div>
 
               <div className="flex justify-center space-x-3 mb-6">
@@ -428,16 +497,25 @@ const Dashboard: React.FC = () => {
                   return (
                     <div key={index} className="text-center">
                       <div
-                        className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-2 text-sm font-bold transition-all duration-300 transform
-                          ${isCompleted
-                            ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg scale-110'
-                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                          }
-                        `}
+                        className={cn(
+                          "w-10 h-10 rounded-2xl flex items-center justify-center mb-2 text-sm font-bold transition-all duration-300 transform",
+                          isCompleted
+                            ? "bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg scale-110"
+                            : cn(
+                              "bg-gray-100 dark:bg-gray-700 high-contrast:bg-gray-900",
+                              "text-gray-400 dark:text-gray-500 high-contrast:text-gray-600",
+                              "hover:bg-gray-200 dark:hover:bg-gray-600"
+                            )
+                        )}
                       >
                         {isCompleted ? '✓' : day}
                       </div>
-                      <div className={`text-xs font-medium ${isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        isCompleted 
+                          ? "text-green-600 dark:text-green-400 high-contrast:text-green-500" 
+                          : cn(themeText.muted)
+                      )}>
                         {day}
                       </div>
                     </div>
@@ -445,12 +523,19 @@ const Dashboard: React.FC = () => {
                 })}
               </div>
 
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-blue-100">
+              <div className={cn(
+                "backdrop-blur-sm rounded-2xl p-4",
+                "bg-white/80 dark:bg-gray-900/50 high-contrast:bg-black/50",
+                "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600"
+              )}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-gray-600 text-sm font-medium">Progreso</span>
-                  <span className="text-gray-900 font-bold">{completedDays} de 7 días</span>
+                  <span className={cn("text-sm font-medium", themeText.secondary)}>Progreso</span>
+                  <span className={cn("font-bold", themeText.primary)}>{completedDays} de 7 días</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                <div className={cn(
+                  "w-full rounded-full h-3 overflow-hidden",
+                  "bg-gray-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+                )}>
                   <div 
                     className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 h-3 rounded-full transition-all duration-700 relative"
                     style={{ width: `${weekProgressPercentage}%` }}

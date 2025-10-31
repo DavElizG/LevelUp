@@ -11,19 +11,38 @@ import {
   Award,
   Calendar
 } from 'lucide-react';
+import { cn, themeText } from '../../shared/utils/themeUtils';
 
 // Skeleton component for loading states
 const StatCardSkeleton = () => (
-  <div className="bg-white rounded-2xl p-4 animate-pulse">
-    <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-    <div className="h-8 bg-gray-200 rounded w-16"></div>
+  <div className={cn(
+    "rounded-2xl p-4 animate-pulse",
+    "bg-white dark:bg-gray-800 high-contrast:bg-black"
+  )}>
+    <div className={cn(
+      "h-4 rounded w-20 mb-2",
+      "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+    )}></div>
+    <div className={cn(
+      "h-8 rounded w-16",
+      "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+    )}></div>
   </div>
 );
 
 const ChartSkeleton = () => (
-  <div className="bg-white rounded-2xl p-6 animate-pulse">
-    <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
-    <div className="h-48 bg-gray-200 rounded"></div>
+  <div className={cn(
+    "rounded-2xl p-6 animate-pulse",
+    "bg-white dark:bg-gray-800 high-contrast:bg-black"
+  )}>
+    <div className={cn(
+      "h-6 rounded w-32 mb-4",
+      "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+    )}></div>
+    <div className={cn(
+      "h-48 rounded",
+      "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+    )}></div>
   </div>
 );
 
@@ -69,12 +88,27 @@ const Progress: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
+      <div className={cn(
+        "min-h-screen pb-24",
+        "bg-gradient-to-br from-orange-50 via-white to-purple-50",
+        "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+        "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+      )}>
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
+        <div className={cn(
+          "backdrop-blur-sm px-6 py-4 sticky top-0 z-10",
+          "bg-white/80 dark:bg-gray-800/80 high-contrast:bg-black/90",
+          "border-b border-gray-100 dark:border-gray-700 high-contrast:border-white/30 high-contrast:border-b-2"
+        )}>
           <div className="flex items-center justify-between">
-            <div className="h-7 bg-gray-200 rounded w-24 animate-pulse"></div>
-            <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+            <div className={cn(
+              "h-7 rounded w-24 animate-pulse",
+              "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+            )}></div>
+            <div className={cn(
+              "h-5 rounded w-16 animate-pulse",
+              "bg-gray-200 dark:bg-gray-700 high-contrast:bg-gray-800"
+            )}></div>
           </div>
         </div>
 
@@ -100,9 +134,14 @@ const Progress: React.FC = () => {
 
   if (!progressData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24 flex items-center justify-center">
+      <div className={cn(
+        "min-h-screen pb-24 flex items-center justify-center",
+        "bg-gradient-to-br from-orange-50 via-white to-purple-50",
+        "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+        "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+      )}>
         <div className="text-center p-6">
-          <p className="text-gray-600">No hay datos de progreso disponibles</p>
+          <p className={cn(themeText.secondary)}>No hay datos de progreso disponibles</p>
         </div>
         <BottomNavbar />
       </div>
@@ -113,14 +152,42 @@ const Progress: React.FC = () => {
 
   return (
     <SwipeableLayout>
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 pb-24">
+    <div className={cn(
+      "relative min-h-screen pb-24 overflow-hidden",
+      "bg-gradient-to-br from-orange-50 via-white to-purple-50",
+      "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+      "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+    )}>
+      {/* Burbujas decorativas de fondo - estilo Dashboard */}
+      <div className={cn(
+        "absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl pointer-events-none",
+        "bg-gradient-to-br from-orange-200 to-pink-300 opacity-30",
+        "dark:from-orange-900/40 dark:to-pink-900/40",
+        "high-contrast:from-orange-800 high-contrast:to-pink-800 high-contrast:opacity-20"
+      )}></div>
+      <div className={cn(
+        "absolute top-1/3 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none",
+        "bg-gradient-to-br from-purple-200 to-blue-300 opacity-30",
+        "dark:from-purple-900/40 dark:to-blue-900/40",
+        "high-contrast:from-purple-800 high-contrast:to-blue-800 high-contrast:opacity-20"
+      )}></div>
+      <div className={cn(
+        "absolute bottom-20 right-10 w-64 h-64 rounded-full blur-3xl pointer-events-none",
+        "bg-gradient-to-br from-pink-200 to-orange-300 opacity-30",
+        "dark:from-pink-900/40 dark:to-orange-900/40",
+        "high-contrast:from-pink-800 high-contrast:to-orange-800 high-contrast:opacity-20"
+      )}></div>
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
+      <div className={cn(
+        "backdrop-blur-sm px-6 py-4 sticky top-0 z-10",
+        "bg-white/80 dark:bg-gray-800/80 high-contrast:bg-black/90",
+        "border-b border-gray-100 dark:border-gray-700 high-contrast:border-white/30 high-contrast:border-b-2"
+      )}>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
             Mi Progreso
           </h1>
-          <span className="text-sm text-purple-600 font-medium">
+          <span className="text-sm font-medium text-purple-600 dark:text-purple-400 high-contrast:text-purple-500">
             {weekProgress}% completado
           </span>
         </div>
@@ -131,7 +198,13 @@ const Progress: React.FC = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4">
           {/* Workouts */}
-          <div className="relative bg-gradient-to-br from-orange-400/90 to-orange-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+          <div className={cn(
+            "relative backdrop-blur-md rounded-3xl p-4 text-white shadow-xl overflow-hidden",
+            "bg-gradient-to-br from-orange-400/90 to-orange-600/90",
+            "dark:from-orange-600/90 dark:to-orange-800/90",
+            "high-contrast:from-orange-700 high-contrast:to-orange-900",
+            "border border-white/30 dark:border-white/20 high-contrast:border-white/40 high-contrast:border-2"
+          )}>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
@@ -144,7 +217,13 @@ const Progress: React.FC = () => {
           </div>
 
           {/* Calories */}
-          <div className="relative bg-gradient-to-br from-green-400/90 to-green-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+          <div className={cn(
+            "relative backdrop-blur-md rounded-3xl p-4 text-white shadow-xl overflow-hidden",
+            "bg-gradient-to-br from-green-400/90 to-green-600/90",
+            "dark:from-green-600/90 dark:to-green-800/90",
+            "high-contrast:from-green-700 high-contrast:to-green-900",
+            "border border-white/30 dark:border-white/20 high-contrast:border-white/40 high-contrast:border-2"
+          )}>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
@@ -159,7 +238,13 @@ const Progress: React.FC = () => {
           </div>
 
           {/* Active Time */}
-          <div className="relative bg-gradient-to-br from-blue-400/90 to-blue-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+          <div className={cn(
+            "relative backdrop-blur-md rounded-3xl p-4 text-white shadow-xl overflow-hidden",
+            "bg-gradient-to-br from-blue-400/90 to-blue-600/90",
+            "dark:from-blue-600/90 dark:to-blue-800/90",
+            "high-contrast:from-blue-700 high-contrast:to-blue-900",
+            "border border-white/30 dark:border-white/20 high-contrast:border-white/40 high-contrast:border-2"
+          )}>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
@@ -174,7 +259,13 @@ const Progress: React.FC = () => {
           </div>
 
           {/* Streak */}
-          <div className="relative bg-gradient-to-br from-purple-400/90 to-purple-600/90 backdrop-blur-md rounded-3xl p-4 text-white shadow-xl border border-white/30 overflow-hidden">
+          <div className={cn(
+            "relative backdrop-blur-md rounded-3xl p-4 text-white shadow-xl overflow-hidden",
+            "bg-gradient-to-br from-purple-400/90 to-purple-600/90",
+            "dark:from-purple-600/90 dark:to-purple-800/90",
+            "high-contrast:from-purple-700 high-contrast:to-purple-900",
+            "border border-white/30 dark:border-white/20 high-contrast:border-white/40 high-contrast:border-2"
+          )}>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
@@ -188,17 +279,26 @@ const Progress: React.FC = () => {
         </div>
 
         {/* Weight Progress Chart */}
-        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+        <div className={cn(
+          "relative backdrop-blur-md rounded-3xl p-6 shadow-xl overflow-hidden",
+          "bg-white/70 dark:bg-gray-800/70 high-contrast:bg-black/90",
+          "border border-white/50 dark:border-gray-700/50 high-contrast:border-white/30 high-contrast:border-2"
+        )}>
           {/* Decorative bubbles */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-300/20 to-pink-400/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-300/20 to-blue-400/20 rounded-full blur-2xl"></div>
           
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-orange-600" />
+            <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", themeText.primary)}>
+              <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400 high-contrast:text-orange-500" />
               Evolución de Peso
             </h3>
-            <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-50/50 to-purple-50/50 rounded-2xl">
+            <div className={cn(
+              "h-48 flex items-center justify-center rounded-2xl",
+              "bg-gradient-to-br from-orange-50/50 to-purple-50/50",
+              "dark:from-gray-900/30 dark:to-gray-800/30",
+              "high-contrast:from-black/50 high-contrast:to-black/50"
+            )}>
               {progressData.weightProgress.length > 0 ? (
               <svg viewBox="0 0 300 160" className="w-full h-full">
                 <defs>
@@ -240,34 +340,38 @@ const Progress: React.FC = () => {
                 })}
               </svg>
             ) : (
-              <p className="text-gray-400">No hay datos suficientes</p>
+              <p className={cn(themeText.muted)}>No hay datos suficientes</p>
             )}
             </div>
             <div className="mt-4 flex items-center justify-between text-sm">
               <div>
-                <p className="text-gray-500">Inicial</p>
-                <p className="font-semibold text-gray-800">{progressData.initialWeight} kg</p>
+                <p className={cn(themeText.muted)}>Inicial</p>
+                <p className={cn("font-semibold", themeText.primary)}>{progressData.initialWeight} kg</p>
               </div>
               <div className="text-center">
-                <p className="text-gray-500">Actual</p>
-                <p className="font-semibold text-orange-600">{progressData.currentWeight} kg</p>
+                <p className={cn(themeText.muted)}>Actual</p>
+                <p className="font-semibold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{progressData.currentWeight} kg</p>
               </div>
               <div className="text-right">
-                <p className="text-gray-500">Meta</p>
-                <p className="font-semibold text-purple-600">{progressData.targetWeight} kg</p>
+                <p className={cn(themeText.muted)}>Meta</p>
+                <p className="font-semibold text-purple-600 dark:text-purple-400 high-contrast:text-purple-500">{progressData.targetWeight} kg</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Weekly Frequency */}
-        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+        <div className={cn(
+          "relative backdrop-blur-md rounded-3xl p-6 shadow-xl overflow-hidden",
+          "bg-white/70 dark:bg-gray-800/70 high-contrast:bg-black/90",
+          "border border-white/50 dark:border-gray-700/50 high-contrast:border-white/30 high-contrast:border-2"
+        )}>
           {/* Decorative bubbles */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/20 to-blue-400/20 rounded-full blur-3xl"></div>
           
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-600" />
+            <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", themeText.primary)}>
+              <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400 high-contrast:text-purple-500" />
               Frecuencia Semanal
             </h3>
             <div className="grid grid-cols-7 gap-2">
@@ -284,11 +388,15 @@ const Progress: React.FC = () => {
                 return (
                   <div key={key} className="text-center">
                     <div
-                      className={`w-full aspect-square rounded-lg flex items-center justify-center font-medium transition-all ${
+                      className={cn(
+                        "w-full aspect-square rounded-lg flex items-center justify-center font-medium transition-all",
                         hasWorkout 
-                          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
-                          : 'bg-gray-100 text-gray-400'
-                      }`}
+                          ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md" 
+                          : cn(
+                            "bg-gray-100 dark:bg-gray-700 high-contrast:bg-gray-900",
+                            "text-gray-400 dark:text-gray-500 high-contrast:text-gray-600"
+                          )
+                      )}
                     >
                       {day}
                     </div>
@@ -300,13 +408,17 @@ const Progress: React.FC = () => {
         </div>
 
         {/* Personal Records */}
-        <div className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 overflow-hidden">
+        <div className={cn(
+          "relative backdrop-blur-md rounded-3xl p-6 shadow-xl overflow-hidden",
+          "bg-white/70 dark:bg-gray-800/70 high-contrast:bg-black/90",
+          "border border-white/50 dark:border-gray-700/50 high-contrast:border-white/30 high-contrast:border-2"
+        )}>
           {/* Decorative bubbles */}
           <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-yellow-300/20 to-orange-400/20 rounded-full blur-3xl"></div>
           
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Award className="w-5 h-5 text-yellow-500" />
+            <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", themeText.primary)}>
+              <Award className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
               Récords Personales
             </h3>
             <div className="space-y-3">
@@ -317,20 +429,44 @@ const Progress: React.FC = () => {
                   'from-blue-50 to-blue-100 text-blue-600',
                   'from-green-50 to-green-100 text-green-600'
                 ];
+                const darkColors = [
+                  'dark:from-orange-900/30 dark:to-orange-800/20 dark:text-orange-400',
+                  'dark:from-purple-900/30 dark:to-purple-800/20 dark:text-purple-400',
+                  'dark:from-blue-900/30 dark:to-blue-800/20 dark:text-blue-400',
+                  'dark:from-green-900/30 dark:to-green-800/20 dark:text-green-400'
+                ];
+                const highContrastColors = [
+                  'high-contrast:from-orange-900/50 high-contrast:to-orange-800/30 high-contrast:text-orange-500',
+                  'high-contrast:from-purple-900/50 high-contrast:to-purple-800/30 high-contrast:text-purple-500',
+                  'high-contrast:from-blue-900/50 high-contrast:to-blue-800/30 high-contrast:text-blue-500',
+                  'high-contrast:from-green-900/50 high-contrast:to-green-800/30 high-contrast:text-green-500'
+                ];
                 const colorClass = colors[index % colors.length];
+                const darkColorClass = darkColors[index % darkColors.length];
+                const highContrastColorClass = highContrastColors[index % highContrastColors.length];
                 
                 return (
                   <div 
                     key={index}
-                    className={`flex items-center justify-between p-4 bg-gradient-to-r ${colorClass.split(' text-')[0]} rounded-xl backdrop-blur-sm`}
+                    className={cn(
+                      "flex items-center justify-between p-4 backdrop-blur-sm rounded-xl",
+                      `bg-gradient-to-r ${colorClass.split(' text-')[0]}`,
+                      darkColorClass.split(' dark:text-')[0],
+                      highContrastColorClass.split(' high-contrast:text-')[0]
+                    )}
                   >
                     <div>
-                      <p className="font-medium text-gray-800">{record.exercise}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className={cn("font-medium", themeText.primary)}>{record.exercise}</p>
+                      <p className={cn("text-sm", themeText.secondary)}>
                         {record.weight} kg · {formatDate(record.date)}
                       </p>
                     </div>
-                    <span className={`font-semibold ${colorClass.split(' ')[1]}`}>
+                    <span className={cn(
+                      "font-semibold",
+                      colorClass.split(' ')[1],
+                      darkColorClass.split(' ')[1],
+                      highContrastColorClass.split(' ')[1]
+                    )}>
                       +{record.improvement} kg
                     </span>
                   </div>

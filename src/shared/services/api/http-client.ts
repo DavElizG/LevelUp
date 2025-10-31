@@ -80,28 +80,83 @@ export class HttpClient {
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.get<T>(url, config);
-    return response.data as ApiResponse<T>;
+    try {
+      const response = await this.client.get<T>(url, config);
+      return response.data as ApiResponse<T>;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          data: null,
+          error: error.response.data,
+        } as ApiResponse<T>;
+      }
+      throw error;
+    }
   }
 
   async post<T, D = Record<string, unknown>>(url: string, data?: D, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.post<T>(url, data as unknown as AxiosRequestConfig, config);
-    return response.data as ApiResponse<T>;
+    try {
+      const response = await this.client.post<T>(url, data as unknown as AxiosRequestConfig, config);
+      return response.data as ApiResponse<T>;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          data: null,
+          error: error.response.data,
+        } as ApiResponse<T>;
+      }
+      throw error;
+    }
   }
 
   async put<T, D = Record<string, unknown>>(url: string, data?: D, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.put<T>(url, data as unknown as AxiosRequestConfig, config);
-    return response.data as ApiResponse<T>;
+    try {
+      const response = await this.client.put<T>(url, data as unknown as AxiosRequestConfig, config);
+      return response.data as ApiResponse<T>;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          data: null,
+          error: error.response.data,
+        } as ApiResponse<T>;
+      }
+      throw error;
+    }
   }
 
   async patch<T, D = Record<string, unknown>>(url: string, data?: D, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.patch<T>(url, data as unknown as AxiosRequestConfig, config);
-    return response.data as ApiResponse<T>;
+    try {
+      const response = await this.client.patch<T>(url, data as unknown as AxiosRequestConfig, config);
+      return response.data as ApiResponse<T>;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          data: null,
+          error: error.response.data,
+        } as ApiResponse<T>;
+      }
+      throw error;
+    }
   }
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.delete<T>(url, config);
-    return response.data as ApiResponse<T>;
+    try {
+      const response = await this.client.delete<T>(url, config);
+      return response.data as ApiResponse<T>;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          data: null,
+          error: error.response.data,
+        } as ApiResponse<T>;
+      }
+      throw error;
+    }
   }
 }
 
