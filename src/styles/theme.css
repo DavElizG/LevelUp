@@ -1,0 +1,246 @@
+/* Theme Variables */
+:root,
+html.light {
+  /* Light Theme (Default) */
+  --bg-primary: 255, 255, 255;
+  --bg-secondary: 249, 250, 251;
+  --bg-tertiary: 243, 244, 246;
+  
+  --text-primary: 17, 24, 39;
+  --text-secondary: 75, 85, 99;
+  --text-tertiary: 156, 163, 175;
+  
+  --border-primary: 229, 231, 235;
+  --border-secondary: 209, 213, 219;
+  
+  --gradient-from: 249, 115, 22; /* orange-500 */
+  --gradient-via: 236, 72, 153; /* pink-500 */
+  --gradient-to: 168, 85, 247; /* purple-600 */
+  
+  --card-bg: 255, 255, 255;
+  --card-hover: 249, 250, 251;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
+}
+
+/* Dark Theme */
+html.dark {
+  --bg-primary: 17, 24, 39; /* gray-900 */
+  --bg-secondary: 31, 41, 55; /* gray-800 */
+  --bg-tertiary: 55, 65, 81; /* gray-700 */
+  
+  --text-primary: 243, 244, 246; /* gray-100 */
+  --text-secondary: 209, 213, 219; /* gray-300 */
+  --text-tertiary: 156, 163, 175; /* gray-400 */
+  
+  --border-primary: 55, 65, 81; /* gray-700 */
+  --border-secondary: 75, 85, 99; /* gray-600 */
+  
+  --gradient-from: 251, 146, 60; /* orange-400 */
+  --gradient-via: 244, 114, 182; /* pink-400 */
+  --gradient-to: 192, 132, 252; /* purple-400 */
+  
+  --card-bg: 31, 41, 55;
+  --card-hover: 55, 65, 81;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  
+  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(75, 85, 99, 0.5);
+}
+
+/* High Contrast Theme (Accessibility) */
+html.high-contrast {
+  --bg-primary: 0, 0, 0;
+  --bg-secondary: 17, 17, 17;
+  --bg-tertiary: 34, 34, 34;
+  
+  --text-primary: 255, 255, 255;
+  --text-secondary: 255, 255, 255;
+  --text-tertiary: 229, 229, 229;
+  
+  --border-primary: 255, 255, 255;
+  --border-secondary: 204, 204, 204;
+  
+  --gradient-from: 255, 165, 0; /* Bright orange */
+  --gradient-via: 255, 20, 147; /* Deep pink */
+  --gradient-to: 138, 43, 226; /* Blue violet */
+  
+  --card-bg: 17, 17, 17;
+  --card-hover: 34, 34, 34;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(255 255 255 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(255 255 255 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(255 255 255 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(255 255 255 / 0.6);
+  
+  --glass-bg: rgba(17, 17, 17, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.8);
+}
+
+/* Apply theme to body */
+body {
+  background-color: rgb(var(--bg-primary));
+  color: rgb(var(--text-primary));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Force light theme when .light class is present */
+html.light body {
+  background-color: rgb(255, 255, 255);
+  color: rgb(17, 24, 39);
+}
+
+/* Force dark theme when .dark class is present */
+html.dark body {
+  background-color: rgb(17, 24, 39);
+  color: rgb(243, 244, 246);
+}
+
+/* Force high-contrast theme when .high-contrast class is present */
+html.high-contrast body {
+  background-color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
+}
+
+/* Utility classes for theme-aware components */
+.bg-theme-primary {
+  background-color: rgb(var(--bg-primary));
+}
+
+.bg-theme-secondary {
+  background-color: rgb(var(--bg-secondary));
+}
+
+.bg-theme-tertiary {
+  background-color: rgb(var(--bg-tertiary));
+}
+
+.text-theme-primary {
+  color: rgb(var(--text-primary));
+}
+
+.text-theme-secondary {
+  color: rgb(var(--text-secondary));
+}
+
+.text-theme-tertiary {
+  color: rgb(var(--text-tertiary));
+}
+
+.border-theme-primary {
+  border-color: rgb(var(--border-primary));
+}
+
+.border-theme-secondary {
+  border-color: rgb(var(--border-secondary));
+}
+
+.bg-glass-theme {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.border-glass-theme {
+  border-color: var(--glass-border);
+}
+
+.card-theme {
+  background-color: rgb(var(--card-bg));
+  transition: all 0.3s ease;
+}
+
+.card-theme:hover {
+  background-color: rgb(var(--card-hover));
+}
+
+/* Gradient classes that adapt to theme */
+.gradient-theme {
+  background: linear-gradient(
+    to right,
+    rgb(var(--gradient-from)),
+    rgb(var(--gradient-via)),
+    rgb(var(--gradient-to))
+  );
+}
+
+/* High contrast specific adjustments */
+.high-contrast * {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.high-contrast button,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border-width: 2px;
+}
+
+.high-contrast a:focus,
+.high-contrast button:focus,
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast textarea:focus {
+  outline: 3px solid rgb(var(--gradient-from));
+  outline-offset: 2px;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark theme scrollbar */
+.dark::-webkit-scrollbar {
+  width: 12px;
+}
+
+.dark::-webkit-scrollbar-track {
+  background: rgb(var(--bg-secondary));
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: rgb(var(--bg-tertiary));
+  border-radius: 6px;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--border-secondary));
+}
+
+/* High contrast scrollbar */
+.high-contrast::-webkit-scrollbar {
+  width: 14px;
+}
+
+.high-contrast::-webkit-scrollbar-track {
+  background: rgb(var(--bg-secondary));
+  border: 1px solid rgb(var(--border-primary));
+}
+
+.high-contrast::-webkit-scrollbar-thumb {
+  background: rgb(var(--text-primary));
+  border: 2px solid rgb(var(--bg-primary));
+  border-radius: 7px;
+}
+
+.high-contrast::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--gradient-from));
+}

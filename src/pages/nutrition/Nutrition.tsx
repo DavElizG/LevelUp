@@ -7,6 +7,7 @@ import { calculateCaloriesFromProfile, getCalorieProgress } from '../../shared/u
 import type { CalorieCalculationResult } from '../../shared/utils/calorieCalculator';
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
+import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
@@ -149,25 +150,45 @@ const Nutrition: React.FC = () => {
 
   return (
     <SwipeableLayout>
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 pb-24">
+    <div className={cn(
+      "min-h-screen pb-24",
+      "bg-gradient-to-br from-green-50 via-white to-blue-50",
+      "dark:from-gray-900 dark:via-gray-900 dark:to-gray-800",
+      "high-contrast:from-black high-contrast:via-black high-contrast:to-black"
+    )}>
       {/* Content */}
       <div className="px-6 pt-6">
         <div className="max-w-md mx-auto space-y-6">
           
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">🍎 Nutrición</h1>
-            <p className="text-gray-600">Gestiona tu alimentación diaria</p>
+            <h1 className={cn("text-3xl font-bold mb-2", themeText.primary)}>🍎 Nutrición</h1>
+            <p className={cn("text-gray-600", themeText.muted)}>Gestiona tu alimentación diaria</p>
           </div>
 
           {/* Daily Summary with Circle */}
-          <div className="bg-gradient-to-br from-white to-pink-50 rounded-3xl p-6 shadow-xl border border-pink-100 relative overflow-hidden">
+          <div className={cn(
+            "rounded-3xl p-6 shadow-xl border relative overflow-hidden",
+            "bg-gradient-to-br from-white to-pink-50 border-pink-100",
+            "dark:from-gray-800 dark:to-gray-800/50 dark:border-pink-900/30",
+            "high-contrast:from-black high-contrast:to-black high-contrast:border-pink-600 high-contrast:border-2"
+          )}>
             {/* Decorative bubbles */}
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-pink-200 to-orange-200 rounded-full opacity-20 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-20 blur-2xl"></div>
+            <div className={cn(
+              "absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20 blur-2xl",
+              "bg-gradient-to-br from-pink-200 to-orange-200",
+              "dark:from-pink-800 dark:to-orange-800",
+              "high-contrast:from-pink-500 high-contrast:to-orange-500"
+            )}></div>
+            <div className={cn(
+              "absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-20 blur-2xl",
+              "bg-gradient-to-br from-purple-200 to-pink-200",
+              "dark:from-purple-800 dark:to-pink-800",
+              "high-contrast:from-purple-500 high-contrast:to-pink-500"
+            )}></div>
             
             <div className="relative z-10">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Resumen de Hoy</h2>
+              <h2 className={cn("text-xl font-bold mb-6 text-center", themeText.primary)}>Resumen de Hoy</h2>
               
               {/* Calories Progress Circle */}
               <div className="flex items-center justify-center mb-6">
@@ -180,6 +201,7 @@ const Nutrition: React.FC = () => {
                       stroke="#fee2e2"
                       strokeWidth="10"
                       fill="none"
+                      className="dark:stroke-gray-700 high-contrast:stroke-gray-800"
                     />
                     <circle
                       cx="60"
@@ -202,33 +224,57 @@ const Nutrition: React.FC = () => {
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-gray-900">{macros.calories}</span>
-                    <span className="text-sm text-gray-500">/ {calorieGoal}</span>
-                    <span className="text-xs text-gray-400 mt-1">kcal</span>
+                    <span className={cn("text-3xl font-bold", themeText.primary)}>{macros.calories}</span>
+                    <span className={cn("text-sm", themeText.muted)}>/ {calorieGoal}</span>
+                    <span className={cn("text-xs mt-1", themeText.muted)}>kcal</span>
                   </div>
                 </div>
               </div>
 
               {/* Macros */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center bg-white/50 backdrop-blur-sm rounded-xl p-3">
+                <div className={cn(
+                  "text-center rounded-xl p-3",
+                  "bg-white/50 backdrop-blur-sm",
+                  "dark:bg-gray-900/50 dark:backdrop-blur-sm",
+                  "high-contrast:bg-black/50 high-contrast:border high-contrast:border-orange-600"
+                )}>
                   <div className="text-xl font-bold text-orange-500">{macros.protein.toFixed(0)}g</div>
-                  <div className="text-xs text-gray-600 mb-2">Proteínas</div>
-                  <div className="w-full bg-orange-100 rounded-full h-2">
+                  <div className={cn("text-xs mb-2", themeText.muted)}>Proteínas</div>
+                  <div className={cn(
+                    "w-full rounded-full h-2",
+                    "bg-orange-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+                  )}>
                     <div className="bg-gradient-to-r from-orange-400 to-orange-600 h-2 rounded-full transition-all" style={{width: `${Math.min(100, macros.protein/proteinGoal*100)}%`}}></div>
                   </div>
                 </div>
-                <div className="text-center bg-white/50 backdrop-blur-sm rounded-xl p-3">
+                <div className={cn(
+                  "text-center rounded-xl p-3",
+                  "bg-white/50 backdrop-blur-sm",
+                  "dark:bg-gray-900/50 dark:backdrop-blur-sm",
+                  "high-contrast:bg-black/50 high-contrast:border high-contrast:border-green-600"
+                )}>
                   <div className="text-xl font-bold text-green-500">{macros.carbs.toFixed(0)}g</div>
-                  <div className="text-xs text-gray-600 mb-2">Carbos</div>
-                  <div className="w-full bg-green-100 rounded-full h-2">
+                  <div className={cn("text-xs mb-2", themeText.muted)}>Carbos</div>
+                  <div className={cn(
+                    "w-full rounded-full h-2",
+                    "bg-green-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+                  )}>
                     <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all" style={{width: `${Math.min(100, macros.carbs/carbGoal*100)}%`}}></div>
                   </div>
                 </div>
-                <div className="text-center bg-white/50 backdrop-blur-sm rounded-xl p-3">
+                <div className={cn(
+                  "text-center rounded-xl p-3",
+                  "bg-white/50 backdrop-blur-sm",
+                  "dark:bg-gray-900/50 dark:backdrop-blur-sm",
+                  "high-contrast:bg-black/50 high-contrast:border high-contrast:border-blue-600"
+                )}>
                   <div className="text-xl font-bold text-blue-500">{macros.fat.toFixed(0)}g</div>
-                  <div className="text-xs text-gray-600 mb-2">Grasas</div>
-                  <div className="w-full bg-blue-100 rounded-full h-2">
+                  <div className={cn("text-xs mb-2", themeText.muted)}>Grasas</div>
+                  <div className={cn(
+                    "w-full rounded-full h-2",
+                    "bg-blue-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+                  )}>
                     <div className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all" style={{width: `${Math.min(100, macros.fat/fatGoal*100)}%`}}></div>
                   </div>
                 </div>
@@ -237,21 +283,34 @@ const Nutrition: React.FC = () => {
           </div>
 
           {/* Hydration Card - Now Prominent */}
-          <div className="bg-gradient-to-br from-white to-cyan-50 rounded-3xl p-6 shadow-xl border border-cyan-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+          <div className={cn(
+            "rounded-3xl p-6 shadow-xl border relative overflow-hidden",
+            "bg-gradient-to-br from-white to-cyan-50 border-cyan-100",
+            "dark:from-gray-800 dark:to-gray-800/50 dark:border-cyan-900/30",
+            "high-contrast:from-black high-contrast:to-black high-contrast:border-cyan-600 high-contrast:border-2"
+          )}>
+            <div className={cn(
+              "absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-50",
+              "bg-gradient-to-br from-cyan-100 to-blue-100",
+              "dark:from-cyan-900 dark:to-blue-900",
+              "high-contrast:from-cyan-700 high-contrast:to-blue-700"
+            )}></div>
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">💧 Hidratación</h3>
+                <h3 className={cn("text-xl font-bold", themeText.primary)}>💧 Hidratación</h3>
                 <span className="text-2xl font-bold text-cyan-600">{formatLiters(waterIntake)}L</span>
               </div>
               
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-600">Meta diaria</span>
-                <span className="text-sm font-semibold text-gray-700">{formatLiters(waterGoal)}L</span>
+                <span className={cn("text-sm", themeText.muted)}>Meta diaria</span>
+                <span className={cn("text-sm font-semibold", themeText.secondary)}>{ formatLiters(waterGoal)}L</span>
               </div>
               
-              <div className="w-full bg-cyan-100 rounded-full h-3 mb-4">
+              <div className={cn(
+                "w-full rounded-full h-3 mb-4",
+                "bg-cyan-100 dark:bg-gray-800 high-contrast:bg-gray-900"
+              )}>
                 <div 
                   className="bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${Math.min(100, (waterIntake / waterGoal) * 100)}%` }}
@@ -293,26 +352,46 @@ const Nutrition: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Generator Card */}
-          <button
-            onClick={() => navigate('/diet/generate')}
-            className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
-            
-            <div className="relative z-10 flex items-center justify-center space-x-3">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span className="text-xl font-bold">Generar Plan con IA</span>
-            </div>
-            <p className="text-white/90 text-sm mt-2 relative z-10">Crea un plan personalizado con inteligencia artificial</p>
-          </button>
+          {/* AI Diet Plan Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* View Diet Plan Button */}
+            <button
+              onClick={() => navigate('/diet/plan')}
+              className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="relative z-10 flex items-center justify-center space-x-3">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span className="text-xl font-bold">Ver Mi Plan</span>
+              </div>
+              <p className="text-white/90 text-sm mt-2 relative z-10">Revisa tu plan nutricional semanal</p>
+            </button>
+
+            {/* AI Generator Button */}
+            <button
+              onClick={() => navigate('/diet/generate')}
+              className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="relative z-10 flex items-center justify-center space-x-3">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span className="text-xl font-bold">Generar Plan con IA</span>
+              </div>
+              <p className="text-white/90 text-sm mt-2 relative z-10">Crea un plan personalizado con inteligencia artificial</p>
+            </button>
+          </div>
 
           {/* Meal Cards - Large and Colorful */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-gray-900">Agregar Comidas</h3>
+            <h3 className={cn("text-xl font-bold", themeText.primary)}>Agregar Comidas</h3>
             
             <div className="grid grid-cols-2 gap-4">
               {/* Breakfast */}
@@ -436,13 +515,23 @@ const Nutrition: React.FC = () => {
           )}
 
           {/* Comidas Registradas Hoy */}
-          <div className="bg-gradient-to-br from-white to-orange-50 rounded-3xl p-6 shadow-xl border border-orange-100 relative overflow-hidden">
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full opacity-30 blur-2xl"></div>
+          <div className={cn(
+            "rounded-3xl p-6 shadow-xl border relative overflow-hidden",
+            "bg-gradient-to-br from-white to-orange-50 border-orange-100",
+            "dark:from-gray-800 dark:to-gray-800/50 dark:border-orange-900/30",
+            "high-contrast:from-black high-contrast:to-black high-contrast:border-orange-600 high-contrast:border-2"
+          )}>
+            <div className={cn(
+              "absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-30 blur-2xl",
+              "bg-gradient-to-br from-orange-100 to-yellow-100",
+              "dark:from-orange-900 dark:to-yellow-900",
+              "high-contrast:from-orange-700 high-contrast:to-yellow-700"
+            )}></div>
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">📋 Comidas Registradas</h3>
-                <div className="text-sm text-gray-500 font-medium">
+                <h3 className={cn("text-xl font-bold", themeText.primary)}>📋 Comidas Registradas</h3>
+                <div className={cn("text-sm font-medium", themeText.muted)}>
                   {new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
                 </div>
               </div>
@@ -462,25 +551,35 @@ const Nutrition: React.FC = () => {
                   
                   return (
                     <div key={type} className={`border-l-4 ${borderColor} pl-4`}>
-                      <h4 className="font-bold text-gray-800 mb-3 text-base">{config.name}</h4>
+                      <h4 className={cn("font-bold text-base mb-3", themeText.secondary)}>{config.name}</h4>
                       {groupedMeals[type].length === 0 ? (
-                        <div className="text-sm text-gray-400 italic bg-gray-50 rounded-lg p-3">
+                        <div className={cn(
+                          "text-sm italic rounded-lg p-3",
+                          "text-gray-400 bg-gray-50",
+                          "dark:text-gray-500 dark:bg-gray-900/50",
+                          "high-contrast:text-gray-400 high-contrast:bg-black high-contrast:border high-contrast:border-gray-700"
+                        )}>
                           Sin registros
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {groupedMeals[type].map((meal: MealLog) => (
-                            <div key={meal.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                            <div key={meal.id} className={cn(
+                              "flex items-center justify-between p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow",
+                              "border-gray-200 bg-white/80 backdrop-blur-sm",
+                              "dark:border-gray-700 dark:bg-gray-900/50",
+                              "high-contrast:border-white/30 high-contrast:bg-black/50 high-contrast:border-2"
+                            )}>
                               <div className="flex-1">
-                                <div className="font-semibold text-gray-900">{meal.food_name}</div>
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className={cn("font-semibold", themeText.primary)}>{meal.food_name}</div>
+                                <div className={cn("text-sm mt-1", themeText.muted)}>
                                   {meal.quantity_grams}g • {meal.protein}g P • {meal.carbs}g C • {meal.fat}g F
                                 </div>
                               </div>
                               <div className="text-right ml-4">
-                                <div className="font-bold text-gray-900 text-lg">{meal.calories}</div>
-                                <div className="text-xs text-gray-500">kcal</div>
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className={cn("font-bold text-lg", themeText.primary)}>{meal.calories}</div>
+                                <div className={cn("text-xs", themeText.muted)}>kcal</div>
+                                <div className={cn("text-xs mt-1", themeText.muted)}>
                                   {new Date(meal.logged_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>

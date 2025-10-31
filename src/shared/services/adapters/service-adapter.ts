@@ -111,23 +111,46 @@ export class ServiceAdapter {
   }): Promise<ApiResponse<DietPlan>> {
     try {
       // Generate diet plan with AI - map to the expected format
-      const aiResponse = await this.ai.generateDietPlan({
+      // IMPORTANTE: Solo enviamos los campos que el backend espera
+      const aiRequest: {
+        userId: string;
+        goal: string;
+        calories: number;
+        restrictions?: string[];
+        mealsPerDay?: number;
+        avoidFoods?: string[];
+        preferences?: string;
+      } = {
         userId: preferences.userId,
         goal: preferences.goal,
         calories: preferences.calories,
-        restrictions: preferences.restrictions,
-        mealsPerDay: preferences.meals,
-        avoidFoods: preferences.allergies,
-        preferences: preferences.dietType,
-      });
+      };
+      
+      // Solo agregar campos opcionales si tienen valor
+      if (preferences.restrictions && preferences.restrictions.length > 0) {
+        aiRequest.restrictions = preferences.restrictions;
+      }
+      if (preferences.meals) {
+        aiRequest.mealsPerDay = preferences.meals;
+      }
+      if (preferences.allergies && preferences.allergies.length > 0) {
+        aiRequest.avoidFoods = preferences.allergies;
+      }
+      if (preferences.dietType) {
+        aiRequest.preferences = preferences.dietType;
+      }
+      
+      // Debug: ver qué estamos enviando a la API
+      console.log('🚀 Petición a AI API:', JSON.stringify(aiRequest, null, 2));
+      
+      const aiResponse = await this.ai.generateDietPlan(aiRequest);
       
       if (!aiResponse.success || !aiResponse.data) {
         return aiResponse;
       }
 
-      // Save to Supabase
-      const saveResponse = await this.diet.createDietPlan(aiResponse.data);
-      return saveResponse;
+      // El backend ya guardó el plan en Supabase, solo devolvemos la respuesta
+      return aiResponse;
     } catch (error) {
       return {
         success: false,
