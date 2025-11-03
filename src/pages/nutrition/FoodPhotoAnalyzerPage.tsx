@@ -6,12 +6,14 @@
 
 import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { analyzeFoodImage, type DetectedFood } from '../../shared/services/foodVision';
 import { saveMealLog, type FoodItem } from '../../shared/services/foodSearch';
 
 const FoodPhotoAnalyzerPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const mealType = (location.state as { mealType?: string })?.mealType || 'lunch';
@@ -68,7 +70,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       setErrorMsg('');
     } catch (err) {
       console.error('Camera error:', err);
-      setErrorMsg('No se pudo abrir la cámara nativa.');
+      setErrorMsg(t('foodPhotoAnalyzer.cameraError'));
     }
   };
 
@@ -147,7 +149,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Analysis error:', err);
-      setErrorMsg(err instanceof Error ? err.message : 'Error al analizar la imagen. Verifica que el microservicio esté corriendo.');
+      setErrorMsg(err instanceof Error ? err.message : t('foodPhotoAnalyzer.analysisError'));
     } finally {
       setAnalyzing(false);
     }
@@ -158,7 +160,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
    */
   const handleSaveAll = async () => {
     if (detectedFoods.length === 0) {
-      setErrorMsg('No hay alimentos detectados para guardar');
+      setErrorMsg(t('foodPhotoAnalyzer.noFoodsDetected'));
       return;
     }
 
@@ -184,7 +186,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
       navigate('/nutrition');
     } catch (err) {
       console.error('Save error:', err);
-      setErrorMsg('Error al guardar. Intenta de nuevo.');
+      setErrorMsg(t('foodSearch.saveError'));
     } finally {
       setSaving(false);
     }
@@ -202,7 +204,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 className="text-xl font-bold text-gray-900">📸 Analizar Foto</h2>
+        <h2 className="text-xl font-bold text-gray-900">📸 {t('foodPhotoAnalyzer.title')}</h2>
         <div className="w-10 h-10"></div>
       </div>
 
@@ -222,12 +224,12 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">Analiza tu Comida</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('foodPhotoAnalyzer.analyzeYourFood')}</h3>
             <p className="text-gray-600 mb-2">
-              La IA detectará todos los alimentos en la foto
+              {t('foodPhotoAnalyzer.aiWillDetect')}
             </p>
             <p className="text-sm text-gray-500 mb-8">
-              Ejemplo: 2 huevos + 1 tortilla + aguacate
+              {t('foodPhotoAnalyzer.example')}
             </p>
             <button
               onClick={() => {
@@ -239,7 +241,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
               }}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
             >
-              📷 Tomar Foto
+              📷 {t('foodPhotoAnalyzer.takePhoto')}
             </button>
             <input
               ref={fileInputRef}
@@ -279,7 +281,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
             {/* Error Message */}
             {errorMsg && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700">
-                <p className="font-semibold mb-1">⚠️ Error</p>
+                <p className="font-semibold mb-1">⚠️ {t('common.error')}</p>
                 <p className="text-sm">{errorMsg}</p>
               </div>
             )}
@@ -288,8 +290,8 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
             {analyzing && (
               <div className="bg-white rounded-3xl p-8 text-center shadow-xl">
                 <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-xl font-bold text-gray-900 mb-2">Analizando con IA...</p>
-                <p className="text-gray-600">Detectando alimentos y nutrientes</p>
+                <p className="text-xl font-bold text-gray-900 mb-2">{t('foodPhotoAnalyzer.analyzing')}</p>
+                <p className="text-gray-600">{t('foodPhotoAnalyzer.detectingFoods')}</p>
               </div>
             )}
 
@@ -299,7 +301,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                 onClick={analyzeImage}
                 className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
-                ⚡ Analizar Imagen
+                ⚡ {t('foodPhotoAnalyzer.analyze')}
               </button>
             )}
 
@@ -312,23 +314,23 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                     <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
-                    Total Estimado
+                    {t('foodPhotoAnalyzer.totalEstimated')}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-sm opacity-90 mb-1">Calorías</p>
+                      <p className="text-sm opacity-90 mb-1">{t('nutrition.calories')}</p>
                       <p className="text-3xl font-bold">{totalNutrition.calories}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-sm opacity-90 mb-1">Proteína</p>
+                      <p className="text-sm opacity-90 mb-1">{t('nutrition.protein')}</p>
                       <p className="text-3xl font-bold">{totalNutrition.protein}g</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-sm opacity-90 mb-1">Carbos</p>
+                      <p className="text-sm opacity-90 mb-1">{t('nutrition.carbs')}</p>
                       <p className="text-3xl font-bold">{totalNutrition.carbs}g</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-sm opacity-90 mb-1">Grasas</p>
+                      <p className="text-sm opacity-90 mb-1">{t('nutrition.fat')}</p>
                       <p className="text-3xl font-bold">{totalNutrition.fat}g</p>
                     </div>
                   </div>
@@ -336,17 +338,17 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
 
                 {/* Detected Foods List */}
                 <div className="bg-white rounded-3xl p-6 shadow-xl">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">🍽️ Alimentos Detectados ({detectedFoods.length})</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">🍽️ {t('foodPhotoAnalyzer.detectedFoods')} ({detectedFoods.length})</h3>
                   <div className="space-y-3">
                     {detectedFoods.map((food, index) => (
                       <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">{food.name}</p>
-                          <p className="text-sm text-gray-600">{food.estimatedGrams}g estimados</p>
+                          <p className="text-sm text-gray-600">{food.estimatedGrams}g {t('foodPhotoAnalyzer.estimatedGrams')}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-2xl font-bold text-purple-600">{Math.round(food.confidence)}%</p>
-                          <p className="text-xs text-gray-500">confianza</p>
+                          <p className="text-xs text-gray-500">{t('foodPhotoAnalyzer.confidence')}</p>
                         </div>
                       </div>
                     ))}
@@ -356,7 +358,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                 {/* Suggestions */}
                 {suggestions.length > 0 && (
                   <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6">
-                    <h3 className="text-lg font-bold text-blue-900 mb-3">💡 Sugerencias</h3>
+                    <h3 className="text-lg font-bold text-blue-900 mb-3">💡 {t('foodPhotoAnalyzer.suggestions')}</h3>
                     <ul className="space-y-2">
                       {suggestions.map((suggestion, index) => (
                         <li key={index} className="flex items-start gap-2 text-blue-800">
@@ -374,7 +376,7 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                   disabled={saving}
                   className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving ? '💾 Guardando...' : '💾 Guardar Todo'}
+                  {saving ? `💾 ${t('foodPhotoAnalyzer.saving')}` : `💾 ${t('foodPhotoAnalyzer.saveAll')}`}
                 </button>
               </div>
             )}

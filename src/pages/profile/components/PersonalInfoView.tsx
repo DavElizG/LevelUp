@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PersonalInfoViewProps {
   name: string;
@@ -19,21 +20,23 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
   email,
   onEdit
 }) => {
+  const { t } = useTranslation();
+  
   const formatAge = () => {
-    if (!age) return 'No especificado';
-    return `${age} años`;
+    if (!age) return t('profile.notSpecified');
+    return `${age} ${t('profile.years')}`;
   };
 
   const formatBirthDate = () => {
-    if (!age) return 'No especificado';
+    if (!age) return t('profile.notSpecified');
     const currentYear = new Date().getFullYear();
     const birthYear = currentYear - Number(age);
     return `${birthYear}`;
   };
 
   const formatGender = () => {
-    if (!gender) return 'No especificado';
-    return gender === 'male' ? 'Masculino' : 'Femenino';
+    if (!gender) return t('profile.notSpecified');
+    return gender === 'male' ? t('profile.male') : t('profile.female');
   };
 
   return (
@@ -45,7 +48,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
-          Información Personal
+          {t('profile.personalInfo')}
         </h3>
         <button
           onClick={onEdit}
@@ -54,7 +57,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
           <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
           </svg>
-          Editar Perfil
+          {t('profile.editProfile')}
         </button>
       </div>
       
@@ -66,12 +69,12 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
               </svg>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 font-medium">Nombre Completo</div>
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">{t('profile.fullName')}</div>
           </div>
           <div className="font-semibold text-sm sm:text-base text-gray-900">
             {name && lastname1 
               ? `${name} ${lastname1} ${lastname2 || ''}`.trim()
-              : 'No especificado'
+              : t('profile.notSpecified')
             }
           </div>
         </div>
@@ -83,7 +86,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
                 <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
               </svg>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 font-medium">Edad</div>
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">{t('profile.age')}</div>
           </div>
           <div className="font-semibold text-sm sm:text-base text-gray-900">{formatAge()}</div>
         </div>
@@ -95,7 +98,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
               </svg>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 font-medium">Año de Nacimiento</div>
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">{t('profile.birthYear')}</div>
           </div>
           <div className="font-semibold text-sm sm:text-base text-gray-900">{formatBirthDate()}</div>
         </div>
@@ -107,7 +110,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
               </svg>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 font-medium">Género</div>
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">{t('profile.gender')}</div>
           </div>
           <div className="font-semibold text-sm sm:text-base text-gray-900">{formatGender()}</div>
         </div>
@@ -119,7 +122,7 @@ const PersonalInfoView: React.FC<PersonalInfoViewProps> = ({
                 <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
               </svg>
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 font-medium">Email</div>
+            <div className="text-xs sm:text-sm text-gray-500 font-medium">{t('profile.email')}</div>
           </div>
           <div className="font-semibold text-sm sm:text-base text-gray-900 truncate">{email}</div>
         </div>

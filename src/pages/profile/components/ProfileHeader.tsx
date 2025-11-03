@@ -1,6 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ProfileHeader: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="mb-6 sm:mb-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 rounded-3xl"></div>
@@ -13,11 +16,12 @@ const ProfileHeader: React.FC = () => {
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
           </svg>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">Mi Perfil</h1>
-        <p className="text-white/90 text-sm sm:text-base">Gestiona tu información personal y preferencias</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">{t('profile.myProfile')}</h1>
+        <p className="text-white/90 text-sm sm:text-base">{t('profile.personalInfo')}</p>
       </div>
     </div>
   );
 };
 
 export default ProfileHeader;
+

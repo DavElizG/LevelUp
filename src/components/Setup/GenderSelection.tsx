@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SetupLayout from './SetupLayout';
 
 interface GenderSelectionProps {
@@ -12,13 +13,15 @@ const GenderSelection: React.FC<GenderSelectionProps> = ({
   onGenderSelect,
   onNext
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <SetupLayout>
       <div className="flex-1 px-6 py-8 flex flex-col">
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Cuéntanos sobre ti
+            {t('setup.selectGender')}
           </h1>
           <p className="text-gray-600 text-base leading-relaxed px-4">
             Para ofrecerte mejores resultados y una experiencia personalizada, necesitamos conocer la composición biológica de tu cuerpo.
@@ -45,7 +48,7 @@ const GenderSelection: React.FC<GenderSelectionProps> = ({
                 </svg>
               </div>
               <span className="text-lg font-medium text-orange-600">
-                Masculino
+                {t('setup.male')}
               </span>
             </div>
           </button>
@@ -68,7 +71,7 @@ const GenderSelection: React.FC<GenderSelectionProps> = ({
                 </svg>
               </div>
               <span className="text-lg font-medium text-orange-600">
-                Femenino
+                {t('setup.female')}
               </span>
             </div>
           </button>
@@ -81,7 +84,7 @@ const GenderSelection: React.FC<GenderSelectionProps> = ({
             disabled={!selectedGender}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-3xl transition-colors duration-200"
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>

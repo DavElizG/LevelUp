@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import { aiService } from '../../shared/services/ai/microservice';
@@ -27,6 +28,7 @@ const MAX_PREFERENCES_LENGTH = 500;
 
 const WorkoutGeneratorPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile(user?.id);
   
@@ -72,7 +74,7 @@ const WorkoutGeneratorPage: React.FC = () => {
     switch (field) {
       case 'goal':
         if (!value || value === '') {
-          errors.goal = 'Debes seleccionar un objetivo';
+          errors.goal = t('workoutGenerator.selectGoal');
         } else {
           delete errors.goal;
         }
@@ -80,7 +82,7 @@ const WorkoutGeneratorPage: React.FC = () => {
       
       case 'difficulty':
         if (!value || value === '') {
-          errors.difficulty = 'Debes seleccionar un nivel de dificultad';
+          errors.difficulty = t('workoutGenerator.selectDifficulty');
         } else {
           delete errors.difficulty;
         }
@@ -89,7 +91,7 @@ const WorkoutGeneratorPage: React.FC = () => {
       case 'preferences': {
         const text = value as string;
         if (text.length > MAX_PREFERENCES_LENGTH) {
-          errors.preferences = `Máximo ${MAX_PREFERENCES_LENGTH} caracteres`;
+          errors.preferences = t('workoutGenerator.maxCharacters', { max: MAX_PREFERENCES_LENGTH });
         } else {
           delete errors.preferences;
         }
@@ -231,10 +233,10 @@ const WorkoutGeneratorPage: React.FC = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
-                  Generar Rutina con IA
+                  {t('workoutGenerator.title')}
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  Crea una rutina personalizada basada en tus objetivos
+                  {t('workoutGenerator.subtitle')}
                 </p>
               </div>
             </div>
@@ -280,10 +282,10 @@ const WorkoutGeneratorPage: React.FC = () => {
                   {profile.fitness_goal && (
                     <span className="flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      {profile.fitness_goal === 'gain_muscle' ? 'Ganar músculo' : 
-                       profile.fitness_goal === 'lose_weight' ? 'Perder peso' :
-                       profile.fitness_goal === 'maintain' ? 'Mantener' :
-                       'Mejorar resistencia'}
+                      {profile.fitness_goal === 'gain_muscle' ? t('workoutGenerator.goal.gainMuscle') : 
+                       profile.fitness_goal === 'lose_weight' ? t('workoutGenerator.goal.loseWeight') :
+                       profile.fitness_goal === 'maintain' ? t('workoutGenerator.goal.maintain') :
+                       t('workoutGenerator.goal.improveEndurance')}
                     </span>
                   )}
                 </div>
@@ -296,8 +298,8 @@ const WorkoutGeneratorPage: React.FC = () => {
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-green-800 font-medium">¡Éxito!</p>
-                <p className="text-green-700 text-sm mt-1">Rutina generada exitosamente. Redirigiendo...</p>
+                <p className="text-green-800 font-medium">{t('common.success')}</p>
+                <p className="text-green-700 text-sm mt-1">{t('workoutGenerator.successGenerated')}</p>
               </div>
             </div>
           </div>
@@ -306,13 +308,13 @@ const WorkoutGeneratorPage: React.FC = () => {
         {/* Form */}
         <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 sm:p-8 border border-white/50">
           <h2 className="text-xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
-            Configura tu rutina
+            {t('workoutGenerator.configureRoutine')}
           </h2>
 
           {/* Goal */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              ¿Cuál es tu objetivo principal? *
+              {t('workoutGenerator.whatIsYourGoal')} *
             </label>
             <select
               value={formData.goal}
@@ -324,13 +326,13 @@ const WorkoutGeneratorPage: React.FC = () => {
                   : "border-gray-200 focus:ring-orange-500"
               )}
             >
-              <option value="">Selecciona un objetivo</option>
-              <option value="lose_weight">Perder peso</option>
-              <option value="gain_muscle">Ganar músculo</option>
-              <option value="improve_endurance">Mejorar resistencia</option>
-              <option value="strength_training">Entrenamiento de fuerza</option>
-              <option value="maintain_fitness">Mantener condición física</option>
-              <option value="flexibility">Mejorar flexibilidad</option>
+              <option value="">{t('workoutGenerator.selectGoalPlaceholder')}</option>
+              <option value="lose_weight">{t('workoutGenerator.goal.loseWeight')}</option>
+              <option value="gain_muscle">{t('workoutGenerator.goal.gainMuscle')}</option>
+              <option value="improve_endurance">{t('workoutGenerator.goal.improveEndurance')}</option>
+              <option value="strength_training">{t('workoutGenerator.goal.strengthTraining')}</option>
+              <option value="maintain_fitness">{t('workoutGenerator.goal.maintainFitness')}</option>
+              <option value="flexibility">{t('workoutGenerator.goal.flexibility')}</option>
             </select>
             {touched.goal && validationErrors.goal && (
               <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
@@ -343,7 +345,7 @@ const WorkoutGeneratorPage: React.FC = () => {
           {/* Difficulty */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              ¿Cuál es tu nivel de experiencia? *
+              {t('workoutGenerator.whatIsYourLevel')} *
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {['beginner', 'intermediate', 'advanced', 'expert'].map((level) => (
@@ -360,9 +362,9 @@ const WorkoutGeneratorPage: React.FC = () => {
                       : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
                   )}
                 >
-                  {level === 'beginner' ? 'Principiante' : 
-                   level === 'intermediate' ? 'Intermedio' : 
-                   level === 'advanced' ? 'Avanzado' : 'Experto'}
+                  {level === 'beginner' ? t('workoutGenerator.difficulty.beginner') : 
+                   level === 'intermediate' ? t('workoutGenerator.difficulty.intermediate') : 
+                   level === 'advanced' ? t('workoutGenerator.difficulty.advanced') : t('workoutGenerator.difficulty.expert')}
                 </button>
               ))}
             </div>
@@ -377,7 +379,7 @@ const WorkoutGeneratorPage: React.FC = () => {
           {/* Days per Week */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Días por semana: <span className="text-orange-600 font-bold">{formData.daysPerWeek}</span>
+              {t('workoutGenerator.daysPerWeekLabel')}: <span className="text-orange-600 font-bold">{formData.daysPerWeek}</span>
             </label>
             <div className="relative">
               <input
@@ -389,8 +391,8 @@ const WorkoutGeneratorPage: React.FC = () => {
                 className="w-full h-3 bg-gradient-to-r from-orange-200 to-pink-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-orange-500 [&::-webkit-slider-thumb]:to-pink-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>1 día</span>
-                <span>7 días</span>
+                <span>{t('workoutGenerator.oneDay')}</span>
+                <span>{t('workoutGenerator.sevenDays')}</span>
               </div>
             </div>
           </div>
@@ -399,7 +401,7 @@ const WorkoutGeneratorPage: React.FC = () => {
           <div className="mb-6">
             <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
               <Clock className="w-4 h-4 mr-2 text-orange-500" />
-              Duración por sesión: <span className="text-orange-600 font-bold ml-1">{formData.duration} min</span>
+              {t('workoutGenerator.durationPerSession')}: <span className="text-orange-600 font-bold ml-1">{formData.duration} {t('workoutGenerator.minutes')}</span>
             </label>
             <div className="relative">
               <input
@@ -412,8 +414,8 @@ const WorkoutGeneratorPage: React.FC = () => {
                 className="w-full h-3 bg-gradient-to-r from-orange-200 to-pink-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-orange-500 [&::-webkit-slider-thumb]:to-pink-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>30 min</span>
-                <span>120 min</span>
+                <span>30 {t('workoutGenerator.minutes')}</span>
+                <span>120 {t('workoutGenerator.minutes')}</span>
               </div>
             </div>
           </div>
@@ -421,7 +423,7 @@ const WorkoutGeneratorPage: React.FC = () => {
           {/* Equipment */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Equipamiento disponible
+              {t('workoutGenerator.equipmentAvailable')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {equipmentOptions.map((equipment) => (
@@ -436,7 +438,7 @@ const WorkoutGeneratorPage: React.FC = () => {
                       : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
                   )}
                 >
-                  {equipment}
+                  {t(`workoutGenerator.${equipment}`)}
                 </button>
               ))}
             </div>
@@ -446,7 +448,7 @@ const WorkoutGeneratorPage: React.FC = () => {
           <div className="mb-6">
             <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
               <Dumbbell className="w-4 h-4 mr-2 text-orange-500" />
-              Grupos musculares a enfocar
+              {t('workoutGenerator.muscleGroupsToFocus')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {muscleGroups.map((muscle) => (
@@ -461,7 +463,7 @@ const WorkoutGeneratorPage: React.FC = () => {
                       : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
                   )}
                 >
-                  {muscle}
+                  {t(`workoutGenerator.${muscle}`)}
                 </button>
               ))}
             </div>
@@ -470,13 +472,13 @@ const WorkoutGeneratorPage: React.FC = () => {
           {/* Preferences */}
           <div className="mb-0">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Preferencias adicionales (opcional)
+              {t('workoutGenerator.additionalPreferences')}
             </label>
             <div className="relative">
               <textarea
                 value={formData.preferences}
                 onChange={(e) => handleInputChange('preferences', e.target.value)}
-                placeholder="Ej: Enfoque en ejercicios compuestos, evitar ejercicios de impacto, incluir estiramientos..."
+                placeholder={t('workoutGenerator.preferencesPlaceholder')}
                 rows={4}
                 maxLength={MAX_PREFERENCES_LENGTH}
                 className={cn(
@@ -513,17 +515,17 @@ const WorkoutGeneratorPage: React.FC = () => {
           {generating ? (
             <>
               <TrendingUp className="w-5 h-5 mr-2 animate-pulse" />
-              Generando con IA... (10-20 segundos)
+              {t('workoutGenerator.generating')}
             </>
           ) : success ? (
             <>
               <CheckCircle className="w-5 h-5 mr-2" />
-              Rutina Generada
+              {t('workoutGenerator.routineGenerated')}
             </>
           ) : (
             <>
               <TrendingUp className="w-5 h-5 mr-2" />
-              Generar Rutina con IA
+              {t('workoutGenerator.generate')}
             </>
           )}
         </button>
@@ -533,8 +535,8 @@ const WorkoutGeneratorPage: React.FC = () => {
           <div className="flex items-start">
             <AlertCircle className="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">Powered by Gemini AI</p>
-              <p>La IA generará una rutina personalizada basada en tus datos y preferencias. El proceso puede tomar 10-20 segundos.</p>
+              <p className="font-semibold mb-1">{t('workoutGenerator.poweredByGemini')}</p>
+              <p>{t('workoutGenerator.aiDescription')}</p>
             </div>
           </div>
         </div>

@@ -5,11 +5,13 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { searchFood, saveMealLog, type FoodItem } from '../../shared/services/foodSearch';
 
 const FoodSearchPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   // Obtener meal type del estado de navegación
   const mealType = (location.state as { mealType?: string })?.mealType || 'lunch';
@@ -28,7 +30,7 @@ const FoodSearchPage: React.FC = () => {
    */
   const handleSearch = async () => {
     if (!query.trim()) {
-      setErrorMsg('Por favor ingresa un alimento');
+      setErrorMsg(t('foodSearch.enterFood'));
       return;
     }
 
@@ -41,11 +43,11 @@ const FoodSearchPage: React.FC = () => {
       setResults(searchResults);
 
       if (searchResults.length === 0) {
-        setErrorMsg('No se encontraron resultados. Intenta con otro nombre.');
+        setErrorMsg(t('foodSearch.noResults'));
       }
     } catch (err) {
       console.error('Search error:', err);
-      setErrorMsg('Error al buscar. Intenta de nuevo.');
+      setErrorMsg(t('foodSearch.searchError'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ const FoodSearchPage: React.FC = () => {
     if (!selectedFood) return;
 
     if (quantity <= 0) {
-      setErrorMsg('La cantidad debe ser mayor a 0');
+      setErrorMsg(t('foodSearch.invalidQuantity'));
       return;
     }
 
@@ -80,11 +82,11 @@ const FoodSearchPage: React.FC = () => {
         // Regresar a la página de nutrición
         navigate('/nutrition');
       } else {
-        setErrorMsg(result.error || 'Error al guardar');
+        setErrorMsg(result.error || t('foodSearch.saveError'));
       }
     } catch (err) {
       console.error('Save error:', err);
-      setErrorMsg('Error al guardar. Intenta de nuevo.');
+      setErrorMsg(t('foodSearch.saveError'));
     } finally {
       setSaving(false);
     }
@@ -116,7 +118,7 @@ const FoodSearchPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold">Buscar Alimento</h2>
+          <h2 className="text-lg font-semibold">{t('foodSearch.title')}</h2>
           <div className="w-10 h-10"></div>
         </div>
       </div>
@@ -130,7 +132,7 @@ const FoodSearchPage: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Ej: pollo, arroz, pizza..."
+              placeholder={t('foodSearch.searchPlaceholder')}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <button
@@ -141,12 +143,12 @@ const FoodSearchPage: React.FC = () => {
               {loading ? (
                 <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
               ) : (
-                'Buscar'
+                t('foodSearch.search')
               )}
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Busca en 97+ alimentos locales (rápido) y OpenFoodFacts
+            {t('foodSearch.searchInfo')}
           </p>
         </div>
 
@@ -160,7 +162,7 @@ const FoodSearchPage: React.FC = () => {
         {/* Results List */}
         {!selectedFood && results.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-semibold text-gray-800">Resultados ({results.length})</h3>
+            <h3 className="font-semibold text-gray-800">{t('foodSearch.results')} ({results.length})</h3>
             {results.map((food, index) => (
               <button
                 key={`${food.source}-${food.id || index}`}
@@ -178,17 +180,17 @@ const FoodSearchPage: React.FC = () => {
                             : 'bg-blue-100 text-blue-700'
                         }`}
                       >
-                        {food.source === 'local' ? 'Local' : 'OpenFoodFacts'}
+                        {food.source === 'local' ? t('foodSearch.local') : t('foodSearch.openFoodFacts')}
                       </span>
                     </div>
                     {food.brand && (
                       <p className="text-sm text-gray-500 mb-2">{food.brand}</p>
                     )}
                     <div className="text-sm text-gray-600">
-                      <span className="font-semibold">{food.calories_per_100g} kcal</span> por 100g
+                      <span className="font-semibold">{food.calories_per_100g} {t('foodSearch.kcal')}</span> {t('foodSearch.per100g')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      Proteína: {food.protein_per_100g}g | Carbos: {food.carbs_per_100g}g | Grasa: {food.fat_per_100g}g
+                      {t('foodSearch.protein')}: {food.protein_per_100g}g | {t('foodSearch.carbs')}: {food.carbs_per_100g}g | {t('foodSearch.fat')}: {food.fat_per_100g}g
                     </div>
                   </div>
                   {food.image_url && (
@@ -214,7 +216,7 @@ const FoodSearchPage: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Volver a resultados
+              {t('foodSearch.backToResults')}
             </button>
 
             <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -231,7 +233,7 @@ const FoodSearchPage: React.FC = () => {
                         : 'bg-blue-100 text-blue-700'
                     }`}
                   >
-                    {selectedFood.source === 'local' ? 'Base de datos local' : 'OpenFoodFacts'}
+                    {selectedFood.source === 'local' ? t('foodSearch.localDatabase') : t('foodSearch.openFoodFacts')}
                   </span>
                 </div>
                 {selectedFood.image_url && (
@@ -246,7 +248,7 @@ const FoodSearchPage: React.FC = () => {
               {/* Quantity Input */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cantidad (gramos)
+                  {t('foodSearch.quantity')}
                 </label>
                 <input
                   type="number"
@@ -259,29 +261,29 @@ const FoodSearchPage: React.FC = () => {
 
               {/* Nutrition Info */}
               <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Información Nutricional</h4>
+                <h4 className="font-semibold text-gray-800 mb-3">{t('foodSearch.nutritionInfo')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Calorías</p>
+                    <p className="text-sm text-gray-600">{t('dashboard.calories')}</p>
                     <p className="text-2xl font-bold text-orange-600">
                       {calculateNutrition(selectedFood, quantity).calories}
-                      <span className="text-sm text-gray-500 ml-1">kcal</span>
+                      <span className="text-sm text-gray-500 ml-1">{t('foodSearch.kcal')}</span>
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Proteína</p>
+                    <p className="text-sm text-gray-600">{t('foodSearch.protein')}</p>
                     <p className="text-xl font-semibold text-gray-900">
                       {calculateNutrition(selectedFood, quantity).protein}g
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Carbohidratos</p>
+                    <p className="text-sm text-gray-600">{t('foodSearch.carbs')}</p>
                     <p className="text-xl font-semibold text-gray-900">
                       {calculateNutrition(selectedFood, quantity).carbs}g
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Grasa</p>
+                    <p className="text-sm text-gray-600">{t('foodSearch.fat')}</p>
                     <p className="text-xl font-semibold text-gray-900">
                       {calculateNutrition(selectedFood, quantity).fat}g
                     </p>
@@ -298,10 +300,10 @@ const FoodSearchPage: React.FC = () => {
                 {saving ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Guardando...</span>
+                    <span>{t('foodSearch.saving')}</span>
                   </div>
                 ) : (
-                  `Agregar a ${mealType === 'breakfast' ? 'Desayuno' : mealType === 'lunch' ? 'Almuerzo' : mealType === 'snack' ? 'Merienda' : 'Cena'}`
+                  `${t('foodSearch.addTo')} ${t(`nutrition.${mealType}`)}`
                 )}
               </button>
             </div>
@@ -314,9 +316,9 @@ const FoodSearchPage: React.FC = () => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="text-gray-500">Busca alimentos por nombre</p>
+            <p className="text-gray-500">{t('foodSearch.emptyState')}</p>
             <p className="text-sm text-gray-400 mt-2">
-              Ejemplo: pollo, arroz, pizza, ensalada
+              {t('foodSearch.emptyStateExample')}
             </p>
           </div>
         )}
