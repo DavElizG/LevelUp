@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import { serviceAdapter } from '../../shared/services/adapters/service-adapter';
@@ -19,6 +20,7 @@ interface DietFormData {
 }
 
 const DietGeneratorPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile(user?.id);
@@ -84,18 +86,18 @@ const DietGeneratorPage: React.FC = () => {
 
   const handleGenerateDiet = async () => {
     if (!user) {
-      setToast({ message: 'Debes iniciar sesión para generar planes de dieta', type: 'error' });
+      setToast({ message: t('dietGenerator.loginRequired'), type: 'error' });
       return;
     }
 
     if (!formData.goal) {
-      setToast({ message: 'Por favor completa los campos obligatorios', type: 'warning' });
+      setToast({ message: t('dietGenerator.completeRequired'), type: 'warning' });
       return;
     }
 
     // Validaciones que coinciden con el backend
     if (formData.calories < 1000 || formData.calories > 5000) {
-      setToast({ message: 'Las calorías deben estar entre 1000 y 5000', type: 'warning' });
+      setToast({ message: t('dietGenerator.caloriesRange'), type: 'warning' });
       return;
     }
 
@@ -285,10 +287,10 @@ const DietGeneratorPage: React.FC = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 dark:from-green-400 dark:via-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
-                  Generar Plan de Dieta con IA
+                  {t('dietGenerator.title')}
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Crea un plan nutricional personalizado
+                  {t('dietGenerator.subtitle')}
                 </p>
               </div>
             </div>
@@ -302,7 +304,7 @@ const DietGeneratorPage: React.FC = () => {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-red-800 dark:text-red-300 font-medium">Error</p>
+                  <p className="text-red-800 dark:text-red-300 font-medium">{t('common.error')}</p>
                   <p className="text-red-700 dark:text-red-400 text-sm mt-1">{error}</p>
                 </div>
               </div>
@@ -314,10 +316,10 @@ const DietGeneratorPage: React.FC = () => {
             <div className="mb-6 p-4 rounded-2xl bg-green-50/80 dark:bg-green-900/20 backdrop-blur-md border border-green-200/50 dark:border-green-800/50 shadow-lg">
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-green-800 dark:text-green-300 font-medium">¡Éxito!</p>
-                  <p className="text-green-700 dark:text-green-400 text-sm mt-1">Plan de dieta generado exitosamente. Redirigiendo...</p>
-                </div>
+              <div className="flex-1">
+                <p className="text-green-800 dark:text-green-300 font-medium">{t('common.success')}</p>
+                <p className="text-green-700 dark:text-green-400 text-sm mt-1">{t('dietGenerator.successGenerated')}</p>
+              </div>
               </div>
             </div>
           )}
@@ -347,10 +349,10 @@ const DietGeneratorPage: React.FC = () => {
                   {profile.fitness_goal && (
                     <span className="flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      {profile.fitness_goal === 'gain_muscle' ? 'Ganar músculo' : 
-                       profile.fitness_goal === 'lose_weight' ? 'Perder peso' :
-                       profile.fitness_goal === 'maintain' ? 'Mantener' :
-                       'Mejorar salud'}
+                      {profile.fitness_goal === 'gain_muscle' ? t('workoutGenerator.goal.gainMuscle') : 
+                       profile.fitness_goal === 'lose_weight' ? t('workoutGenerator.goal.loseWeight') :
+                       profile.fitness_goal === 'maintain' ? t('workoutGenerator.goal.maintain') :
+                       t('dietGenerator.improveHealth')}
                     </span>
                   )}
                 </div>
@@ -361,11 +363,11 @@ const DietGeneratorPage: React.FC = () => {
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Calorías Sugeridas</p>
+                  <p className="text-gray-600 dark:text-gray-400">{t('dietGenerator.suggestedCalories')}</p>
                   <p className="text-xl font-bold text-green-600 dark:text-green-400">{formData.calories} kcal</p>
                 </div>
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Comidas/día</p>
+                  <p className="text-gray-600 dark:text-gray-400">{t('dietGenerator.mealsPerDay')}</p>
                   <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formData.meals}</p>
                 </div>
               </div>
@@ -376,13 +378,13 @@ const DietGeneratorPage: React.FC = () => {
         {/* Form */}
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-3xl shadow-xl p-6 sm:p-8 border border-white/50 dark:border-gray-700/50">
           <h2 className="text-xl font-bold mb-6 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
-            Configura tu plan de dieta
+            {t('dietGenerator.configureDiet')}
           </h2>
 
           {/* Goal */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              ¿Cuál es tu objetivo nutricional? *
+              {t('dietGenerator.whatIsYourGoal')} *
             </label>
             <select
               value={formData.goal}
@@ -393,19 +395,19 @@ const DietGeneratorPage: React.FC = () => {
               )}
               required
             >
-              <option value="">Selecciona un objetivo</option>
-              <option value="lose_weight">Perder peso</option>
-              <option value="gain_weight">Ganar peso</option>
-              <option value="maintain_weight">Mantener peso</option>
-              <option value="build_muscle">Ganar músculo</option>
-              <option value="improve_health">Mejorar salud</option>
+              <option value="">{t('dietGenerator.selectGoalPlaceholder')}</option>
+              <option value="lose_weight">{t('dietGenerator.goals.loseWeight')}</option>
+              <option value="gain_weight">{t('dietGenerator.goals.gainWeight')}</option>
+              <option value="maintain_weight">{t('dietGenerator.goals.maintainWeight')}</option>
+              <option value="build_muscle">{t('dietGenerator.goals.buildMuscle')}</option>
+              <option value="improve_health">{t('dietGenerator.goals.improveHealth')}</option>
             </select>
           </div>
 
           {/* Calories */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Calorías diarias: <span className="text-green-600 dark:text-green-400 font-bold">{formData.calories} kcal</span>
+              {t('dietGenerator.dailyCaloriesLabel')}: <span className="text-green-600 dark:text-green-400 font-bold">{formData.calories} kcal</span>
             </label>
             <div className="relative">
               <input
@@ -424,11 +426,11 @@ const DietGeneratorPage: React.FC = () => {
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
               {formData.calories < 1500 ? (
-                <><AlertCircle className="w-3 h-3" /> Déficit calórico (pérdida de peso)</>
+                <><AlertCircle className="w-3 h-3" /> {t('dietGenerator.calorieDeficit')}</>
               ) : formData.calories < 2500 ? (
-                <><CheckCircle className="w-3 h-3" /> Calorías de mantenimiento</>
+                <><CheckCircle className="w-3 h-3" /> {t('dietGenerator.maintenanceCalories')}</>
               ) : (
-                <><Zap className="w-3 h-3" /> Superávit calórico (ganancia)</>
+                <><Zap className="w-3 h-3" /> {t('dietGenerator.calorieSurplus')}</>
               )}
             </p>
           </div>
@@ -437,7 +439,7 @@ const DietGeneratorPage: React.FC = () => {
           <div className="mb-6">
             <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
               <Clock className="w-4 h-4 mr-2 text-green-500 dark:text-green-400" />
-              Comidas por día: <span className="text-green-600 dark:text-green-400 font-bold ml-1">{formData.meals}</span>
+              {t('dietGenerator.mealsPerDayLabel')}: <span className="text-green-600 dark:text-green-400 font-bold ml-1">{formData.meals}</span>
             </label>
             <div className="grid grid-cols-4 gap-3">
               {[3, 4, 5, 6].map((mealCount) => (
@@ -461,7 +463,7 @@ const DietGeneratorPage: React.FC = () => {
           {/* Diet Type */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Tipo de dieta
+              {t('dietGenerator.dietType')}
             </label>
             <select
               value={formData.dietType}
@@ -471,9 +473,9 @@ const DietGeneratorPage: React.FC = () => {
                 "border-gray-200 dark:border-gray-700 focus:ring-green-500 dark:focus:ring-green-400"
               )}
             >
-              <option value="">Selecciona tipo (Opcional)</option>
+              <option value="">{t('dietGenerator.selectDietTypePlaceholder')}</option>
               {dietTypes.map((type) => (
-                <option key={type.value} value={type.value}>{type.label}</option>
+                <option key={type.value} value={type.value}>{t(`dietGenerator.dietTypes.${type.value.replace(/-/g, '')}`)}</option>
               ))}
             </select>
           </div>
@@ -481,7 +483,7 @@ const DietGeneratorPage: React.FC = () => {
           {/* Dietary Restrictions */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Restricciones dietéticas
+              {t('dietGenerator.restrictions')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {dietaryRestrictions.map((restriction) => (
@@ -506,7 +508,7 @@ const DietGeneratorPage: React.FC = () => {
           <div className="mb-6">
             <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
               <AlertCircle className="w-4 h-4 mr-2 text-red-500 dark:text-red-400" />
-              Alergias alimentarias
+              {t('dietGenerator.allergies')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {commonAllergies.map((allergy) => (
@@ -530,12 +532,12 @@ const DietGeneratorPage: React.FC = () => {
           {/* Preferences */}
           <div className="mb-0">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Preferencias adicionales (opcional)
+              {t('dietGenerator.additionalPreferences')}
             </label>
             <textarea
               value={formData.preferences}
               onChange={(e) => handleInputChange('preferences', e.target.value)}
-              placeholder="Ej: Prefiero comidas fáciles de preparar, me gustan los smoothies, evitar comida picante..."
+              placeholder={t('dietGenerator.preferencesPlaceholder')}
               rows={4}
               className={cn(
                 "w-full px-4 py-3 border rounded-2xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-all resize-none",
@@ -559,17 +561,17 @@ const DietGeneratorPage: React.FC = () => {
           {generating ? (
             <>
               <UtensilsCrossed className="w-5 h-5 mr-2 animate-pulse" />
-              Generando con IA... (10-20 segundos)
+              {t('dietGenerator.generating')}
             </>
           ) : success ? (
             <>
               <CheckCircle className="w-5 h-5 mr-2" />
-              Plan de Dieta Generado
+              {t('dietGenerator.dietGenerated')}
             </>
           ) : (
             <>
               <UtensilsCrossed className="w-5 h-5 mr-2" />
-              Generar Plan de Dieta con IA
+              {t('dietGenerator.generate')}
             </>
           )}
         </button>
@@ -578,26 +580,26 @@ const DietGeneratorPage: React.FC = () => {
         <div className="mt-6 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-md rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/50">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <Zap className="w-5 h-5 mr-2 text-blue-500 dark:text-blue-400" />
-            Distribución de Macros Estimada
+            {t('dietGenerator.macrosDistribution')}
           </h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {Math.round((formData.calories * 0.30) / 4)}g
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Proteína (30%)</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('nutrition.protein')} (30%)</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {Math.round((formData.calories * 0.40) / 4)}g
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Carbohidratos (40%)</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('nutrition.carbs')} (40%)</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {Math.round((formData.calories * 0.30) / 9)}g
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Grasas (30%)</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('nutrition.fat')} (30%)</p>
             </div>
           </div>
         </div>
@@ -607,8 +609,8 @@ const DietGeneratorPage: React.FC = () => {
           <div className="flex items-start">
             <AlertCircle className="w-5 h-5 text-blue-500 dark:text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-semibold mb-1">Powered by Gemini AI</p>
-              <p>La IA generará un plan nutricional completo con recetas y macros basado en tus necesidades. El proceso puede tomar 10-20 segundos.</p>
+              <p className="font-semibold mb-1">{t('dietGenerator.poweredByGemini')}</p>
+              <p>{t('dietGenerator.aiDescription')}</p>
             </div>
           </div>
         </div>

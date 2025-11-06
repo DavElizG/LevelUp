@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SetupLayout from './SetupLayout';
 
 interface WeightSelectionProps {
@@ -12,6 +13,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
   onWeightSelect,
   onNext
 }) => {
+  const { t } = useTranslation();
   const [currentWeight, setCurrentWeight] = useState(selectedWeight || 70);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
 
@@ -21,7 +23,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const weight = parseInt(e.target.value);
+    const weight = Number.parseInt(e.target.value);
     handleWeightChange(weight);
   };
 
@@ -42,10 +44,10 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            ¿Cuál es tu peso actualmente?
+            {t('setup.selectWeight')}
           </h1>
           <p className="text-gray-600 text-sm">
-            No te preocupes, puedes cambiarlo más tarde.
+            {t('setup.currentWeight')}
           </p>
         </div>
 
@@ -60,7 +62,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
                   : 'text-gray-700'
               }`}
             >
-              Kg
+              {t('setup.kg')}
             </button>
             <button
               onClick={() => setUnit('lbs')}
@@ -70,7 +72,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
                   : 'text-gray-700'
               }`}
             >
-              Lbs
+              {t('setup.lbs')}
             </button>
           </div>
         </div>
@@ -79,7 +81,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
         <div className="flex-1 flex flex-col justify-center">
           <div className="text-center mb-16">
             <div className="text-6xl font-bold text-orange-500">
-              {currentWeight} Kg
+              {currentWeight} {t('setup.kg')}
             </div>
           </div>
 
@@ -146,7 +148,7 @@ const WeightSelection: React.FC<WeightSelectionProps> = ({
             disabled={!currentWeight}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-3xl transition-colors duration-200"
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>

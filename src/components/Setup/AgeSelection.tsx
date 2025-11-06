@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SetupLayout from './SetupLayout';
 
 interface AgeSelectionProps {
@@ -12,6 +13,7 @@ const AgeSelection: React.FC<AgeSelectionProps> = ({
   onAgeSelect,
   onNext
 }) => {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasInitialScrolled, setHasInitialScrolled] = useState(false);
 
@@ -49,7 +51,7 @@ const AgeSelection: React.FC<AgeSelectionProps> = ({
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-2xl font-bold text-gray-900">
-            ¿Cuál es tu edad?
+            {t('setup.selectAge')}
           </h1>
         </div>
 
@@ -92,7 +94,7 @@ const AgeSelection: React.FC<AgeSelectionProps> = ({
             disabled={!selectedAge}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-3xl transition-colors duration-200"
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>

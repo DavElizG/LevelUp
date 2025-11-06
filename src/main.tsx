@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './app/providers/ThemeProvider'
+import './i18n/config' // Initialize i18n
 import './index.css'
 import './styles/theme.css'
 import App from './App.tsx'

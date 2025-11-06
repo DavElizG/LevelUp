@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SetupLayout from './SetupLayout';
 import type { FitnessGoal } from '../../hooks/useSetup';
 
@@ -13,10 +14,12 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
   onGoalSelect,
   onNext
 }) => {
+  const { t } = useTranslation();
+  
   const goals = [
     { 
       id: 'lose_weight' as FitnessGoal, 
-      label: 'Perder Peso',
+      label: t('setup.loseWeight'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -25,7 +28,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
     },
     { 
       id: 'maintain' as FitnessGoal, 
-      label: 'Mantener Peso',
+      label: t('setup.stayFit'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -34,7 +37,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
     },
     { 
       id: 'gain_weight' as FitnessGoal, 
-      label: 'Ganar Peso',
+      label: t('setup.loseWeight'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
@@ -43,7 +46,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
     },
     { 
       id: 'improve_endurance' as FitnessGoal, 
-      label: 'Ganar Resistencia',
+      label: t('workouts.intensity'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -52,7 +55,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
     },
     { 
       id: 'gain_muscle' as FitnessGoal, 
-      label: 'Ganar Músculo',
+      label: t('setup.gainMuscle'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -67,7 +70,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-2xl font-bold text-gray-900">
-            ¿Cuál es tu meta?
+            {t('setup.selectGoal')}
           </h1>
         </div>
 
@@ -119,7 +122,7 @@ const GoalSelection: React.FC<GoalSelectionProps> = ({
             disabled={!selectedGoal}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-2xl transition-colors duration-200"
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>

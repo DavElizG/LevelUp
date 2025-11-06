@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import { WorkoutSkeletonGrid } from '../../components/shared/WorkoutSkeleton';
 import WorkoutCard from '../../modules/workouts/components/cards/WorkoutCard';
@@ -11,6 +12,7 @@ import { toast } from '../../hooks/useNotification';
 import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Workouts: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [workouts, setWorkouts] = useState<WorkoutRoutine[]>([]);
   const [publicWorkouts, setPublicWorkouts] = useState<WorkoutRoutine[]>([]);
@@ -45,7 +47,7 @@ const Workouts: React.FC = () => {
   const handleCompleteWorkout = () => {
     setIsExecuting(false);
     setActiveRoutine(null);
-    toast.success('¡Entrenamiento completado! 🎉');
+    toast.success(t('workouts.completed') + ' 🎉');
   };
 
   const handleCancelWorkout = () => {
@@ -56,7 +58,7 @@ const Workouts: React.FC = () => {
   const handleDeleteRoutine = async (id: string) => {
     const res = await workoutService.deleteWorkout(id);
     if (res.error) {
-      toast.error('Error al eliminar la rutina');
+      toast.error(t('common.error'));
     } else {
       loadWorkouts();
     }
@@ -66,9 +68,9 @@ const Workouts: React.FC = () => {
     const res = await workoutService.clonePublicWorkout(id);
     if (res.error) {
       const errorMsg = typeof res.error === 'string' ? res.error : res.error.message;
-      toast.error('Error al clonar la rutina: ' + (errorMsg || 'Error desconocido'));
+      toast.error(t('common.error') + ': ' + (errorMsg || t('common.error')));
     } else {
-      toast.success('✅ Rutina clonada exitosamente a tu colección');
+      toast.success('✅ ' + t('workouts.clone'));
       loadWorkouts();
     }
   };
@@ -96,11 +98,11 @@ const Workouts: React.FC = () => {
             // Crear la rutina usando el servicio
             const result = await workoutService.createWorkout(data);
             if (result?.data) {
-              toast.success('✅ Rutina creada exitosamente');
+              toast.success('✅ ' + t('workouts.createRoutine'));
               setShowCreate(false); 
               await loadWorkouts();
             } else {
-              toast.error('❌ Error al crear la rutina');
+              toast.error('❌ ' + t('common.error'));
             }
           }} 
           onClose={() => setShowCreate(false)} 
@@ -149,10 +151,10 @@ const Workouts: React.FC = () => {
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                💪 Mis Entrenamientos
+                💪 {t('workouts.myTrainings')}
               </h1>
               <p className={cn(themeText.secondary)}>
-                Gestiona y ejecuta tus rutinas personalizadas
+                {t('workouts.manageRoutines')}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -163,13 +165,13 @@ const Workouts: React.FC = () => {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span>Generar con IA</span>
+                <span>{t('workouts.generateWithAI')}</span>
               </button>
               <button 
                 onClick={() => setShowCreate(true)} 
                 className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
               >
-                + Crear Rutina
+                + {t('workouts.createRoutine')}
               </button>
             </div>
           </div>
@@ -194,24 +196,24 @@ const Workouts: React.FC = () => {
           )}>
             <div className="text-6xl mb-4">🏋️</div>
             <h3 className={cn("text-xl font-semibold mb-2", themeText.primary)}>
-              No tienes rutinas todavía
+              {t('workouts.noWorkouts')}
             </h3>
             <p className={cn("mb-6", themeText.secondary)}>
-              Crea tu primera rutina o usa una de las rutinas populares
+              {t('workouts.createFirst')}
             </p>
             <button 
               onClick={() => setShowCreate(true)}
               className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all shadow-lg"
             >
-              Crear mi primera rutina
+              {t('workouts.createFirst')}
             </button>
           </div>
         ) : null}
 
         {!loading && workouts.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">Mis Rutinas</h2>
-            <p className={cn("mb-6", themeText.secondary)}>Rutinas personalizadas que has creado</p>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-2">{t('workouts.myWorkouts')}</h2>
+            <p className={cn("mb-6", themeText.secondary)}>{t('workouts.manageRoutines')}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {workouts.map((workout) => (
                 <WorkoutCard 
@@ -231,9 +233,9 @@ const Workouts: React.FC = () => {
           <div className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">Rutinas Populares</h2>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">{t('workouts.popularRoutines')}</h2>
                 <p className={cn(themeText.secondary)}>
-                  Rutinas profesionales diseñadas por expertos. Clónalas para empezar a entrenar.
+                  {t('workouts.professionalRoutines')}
                 </p>
               </div>
             </div>

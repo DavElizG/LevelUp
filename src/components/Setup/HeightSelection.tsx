@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SetupLayout from './SetupLayout';
 
 interface HeightSelectionProps {
@@ -12,6 +13,7 @@ const HeightSelection: React.FC<HeightSelectionProps> = ({
   onHeightSelect,
   onNext
 }) => {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasInitialScrolled, setHasInitialScrolled] = useState(false);
 
@@ -49,10 +51,10 @@ const HeightSelection: React.FC<HeightSelectionProps> = ({
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            ¿Cuál es tu estatura actualmente?
+            {t('setup.selectHeight')}
           </h1>
           <p className="text-gray-600 text-sm">
-            Altura en cm. No te preocupes, puedes cambiarlo más tarde.
+            {t('setup.enterHeight')}
           </p>
         </div>
 
@@ -83,7 +85,7 @@ const HeightSelection: React.FC<HeightSelectionProps> = ({
                 >
                   {height}
                   {selectedHeight === height && (
-                    <span className="ml-2 text-orange-500 text-2xl font-medium">cm</span>
+                    <span className="ml-2 text-orange-500 text-2xl font-medium">{t('setup.cm')}</span>
                   )}
                 </button>
               ))}
@@ -98,7 +100,7 @@ const HeightSelection: React.FC<HeightSelectionProps> = ({
             disabled={!selectedHeight}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-3xl transition-colors duration-200"
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>

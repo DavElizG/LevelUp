@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useSetup } from '../../hooks/useSetup';
 import { useProfile } from '../../hooks/useProfile';
@@ -12,6 +13,7 @@ import DashboardSkeleton from './components/DashboardSkeleton';
 import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { loadExistingProfile } = useSetup();
   const { profile } = useProfile(user?.id);
@@ -107,42 +109,21 @@ const Dashboard: React.FC = () => {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return '¡Buenos días';
-    if (hour < 18) return '¡Buenas tardes';
-    return '¡Buenas noches';
-  };
-
-  const getMotivationalMessage = () => {
-    const messages = [
-      "¡Hoy es el día perfecto para superarte!",
-      "Cada repetición te acerca a tu meta",
-      "Tu único límite eres tú mismo",
-      "El progreso, no la perfección",
-      "¡Vamos por esos objetivos!",
-      "La disciplina vence a la motivación",
-      "El dolor de hoy es la fuerza de mañana",
-      "No pares cuando estés cansado, para cuando hayas terminado",
-      "Un paso más es un paso menos hacia tu meta",
-      "La constancia construye resultados",
-      "Los cambios pequeños crean grandes transformaciones",
-      "Entrena fuerte, mantente humilde",
-      "Suda, sonríe y repite",
-      "Nunca es tarde para empezar, pero siempre es tarde para rendirse",
-      "Eres más fuerte de lo que piensas"
-    ];
-    return messages[Math.floor(Math.random() * messages.length)];
+    if (hour < 12) return t('dashboard.goodMorning');
+    if (hour < 18) return t('dashboard.goodAfternoon');
+    return t('dashboard.goodEvening');
   };
 
   const formatGoal = () => {
-    if (!profile?.fitness_goal) return 'Definir objetivo';
+    if (!profile?.fitness_goal) return t('setup.goal');
     const goals: Record<string, string> = {
-      'lose_weight': 'Perder Peso',
-      'gain_weight': 'Ganar Peso',
-      'gain_muscle': 'Ganar Músculo',
-      'maintain': 'Mantener Peso',
-      'improve_endurance': 'Mejorar Resistencia'
+      'lose_weight': t('setup.loseWeight'),
+      'gain_weight': t('setup.gainMuscle'),
+      'gain_muscle': t('setup.gainMuscle'),
+      'maintain': t('setup.stayFit'),
+      'improve_endurance': t('setup.stayFit')
     };
-    return goals[profile.fitness_goal] || 'Objetivo personalizado';
+    return goals[profile.fitness_goal] || t('setup.goal');
   };
 
   const getGoalIcon = () => {
@@ -224,7 +205,7 @@ const Dashboard: React.FC = () => {
               {getGreeting()}, {profile?.name || 'Usuario'} 👋
             </h2>
             <p className="text-white/90 text-base font-medium drop-shadow">
-              {getMotivationalMessage()}
+              {t('dashboard.trainHard')}
             </p>
           </div>
         </div>
@@ -247,14 +228,14 @@ const Dashboard: React.FC = () => {
                 <div className={cn(
                   "text-sm font-semibold mb-1",
                   "text-orange-500 dark:text-orange-400 high-contrast:text-orange-500"
-                )}>🔥 Calorías</div>
+                )}>🔥 {t('dashboard.calories')}</div>
                 <div className={cn(
                   "text-2xl font-bold mb-1",
                   themeText.primary
                 )}>{todayStats.calories}</div>
                 {calorieData && (
                   <>
-                    <div className={cn("text-xs", themeText.muted)}>de {calorieData.targetCalories}</div>
+                    <div className={cn("text-xs", themeText.muted)}>{t('dashboard.of')} {calorieData.targetCalories}</div>
                     <div className={cn(
                       "w-full rounded-full h-1.5 mt-2",
                       "bg-orange-100 dark:bg-orange-900/30 high-contrast:bg-orange-900/50"
@@ -280,12 +261,12 @@ const Dashboard: React.FC = () => {
                 <div className={cn(
                   "text-sm font-semibold mb-1",
                   "text-blue-500 dark:text-blue-400 high-contrast:text-blue-500"
-                )}>💪 Entrenos</div>
+                )}>💪 {t('dashboard.workouts')}</div>
                 <div className={cn(
                   "text-2xl font-bold mb-1",
                   themeText.primary
                 )}>{completedDays}</div>
-                <div className={cn("text-xs", themeText.muted)}>de 7 días</div>
+                <div className={cn("text-xs", themeText.muted)}>{t('dashboard.of')} 7 {t('dashboard.days')}</div>
                 <div className={cn(
                   "w-full rounded-full h-1.5 mt-2",
                   "bg-blue-100 dark:bg-blue-900/30 high-contrast:bg-blue-900/50"
@@ -309,7 +290,7 @@ const Dashboard: React.FC = () => {
                 <div className={cn(
                   "text-sm font-semibold mb-1",
                   "text-cyan-500 dark:text-cyan-400 high-contrast:text-cyan-500"
-                )}>💧 Agua</div>
+                )}>💧 {t('dashboard.water')}</div>
                 <div className={cn(
                   "text-2xl font-bold mb-1",
                   themeText.primary
@@ -340,8 +321,8 @@ const Dashboard: React.FC = () => {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Tu Objetivo Actual</h3>
-                  <p className={cn("text-sm", themeText.muted)}>Enfócate en lo que importa</p>
+                  <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>{t('dashboard.currentGoal')}</h3>
+                  <p className={cn("text-sm", themeText.muted)}>{t('dashboard.focusOnWhatMatters')}</p>
                 </div>
                 <div className="text-4xl animate-pulse">{getGoalIcon()}</div>
               </div>
@@ -353,7 +334,7 @@ const Dashboard: React.FC = () => {
               )}>
                 <h4 className={cn("text-2xl font-bold mb-2", themeText.primary)}>{formatGoal()}</h4>
                 <div className="flex items-center justify-between text-sm">
-                  <span className={themeText.secondary}>Progreso semanal</span>
+                  <span className={themeText.secondary}>{t('dashboard.weeklyProgress')}</span>
                   <span className="font-bold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{weekProgressPercentage}%</span>
                 </div>
                 <div className={cn(
@@ -373,7 +354,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => navigate('/workouts')}
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold py-4 rounded-xl hover:from-orange-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                Empezar Entrenamiento 🚀
+                {t('dashboard.startTraining')} 🚀
               </button>
             </div>
           </div>
@@ -397,8 +378,8 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Entrenamientos</h3>
-                    <p className={cn("text-sm", themeText.muted)}>Rutinas personalizadas</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.workouts')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.personalizedRoutines')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -430,8 +411,8 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Nutrición</h3>
-                    <p className={cn("text-sm", themeText.muted)}>Plan alimenticio diario</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.nutrition')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.dailyNutritionPlan')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -463,8 +444,8 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-gray-900 text-base font-bold mb-1">Progreso</h3>
-                    <p className="text-gray-500 text-sm">Estadísticas y logros</p>
+                    <h3 className="text-gray-900 text-base font-bold mb-1">{t('navigation.progress')}</h3>
+                    <p className="text-gray-500 text-sm">{t('dashboard.statsAndAchievements')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -487,8 +468,8 @@ const Dashboard: React.FC = () => {
             
             <div className="relative z-10">
               <div className="text-center mb-6">
-                <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Esta Semana</h3>
-                <p className={cn("text-sm", themeText.muted)}>Desafío de 7 días</p>
+                <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>{t('dashboard.thisWeek')}</h3>
+                <p className={cn("text-sm", themeText.muted)}>{t('dashboard.weekChallenge')}</p>
               </div>
 
               <div className="flex justify-center space-x-3 mb-6">
@@ -529,8 +510,8 @@ const Dashboard: React.FC = () => {
                 "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600"
               )}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className={cn("text-sm font-medium", themeText.secondary)}>Progreso</span>
-                  <span className={cn("font-bold", themeText.primary)}>{completedDays} de 7 días</span>
+                  <span className={cn("text-sm font-medium", themeText.secondary)}>{t('dashboard.progress')}</span>
+                  <span className={cn("font-bold", themeText.primary)}>{completedDays} {t('dashboard.of')} 7 {t('dashboard.days')}</span>
                 </div>
                 <div className={cn(
                   "w-full rounded-full h-3 overflow-hidden",
@@ -556,10 +537,10 @@ const Dashboard: React.FC = () => {
             <div className="relative z-10 text-center text-white">
               <div className="text-4xl mb-3">💪</div>
               <p className="text-lg font-bold mb-2 drop-shadow-lg">
-                "El único mal entrenamiento es el que no hiciste"
+                "{t('dashboard.motivationalQuote')}"
               </p>
               <p className="text-white/80 text-sm">
-                Cada día es una nueva oportunidad
+                {t('dashboard.newOpportunity')}
               </p>
             </div>
           </div>

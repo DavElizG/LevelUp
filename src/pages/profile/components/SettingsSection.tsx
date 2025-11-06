@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, Bell, Lock, HelpCircle, Info, ChevronRight, Contrast } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/useTheme';
 import type { ThemeMode } from '../../../app/providers/ThemeProvider';
 import { cn, themeText } from '../../../shared/utils/themeUtils';
 
 const SettingsSection: React.FC = () => {
   const { theme, setTheme } = useTheme();
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const { i18n, t } = useTranslation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as 'es' | 'en' || 'es';
     const savedNotifications = localStorage.getItem('notifications') !== 'false';
-    
-    setLanguage(savedLanguage);
     setNotificationsEnabled(savedNotifications);
   }, []);
 
@@ -37,9 +35,18 @@ const SettingsSection: React.FC = () => {
     }
   };
 
-  const handleLanguageChange = (newLanguage: 'es' | 'en') => {
-    setLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
+  const handleLanguageChange = (newLanguage: string) => {
+    i18n.changeLanguage(newLanguage);
+  };
+
+  const getLanguageName = (lang: string): string => {
+    const languageNames: Record<string, string> = {
+      es: 'Español',
+      en: 'English',
+      fr: 'Français',
+      pt: 'Português'
+    };
+    return languageNames[lang] || 'Español';
   };
 
   const handleNotificationsToggle = () => {
@@ -140,13 +147,13 @@ const SettingsSection: React.FC = () => {
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h4 className={cn("text-sm font-semibold", themeText.primary)}>Idioma</h4>
-                <p className={cn("text-xs", themeText.muted)}>{language === 'es' ? 'Español' : 'English'}</p>
+                <h4 className={cn("text-sm font-semibold", themeText.primary)}>{t('profile.language')}</h4>
+                <p className={cn("text-xs", themeText.muted)}>{getLanguageName(i18n.language)}</p>
               </div>
             </div>
             <select
-              value={language}
-              onChange={(e) => handleLanguageChange(e.target.value as 'es' | 'en')}
+              value={i18n.language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
               className={cn(
                 "px-4 py-2 rounded-xl text-sm font-medium border-none focus:ring-2 focus:ring-blue-400 transition-all duration-300",
                 "bg-gray-100 text-gray-700",
@@ -156,6 +163,8 @@ const SettingsSection: React.FC = () => {
             >
               <option value="es">🇪🇸 Español</option>
               <option value="en">🇺🇸 English</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="pt">🇧🇷 Português</option>
             </select>
           </div>
         </div>
