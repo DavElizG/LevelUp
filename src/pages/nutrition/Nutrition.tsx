@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
@@ -10,6 +11,7 @@ import SwipeableLayout from '../../components/Layout/SwipeableLayout';
 import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Nutrition: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
@@ -162,8 +164,8 @@ const Nutrition: React.FC = () => {
           
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className={cn("text-3xl font-bold mb-2", themeText.primary)}>🍎 Nutrición</h1>
-            <p className={cn("text-gray-600", themeText.muted)}>Gestiona tu alimentación diaria</p>
+            <h1 className={cn("text-3xl font-bold mb-2", themeText.primary)}>🍎 {t('nutrition.title')}</h1>
+            <p className={cn("text-gray-600", themeText.muted)}>{t('nutrition.manageDaily')}</p>
           </div>
 
           {/* Daily Summary with Circle */}
@@ -188,7 +190,7 @@ const Nutrition: React.FC = () => {
             )}></div>
             
             <div className="relative z-10">
-              <h2 className={cn("text-xl font-bold mb-6 text-center", themeText.primary)}>Resumen de Hoy</h2>
+              <h2 className={cn("text-xl font-bold mb-6 text-center", themeText.primary)}>{t('nutrition.todaySummary')}</h2>
               
               {/* Calories Progress Circle */}
               <div className="flex items-center justify-center mb-6">
@@ -226,7 +228,7 @@ const Nutrition: React.FC = () => {
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className={cn("text-3xl font-bold", themeText.primary)}>{macros.calories}</span>
                     <span className={cn("text-sm", themeText.muted)}>/ {calorieGoal}</span>
-                    <span className={cn("text-xs mt-1", themeText.muted)}>kcal</span>
+                    <span className={cn("text-xs mt-1", themeText.muted)}>{t('nutrition.kcal')}</span>
                   </div>
                 </div>
               </div>
@@ -240,7 +242,7 @@ const Nutrition: React.FC = () => {
                   "high-contrast:bg-black/50 high-contrast:border high-contrast:border-orange-600"
                 )}>
                   <div className="text-xl font-bold text-orange-500">{macros.protein.toFixed(0)}g</div>
-                  <div className={cn("text-xs mb-2", themeText.muted)}>Proteínas</div>
+                  <div className={cn("text-xs mb-2", themeText.muted)}>{t('nutrition.proteins')}</div>
                   <div className={cn(
                     "w-full rounded-full h-2",
                     "bg-orange-100 dark:bg-gray-800 high-contrast:bg-gray-900"
@@ -255,7 +257,7 @@ const Nutrition: React.FC = () => {
                   "high-contrast:bg-black/50 high-contrast:border high-contrast:border-green-600"
                 )}>
                   <div className="text-xl font-bold text-green-500">{macros.carbs.toFixed(0)}g</div>
-                  <div className={cn("text-xs mb-2", themeText.muted)}>Carbos</div>
+                  <div className={cn("text-xs mb-2", themeText.muted)}>{t('nutrition.carbos')}</div>
                   <div className={cn(
                     "w-full rounded-full h-2",
                     "bg-green-100 dark:bg-gray-800 high-contrast:bg-gray-900"
@@ -270,7 +272,7 @@ const Nutrition: React.FC = () => {
                   "high-contrast:bg-black/50 high-contrast:border high-contrast:border-blue-600"
                 )}>
                   <div className="text-xl font-bold text-blue-500">{macros.fat.toFixed(0)}g</div>
-                  <div className={cn("text-xs mb-2", themeText.muted)}>Grasas</div>
+                  <div className={cn("text-xs mb-2", themeText.muted)}>{t('nutrition.fats')}</div>
                   <div className={cn(
                     "w-full rounded-full h-2",
                     "bg-blue-100 dark:bg-gray-800 high-contrast:bg-gray-900"
@@ -298,12 +300,12 @@ const Nutrition: React.FC = () => {
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <h3 className={cn("text-xl font-bold", themeText.primary)}>💧 Hidratación</h3>
+                <h3 className={cn("text-xl font-bold", themeText.primary)}>💧 {t('nutrition.hydration')}</h3>
                 <span className="text-2xl font-bold text-cyan-600">{formatLiters(waterIntake)}L</span>
               </div>
               
               <div className="flex items-center justify-between mb-3">
-                <span className={cn("text-sm", themeText.muted)}>Meta diaria</span>
+                <span className={cn("text-sm", themeText.muted)}>{t('nutrition.dailyGoal')}</span>
                 <span className={cn("text-sm font-semibold", themeText.secondary)}>{ formatLiters(waterGoal)}L</span>
               </div>
               
@@ -366,9 +368,9 @@ const Nutrition: React.FC = () => {
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <span className="text-xl font-bold">Ver Mi Plan</span>
+                <span className="text-xl font-bold">{t('nutrition.viewMyPlan')}</span>
               </div>
-              <p className="text-white/90 text-sm mt-2 relative z-10">Revisa tu plan nutricional semanal</p>
+              <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.reviewWeeklyPlan')}</p>
             </button>
 
             {/* AI Generator Button */}
@@ -383,15 +385,15 @@ const Nutrition: React.FC = () => {
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-xl font-bold">Generar Plan con IA</span>
+                <span className="text-xl font-bold">{t('nutrition.generatePlan')}</span>
               </div>
-              <p className="text-white/90 text-sm mt-2 relative z-10">Crea un plan personalizado con inteligencia artificial</p>
+              <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.createPersonalizedPlan')}</p>
             </button>
           </div>
 
           {/* Meal Cards - Large and Colorful */}
           <div className="space-y-4">
-            <h3 className={cn("text-xl font-bold", themeText.primary)}>Agregar Comidas</h3>
+            <h3 className={cn("text-xl font-bold", themeText.primary)}>{t('nutrition.addMeals')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
               {/* Breakfast */}
@@ -402,7 +404,7 @@ const Nutrition: React.FC = () => {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="text-4xl mb-2">🌅</div>
-                  <span className="text-lg font-bold">Desayuno</span>
+                  <span className="text-lg font-bold">{t('nutrition.breakfast')}</span>
                 </div>
               </button>
 
@@ -414,7 +416,7 @@ const Nutrition: React.FC = () => {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="text-4xl mb-2">☀️</div>
-                  <span className="text-lg font-bold">Almuerzo</span>
+                  <span className="text-lg font-bold">{t('nutrition.lunch')}</span>
                 </div>
               </button>
 
@@ -426,7 +428,7 @@ const Nutrition: React.FC = () => {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="text-4xl mb-2">🍪</div>
-                  <span className="text-lg font-bold">Merienda</span>
+                  <span className="text-lg font-bold">{t('nutrition.snack')}</span>
                 </div>
               </button>
 
@@ -438,7 +440,7 @@ const Nutrition: React.FC = () => {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="text-4xl mb-2">🌙</div>
-                  <span className="text-lg font-bold">Cena</span>
+                  <span className="text-lg font-bold">{t('nutrition.dinner')}</span>
                 </div>
               </button>
             </div>
@@ -455,7 +457,7 @@ const Nutrition: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-lg font-bold">Analizar Foto con IA</span>
+              <span className="text-lg font-bold">{t('nutrition.analyzeWithAI')}</span>
             </div>
           </button>
 
@@ -467,24 +469,24 @@ const Nutrition: React.FC = () => {
               
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold">Tu Plan Personalizado</h3>
+                  <h3 className="text-xl font-bold">{t('nutrition.personalizedPlan')}</h3>
                   <span className="text-xs bg-white/20 px-3 py-1.5 rounded-full font-semibold">
-                    {calorieProgress.status === 'on_track' && '✅ En Meta'}
-                    {calorieProgress.status === 'under' && '⚠️ Por Debajo'}
-                    {calorieProgress.status === 'over' && '⚠️ Excedido'}
+                    {calorieProgress.status === 'on_track' && '✅ ' + t('common.success')}
+                    {calorieProgress.status === 'under' && '⚠️ ' + t('nutrition.underDevelopment')}
+                    {calorieProgress.status === 'over' && '⚠️ ' + t('common.error')}
                   </span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                    <div className="text-xs opacity-90 mb-1">Metabolismo Basal</div>
+                    <div className="text-xs opacity-90 mb-1">{t('nutrition.basalMetabolism')}</div>
                     <div className="text-3xl font-bold">{calorieData.bmr}</div>
-                    <div className="text-xs opacity-75">kcal/día</div>
+                    <div className="text-xs opacity-75">{t('nutrition.kcal')}/día</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                    <div className="text-xs opacity-90 mb-1">Factor Actividad</div>
+                    <div className="text-xs opacity-90 mb-1">{t('nutrition.activityFactor')}</div>
                     <div className="text-3xl font-bold">{calorieData.activityFactor}x</div>
-                    <div className="text-xs opacity-75">multiplicador</div>
+                    <div className="text-xs opacity-75">{t('nutrition.multiplier')}</div>
                   </div>
                 </div>
 
@@ -492,7 +494,7 @@ const Nutrition: React.FC = () => {
                   <div className="text-sm opacity-90 mb-2">{calorieProgress.message}</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold">{macros.calories}</span>
-                    <span className="text-lg opacity-75">/ {calorieData.targetCalories} kcal</span>
+                    <span className="text-lg opacity-75">/ {calorieData.targetCalories} {t('nutrition.kcal')}</span>
                   </div>
                   <div className="w-full bg-white/20 rounded-full h-2.5 mt-3">
                     <div 

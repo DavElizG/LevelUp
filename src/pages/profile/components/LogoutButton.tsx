@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LogoutButtonProps {
   onLogout: () => void;
@@ -6,6 +7,8 @@ interface LogoutButtonProps {
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout, isLoggingOut }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-4 sm:p-6 border border-white/50">
       <button
@@ -28,9 +31,9 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout, isLoggingOut }) =
           </div>
           <div className="text-left">
             <div className="text-sm sm:text-base font-semibold text-red-700">
-              {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión'}
+              {isLoggingOut ? t('profile.loggingOut') : t('profile.logout')}
             </div>
-            <div className="text-xs sm:text-sm text-red-600">Salir de la aplicación</div>
+            <div className="text-xs sm:text-sm text-red-600">{t('auth.logout')}</div>
           </div>
         </div>
         <div className="text-red-400 group-hover:translate-x-1 transition-transform duration-300">

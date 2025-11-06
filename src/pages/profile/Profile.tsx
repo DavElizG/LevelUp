@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import BottomNavbar from '../../components/shared/BottomNavbar';
@@ -13,6 +14,7 @@ import ProfileSkeleton from './components/ProfileSkeleton';
 import { cn } from '../../shared/utils/themeUtils';
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { 
     formData, 
@@ -51,7 +53,7 @@ const Profile: React.FC = () => {
     
     const success = await saveProfile();
     if (success) {
-      setSuccessMessage('Perfil actualizado correctamente');
+      setSuccessMessage(t('profile.profileUpdated'));
       setIsEditing(false);
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -63,7 +65,7 @@ const Profile: React.FC = () => {
     try {
       await signOut();
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error(t('profile.logoutError'), error);
     } finally {
       setIsLoggingOut(false);
     }

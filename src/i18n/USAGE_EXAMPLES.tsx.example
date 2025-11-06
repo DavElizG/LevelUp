@@ -1,0 +1,312 @@
+// 🌍 Ejemplos de Uso del Sistema i18n en LevelUp
+
+/**
+ * EJEMPLO 1: Componente de Setup - Selección de Edad
+ */
+import { useTranslation } from 'react-i18next';
+
+function AgeSelection() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h2>{t('setup.age')}</h2>
+      <p>{t('setup.selectAge')}</p>
+      <span>{age} {t('setup.years')}</span>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 2: Página de Workouts
+ */
+function WorkoutsPage() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h1>{t('workouts.title')}</h1>
+      <button>{t('workouts.generateWorkout')}</button>
+      <button>{t('workouts.startWorkout')}</button>
+      
+      {/* Estado del workout */}
+      <span>{t('workouts.completed')}</span>
+      <span>{t('workouts.inProgress')}</span>
+      <span>{t('workouts.notStarted')}</span>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 3: Página de Nutrición
+ */
+function NutritionPage() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h1>{t('nutrition.title')}</h1>
+      <button>{t('nutrition.addMeal')}</button>
+      <button>{t('nutrition.searchFood')}</button>
+      <button>{t('nutrition.scanFood')}</button>
+      
+      {/* Comidas */}
+      <div>
+        <h3>{t('nutrition.breakfast')}</h3>
+        <h3>{t('nutrition.lunch')}</h3>
+        <h3>{t('nutrition.dinner')}</h3>
+        <h3>{t('nutrition.snack')}</h3>
+      </div>
+      
+      {/* Macros */}
+      <span>{t('nutrition.calories')}</span>
+      <span>{t('nutrition.protein')}</span>
+      <span>{t('nutrition.carbs')}</span>
+      <span>{t('nutrition.fat')}</span>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 4: Bottom Navigation
+ */
+function BottomNavbar() {
+  const { t } = useTranslation();
+  
+  const navItems = [
+    { id: 'home', label: t('navigation.dashboard'), path: '/dashboard' },
+    { id: 'workouts', label: t('navigation.workouts'), path: '/workouts' },
+    { id: 'nutrition', label: t('navigation.nutrition'), path: '/nutrition' },
+    { id: 'progress', label: t('navigation.progress'), path: '/progress' },
+    { id: 'profile', label: t('navigation.profile'), path: '/profile' },
+  ];
+  
+  return (
+    <nav>
+      {navItems.map(item => (
+        <a key={item.id} href={item.path}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * EJEMPLO 5: Formulario con validación
+ */
+function RegisterForm() {
+  const { t } = useTranslation();
+  
+  return (
+    <form>
+      <input placeholder={t('auth.fullName')} />
+      <input placeholder={t('auth.email')} />
+      <input placeholder={t('auth.password')} />
+      <input placeholder={t('auth.confirmPassword')} />
+      
+      <button type="submit">{t('auth.register')}</button>
+      
+      <p>
+        {t('auth.haveAccount')}{' '}
+        <a href="/login">{t('auth.login')}</a>
+      </p>
+    </form>
+  );
+}
+
+/**
+ * EJEMPLO 6: Modal de confirmación
+ */
+function ConfirmDialog({ onConfirm, onCancel }) {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h3>{t('common.confirm')}</h3>
+      <button onClick={onConfirm}>{t('common.yes')}</button>
+      <button onClick={onCancel}>{t('common.no')}</button>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 7: Botones de acción comunes
+ */
+function ActionButtons() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <button>{t('common.save')}</button>
+      <button>{t('common.cancel')}</button>
+      <button>{t('common.delete')}</button>
+      <button>{t('common.edit')}</button>
+      <button>{t('common.back')}</button>
+      <button>{t('common.next')}</button>
+      <button>{t('common.finish')}</button>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 8: Estados de carga y error
+ */
+function DataComponent() {
+  const { t } = useTranslation();
+  const { loading, error, data } = useFetchData();
+  
+  if (loading) return <div>{t('common.loading')}</div>;
+  if (error) return <div>{t('common.error')}: {error.message}</div>;
+  
+  return <div>{/* render data */}</div>;
+}
+
+/**
+ * EJEMPLO 9: Página de Progreso
+ */
+function ProgressPage() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h1>{t('progress.title')}</h1>
+      
+      <div>
+        <h3>{t('progress.weight')}</h3>
+        <h3>{t('progress.bodyFat')}</h3>
+        <h3>{t('progress.muscle')}</h3>
+        <h3>{t('progress.measurements')}</h3>
+      </div>
+      
+      <div>
+        <button>{t('progress.weeklyProgress')}</button>
+        <button>{t('progress.monthlyProgress')}</button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 10: Perfil de Usuario
+ */
+function ProfilePage() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h1>{t('profile.title')}</h1>
+      
+      <section>
+        <h2>{t('profile.personalInfo')}</h2>
+        <button>{t('profile.editProfile')}</button>
+      </section>
+      
+      <section>
+        <h2>{t('profile.settings')}</h2>
+        <div>
+          <span>{t('profile.language')}</span>
+          <span>{t('profile.theme')}</span>
+          <span>{t('profile.notifications')}</span>
+        </div>
+      </section>
+      
+      <button>{t('auth.logout')}</button>
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 11: Hook personalizado con traducciones
+ */
+import { useLanguage } from '@/hooks/useLanguage';
+
+function LanguageSettings() {
+  const { currentLanguage, changeLanguage, languages, t } = useLanguage();
+  
+  return (
+    <div>
+      <h3>{t('profile.language')}</h3>
+      <p>Idioma actual: {currentLanguage}</p>
+      
+      {languages.map(lang => (
+        <button
+          key={lang.code}
+          onClick={() => changeLanguage(lang.code)}
+          className={currentLanguage === lang.code ? 'active' : ''}
+        >
+          {lang.flag} {lang.name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 12: Interpolación de variables
+ */
+// Si necesitas incluir variables en las traducciones:
+// En el archivo de traducción: "welcome": "Bienvenido, {{name}}!"
+function WelcomeMessage({ userName }) {
+  const { t } = useTranslation();
+  
+  return <h1>{t('welcome', { name: userName })}</h1>;
+}
+
+/**
+ * EJEMPLO 13: Pluralización
+ */
+// En el archivo de traducción:
+// "itemCount": "{{count}} item",
+// "itemCount_plural": "{{count}} items"
+function ItemCount({ count }) {
+  const { t } = useTranslation();
+  
+  return <span>{t('itemCount', { count })}</span>;
+}
+
+/**
+ * EJEMPLO 14: Cambio de idioma con feedback
+ */
+function LanguageSwitcher() {
+  const { changeLanguage, t } = useLanguage();
+  const [success, setSuccess] = useState(false);
+  
+  const handleChange = async (lang: string) => {
+    await changeLanguage(lang);
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 2000);
+  };
+  
+  return (
+    <div>
+      {success && <p>{t('common.success')}</p>}
+      {/* Language buttons */}
+    </div>
+  );
+}
+
+/**
+ * EJEMPLO 15: Usar traducciones en atributos HTML
+ */
+function AccessibleForm() {
+  const { t } = useTranslation();
+  
+  return (
+    <input
+      type="email"
+      placeholder={t('auth.email')}
+      aria-label={t('auth.email')}
+      title={t('auth.email')}
+    />
+  );
+}
+
+// 🎯 MEJORES PRÁCTICAS:
+// 1. Siempre usa 't()' para textos visibles al usuario
+// 2. Agrupa traducciones relacionadas en las mismas categorías
+// 3. Usa nombres descriptivos para las keys (no abreviaturas)
+// 4. Mantén consistencia en los niveles de anidación
+// 5. Revisa que todas las keys existan en todos los idiomas
+// 6. Usa el componente LanguageSelector para permitir cambio de idioma
+// 7. Los placeholders, labels y títulos también deben traducirse
