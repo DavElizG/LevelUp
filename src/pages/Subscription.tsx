@@ -262,9 +262,9 @@ export default function SubscriptionPage() {
                 {/* Decorative gradient blob - constrained within card */}
                 <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors.gradient} rounded-full -mr-12 -mt-12 group-hover:scale-125 transition-transform duration-500 pointer-events-none`}></div>
                 
-                {/* Badge Más Popular */}
+                {/* Badge Más Popular - Posicionado dentro del card */}
                 {isPro && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
                     <span className="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg animate-bounce-slow">
                       <Sparkles className="w-3 h-3" />
                       Más Popular
@@ -272,9 +272,9 @@ export default function SubscriptionPage() {
                   </div>
                 )}
 
-                {/* Badge Activo */}
+                {/* Badge Activo - Posicionado dentro del card */}
                 {isCurrentPlan && (
-                  <div className="absolute -top-3 right-4 z-10">
+                  <div className="absolute top-3 right-3 z-20">
                     <span className="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
                       <Check className="w-3 h-3" />
                       Activo
@@ -282,7 +282,7 @@ export default function SubscriptionPage() {
                   </div>
                 )}
 
-                <div className="relative z-10 flex flex-col p-5 sm:p-6 flex-grow">
+                <div className="relative z-10 flex flex-col p-5 sm:p-6 flex-grow pt-10 sm:pt-12">
                   {/* Icon & Title */}
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`inline-flex p-2.5 rounded-xl ${colors.iconBg} text-white shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
