@@ -184,26 +184,23 @@ const WorkoutGeneratorPage: React.FC = () => {
   };
 
   const equipmentOptions = [
-    'Barra',
-    'Mancuernas',
-    'Máquinas',
-    'Bandas elásticas',
-    'Peso corporal',
-    'TRX',
-    'Kettlebells',
-    'Banco',
-    'Pull-up bar'
+    'gym',
+    'dumbbells',
+    'barbell',
+    'resistanceBands',
+    'bodyweight',
+    'kettlebells',
+    'pullupBar'
   ];
 
   const muscleGroups = [
-    'Pecho',
-    'Espalda',
-    'Hombros',
-    'Brazos',
-    'Piernas',
-    'Abdominales',
-    'Glúteos',
-    'Pantorrillas'
+    'chest',
+    'back',
+    'legs',
+    'shoulders',
+    'arms',
+    'core',
+    'glutes'
   ];
 
   if (profileLoading) {
