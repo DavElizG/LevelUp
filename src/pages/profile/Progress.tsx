@@ -2,8 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
+import { useProgressDashboard } from '../../hooks/useRecommendations';
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
+import InsightsCard from '../progress/components/InsightsCard';
+import MotivationalSection from '../progress/components/MotivationalSection';
 import { 
   Activity, 
   Flame, 
@@ -51,6 +54,11 @@ const Progress: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { progressData, loading } = useProgress(user?.id);
+  
+  // Obtener insights y motivación de IA
+  const { insights, motivation } = useProgressDashboard(
+    user?.id || ''
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -476,6 +484,29 @@ const Progress: React.FC = () => {
               })}
             </div>
           </div>
+        </div>
+
+        {/* AI Insights & Tips Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <h2 className={cn("text-xl font-bold", themeText.primary)}>
+              {t('progress.insights')}
+            </h2>
+          </div>
+
+          {/* Insights Card */}
+          <InsightsCard insights={insights.data} isLoading={insights.isLoading} />
+
+          {/* Motivational Content */}
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h2 className={cn("text-xl font-bold", themeText.primary)}>
+              {t('progress.motivation')}
+            </h2>
+          </div>
+
+          <MotivationalSection content={motivation.data} isLoading={motivation.isLoading} />
         </div>
       </div>
 
