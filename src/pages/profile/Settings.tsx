@@ -1,11 +1,38 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { Crown, Shield, ChevronRight } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import LanguageSelector from '../../components/shared/LanguageSelector';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Get user subscription
+  const { data: subscription } = useQuery({
+    queryKey: ['user-subscription'],
+    queryFn: async () => {
+      if (!supabase) return null;
+      const { data, error } = await supabase.rpc('get_user_subscription').single();
+      if (error) return null;
+      return data as { plan: string } | null;
+    },
+  });
+
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['is-admin'],
+    queryFn: async () => {
+      if (!supabase) return false;
+      const { data, error } = await supabase.rpc('is_admin');
+      if (error) return false;
+      return data === true;
+    },
+  });
 
   const handleSignOut = async () => {
     await signOut();
@@ -138,6 +165,58 @@ const Settings: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Subscription */}
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg shadow border-2 border-orange-200 dark:border-orange-800 p-6 mb-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Suscripción</h3>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                Plan actual: <span className="font-bold text-orange-600 dark:text-orange-400 capitalize">{subscription?.plan || 'Free'}</span>
+              </p>
+              <button
+                onClick={() => navigate('/subscription')}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                <Crown className="w-4 h-4" />
+                Mejorar Plan
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Admin Access */}
+        {isAdmin && (
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg shadow border-2 border-blue-200 dark:border-blue-800 p-6 mb-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Panel de Administrador</h3>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                  Accede al panel de administración para gestionar usuarios, contenido y configuraciones del sistema.
+                </p>
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  <Shield className="w-4 h-4" />
+                  Ir al Panel Admin
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* About */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">

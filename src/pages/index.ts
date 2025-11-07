@@ -25,6 +25,9 @@ export { default as Profile } from './profile/Profile';
 export { default as Progress } from './profile/Progress';
 export { default as Settings } from './profile/Settings';
 
+// Subscription
+export { default as Subscription } from './Subscription';
+
 // Demo pages
 export { default as NotificationDemo } from './demo/NotificationDemo';
 

@@ -10,6 +10,8 @@ import type { CalorieCalculationResult } from '../../shared/utils/calorieCalcula
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
 import DashboardSkeleton from './components/DashboardSkeleton';
+import StatsCard from './components/StatsCard';
+import SubscriptionBanner from './components/SubscriptionBanner';
 import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Dashboard: React.FC = () => {
@@ -114,35 +116,8 @@ const Dashboard: React.FC = () => {
     return t('dashboard.goodEvening');
   };
 
-  const formatGoal = () => {
-    if (!profile?.fitness_goal) return t('setup.goal');
-    const goals: Record<string, string> = {
-      'lose_weight': t('setup.loseWeight'),
-      'gain_weight': t('setup.gainMuscle'),
-      'gain_muscle': t('setup.gainMuscle'),
-      'maintain': t('setup.stayFit'),
-      'improve_endurance': t('setup.stayFit')
-    };
-    return goals[profile.fitness_goal] || t('setup.goal');
-  };
-
-  const getGoalIcon = () => {
-    if (!profile?.fitness_goal) return '🎯';
-    const icons: Record<string, string> = {
-      'lose_weight': '📉',
-      'gain_weight': '📈',
-      'gain_muscle': '💪',
-      'maintain': '⚖️',
-      'improve_endurance': '🏃'
-    };
-    return icons[profile.fitness_goal] || '🎯';
-  };
-
   const completedDays = weekProgress.filter(Boolean).length;
   const weekProgressPercentage = Math.round((completedDays / 7) * 100);
-  const calorieProgress = calorieData && todayStats.calories > 0 
-    ? Math.min(100, Math.round((todayStats.calories / calorieData.targetCalories) * 100))
-    : 0;
 
   // Show loading while checking profile
   if (isLoading) {
@@ -217,147 +192,34 @@ const Dashboard: React.FC = () => {
 
           {/* Today's Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
-            {/* Calories Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 high-contrast:from-orange-900/50 high-contrast:to-orange-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-orange-500 dark:text-orange-400 high-contrast:text-orange-500"
-                )}>🔥 {t('dashboard.calories')}</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{todayStats.calories}</div>
-                {calorieData && (
-                  <>
-                    <div className={cn("text-xs", themeText.muted)}>{t('dashboard.of')} {calorieData.targetCalories}</div>
-                    <div className={cn(
-                      "w-full rounded-full h-1.5 mt-2",
-                      "bg-orange-100 dark:bg-orange-900/30 high-contrast:bg-orange-900/50"
-                    )}>
-                      <div 
-                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-1.5 rounded-full transition-all duration-500"
-                        style={{ width: `${calorieProgress}%` }}
-                      ></div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Workouts Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 high-contrast:from-blue-900/50 high-contrast:to-blue-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-blue-500 dark:text-blue-400 high-contrast:text-blue-500"
-                )}>💪 {t('dashboard.workouts')}</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{completedDays}</div>
-                <div className={cn("text-xs", themeText.muted)}>{t('dashboard.of')} 7 {t('dashboard.days')}</div>
-                <div className={cn(
-                  "w-full rounded-full h-1.5 mt-2",
-                  "bg-blue-100 dark:bg-blue-900/30 high-contrast:bg-blue-900/50"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-blue-400 to-blue-600 h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${weekProgressPercentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Water Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-cyan-100 dark:border-cyan-900 high-contrast:border-cyan-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-900/30 dark:to-cyan-800/20 high-contrast:from-cyan-900/50 high-contrast:to-cyan-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-cyan-500 dark:text-cyan-400 high-contrast:text-cyan-500"
-                )}>💧 {t('dashboard.water')}</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{(todayStats.water / 1000).toFixed(1)}</div>
-                <div className={cn("text-xs", themeText.muted)}>de 2.5 L</div>
-                <div className={cn(
-                  "w-full rounded-full h-1.5 mt-2",
-                  "bg-cyan-100 dark:bg-cyan-900/30 high-contrast:bg-cyan-900/50"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-cyan-400 to-cyan-600 h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, (todayStats.water / 2500) * 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <StatsCard
+              icon="🔥"
+              label={t('dashboard.calories')}
+              value={todayStats.calories}
+              target={calorieData?.targetCalories}
+              color="orange"
+              unit=""
+            />
+            <StatsCard
+              icon="💪"
+              label={t('dashboard.workouts')}
+              value={completedDays}
+              target={7}
+              color="green"
+              unit={t('dashboard.days')}
+            />
+            <StatsCard
+              icon="💧"
+              label={t('dashboard.water')}
+              value={Number.parseFloat((todayStats.water / 1000).toFixed(1))}
+              target={2.5}
+              color="cyan"
+              unit="L"
+            />
           </div>
 
-          {/* Goal Card with Animation */}
-          <div className={cn(
-            "rounded-3xl p-6 shadow-xl relative overflow-hidden",
-            "bg-gradient-to-br from-white to-orange-50 dark:from-gray-800 dark:to-gray-800/50 high-contrast:from-black high-contrast:to-black",
-            "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
-          )}>
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-orange-200 to-pink-200 dark:from-orange-900/30 dark:to-pink-900/30 high-contrast:from-orange-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-900/30 dark:to-pink-900/30 high-contrast:from-purple-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>{t('dashboard.currentGoal')}</h3>
-                  <p className={cn("text-sm", themeText.muted)}>{t('dashboard.focusOnWhatMatters')}</p>
-                </div>
-                <div className="text-4xl animate-pulse">{getGoalIcon()}</div>
-              </div>
-
-              <div className={cn(
-                "backdrop-blur-sm rounded-2xl p-5 mb-4",
-                "bg-white/80 dark:bg-gray-900/50 high-contrast:bg-black/50",
-                "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600"
-              )}>
-                <h4 className={cn("text-2xl font-bold mb-2", themeText.primary)}>{formatGoal()}</h4>
-                <div className="flex items-center justify-between text-sm">
-                  <span className={themeText.secondary}>{t('dashboard.weeklyProgress')}</span>
-                  <span className="font-bold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{weekProgressPercentage}%</span>
-                </div>
-                <div className={cn(
-                  "w-full rounded-full h-3 mt-3 overflow-hidden",
-                  "bg-gray-100 dark:bg-gray-800 high-contrast:bg-gray-900"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 h-3 rounded-full transition-all duration-700 relative"
-                    style={{ width: `${weekProgressPercentage}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => navigate('/workouts')}
-                className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold py-4 rounded-xl hover:from-orange-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                {t('dashboard.startTraining')} 🚀
-              </button>
-            </div>
-          </div>
+          {/* Subscription CTA Banner */}
+          <SubscriptionBanner />
 
           {/* Navigation Menu with Enhanced Design */}
           <div className="space-y-3">
@@ -444,13 +306,16 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-gray-900 text-base font-bold mb-1">{t('navigation.progress')}</h3>
-                    <p className="text-gray-500 text-sm">{t('dashboard.statsAndAchievements')}</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.progress')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.statsAndAchievements')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn(
+                    "w-5 h-5 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300",
+                    "text-gray-400 dark:text-gray-500 high-contrast:text-gray-400"
+                  )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>

@@ -14,6 +14,7 @@ import {
   Profile, 
   Progress,
   Settings,
+  Subscription,
   Workouts, 
   WorkoutPreviewPage, 
   WorkoutEditPage, 
@@ -25,6 +26,17 @@ import {
   FoodSearchPage,
   FoodPhotoAnalyzerPage
 } from '../pages';
+
+// Admin Components
+import { AdminLayout } from '../components/admin/AdminLayout';
+import { AdminDashboard } from '../pages/admin/AdminDashboard';
+import { UserManagement } from '../pages/admin/UserManagement';
+import { RoleManagement } from '../pages/admin/RoleManagement';
+import { RoutineManagement } from '../pages/admin/RoutineManagement';
+import ExerciseManagement from '../pages/admin/ExerciseManagement';
+import FoodManagement from '../pages/admin/FoodManagement';
+import { AuditLogsPage } from '../pages/admin/AuditLogsPage';
+import { SystemSettingsPage } from '../pages/admin/SystemSettingsPage';
 
 // Route Protection Component
 import ProtectedRoute from './ProtectedRoute.tsx';
@@ -153,6 +165,28 @@ const AppRoutes: React.FC = () => {
           <Settings />
         </ProtectedRoute>
       } />
+
+      <Route path="/subscription" element={
+        <ProtectedRoute>
+          <Subscription />
+        </ProtectedRoute>
+      } />
+      
+      {/* Admin Routes - Protected by AdminLayout */}
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <AdminLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="roles" element={<RoleManagement />} />
+        <Route path="routines" element={<RoutineManagement />} />
+        <Route path="exercises" element={<ExerciseManagement />} />
+        <Route path="foods" element={<FoodManagement />} />
+        <Route path="logs" element={<AuditLogsPage />} />
+        <Route path="settings" element={<SystemSettingsPage />} />
+      </Route>
       
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/" replace />} />
