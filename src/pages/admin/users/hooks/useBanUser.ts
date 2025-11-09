@@ -18,10 +18,13 @@ export function useBanUser() {
         throw new Error('Supabase client no disponible');
       }
 
-      const { data, error } = await supabase.rpc('ban_user', {
-        p_user_id: userId,
-        p_reason: reason,
-        p_duration_days: durationDays,
+      // Convert days to hours for admin_ban_user function
+      const durationHours = durationDays !== null ? durationDays * 24 : null;
+
+      const { data, error } = await supabase.rpc('admin_ban_user', {
+        target_user_id: userId,
+        ban_duration_hours: durationHours,
+        reason: reason,
       });
 
       if (error) {
@@ -32,7 +35,9 @@ export function useBanUser() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      // Invalidate all user-related queries to trigger refresh
+      queryClient.invalidateQueries({ queryKey: ['users-list'] });
+      queryClient.invalidateQueries({ queryKey: ['system-stats'] });
       showToast('Usuario baneado correctamente', 'success');
     },
     onError: (error: Error) => {
@@ -51,8 +56,8 @@ export function useUnbanUser() {
         throw new Error('Supabase client no disponible');
       }
 
-      const { data, error } = await supabase.rpc('unban_user', {
-        p_user_id: userId,
+      const { data, error } = await supabase.rpc('admin_unban_user', {
+        target_user_id: userId,
       });
 
       if (error) {
@@ -63,7 +68,9 @@ export function useUnbanUser() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      // Invalidate all user-related queries to trigger refresh
+      queryClient.invalidateQueries({ queryKey: ['users-list'] });
+      queryClient.invalidateQueries({ queryKey: ['system-stats'] });
       showToast('Usuario desbaneado correctamente', 'success');
     },
     onError: (error: Error) => {

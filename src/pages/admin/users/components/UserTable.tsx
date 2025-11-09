@@ -121,18 +121,37 @@ export function UserTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {user.is_banned ? (
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 group relative">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         <Ban className="w-3 h-3 mr-1" />
                         Baneado
                       </span>
-                      <span
-                        className="text-xs text-gray-500 flex items-center"
-                        title={user.banned_until || 'Permanente'}
-                      >
+                      <span className="text-xs text-gray-500 flex items-center">
                         <Clock className="w-3 h-3 mr-1" />
                         {getBanExpirationText(user.banned_until)}
                       </span>
+                      {user.banned_reason && (
+                        <span className="text-xs text-gray-400 italic truncate max-w-[150px]" title={user.banned_reason}>
+                          {user.banned_reason}
+                        </span>
+                      )}
+                      {/* Tooltip on hover */}
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
+                        <div className="space-y-1">
+                          {user.banned_reason && (
+                            <p><span className="font-semibold">Razón:</span> {user.banned_reason}</p>
+                          )}
+                          {user.banned_at && (
+                            <p><span className="font-semibold">Baneado el:</span> {new Date(user.banned_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                          )}
+                          {user.banned_until ? (
+                            <p><span className="font-semibold">Expira:</span> {new Date(user.banned_until).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                          ) : (
+                            <p><span className="font-semibold">Duración:</span> Permanente</p>
+                          )}
+                        </div>
+                        <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                      </div>
                     </div>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
