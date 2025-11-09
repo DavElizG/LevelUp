@@ -111,12 +111,17 @@ const DietGeneratorPage: React.FC = () => {
     setSuccess(false);
 
     try {
+      // Convertir restricciones de español a inglés
+      const mappedRestrictions = formData.restrictions.map(restriction => 
+        restrictionsMap[restriction] || restriction
+      );
+      
       // Preparar datos para enviar
       const dataToSend = {
         userId: user.id,
         goal: formData.goal,
         calories: formData.calories,
-        restrictions: formData.restrictions,
+        restrictions: mappedRestrictions,
         meals: formData.meals,
         dietType: formData.dietType,
         allergies: formData.allergies
@@ -228,12 +233,24 @@ const DietGeneratorPage: React.FC = () => {
     }
   };
 
+  // Mapeo de restricciones español -> inglés para el backend
+  const restrictionsMap: Record<string, string> = {
+    'Vegetariano': 'vegetarian',
+    'Vegano': 'vegan',
+    'Sin gluten': 'no_gluten',
+    'Sin lácteos': 'no_dairy',
+    'Sin azúcar': 'no_nuts', // Note: "Sin azúcar" no está en la lista del backend, usando no_nuts como fallback
+    'Bajo en carbohidratos': 'low_carb',
+    'Keto': 'keto',
+    'Paleo': 'paleo',
+    'Mediterránea': 'mediterranean'
+  };
+
   const dietaryRestrictions = [
     'Vegetariano',
     'Vegano',
     'Sin gluten',
     'Sin lácteos',
-    'Sin azúcar',
     'Bajo en carbohidratos',
     'Keto',
     'Paleo',

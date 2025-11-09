@@ -104,7 +104,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onEmailConfirmatio
             value={formData.username}
             onChange={handleInputChange}
             placeholder="Usuario"
-            className={`w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
+            className={`w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
               errors.username ? 'ring-2 ring-red-500' : ''
             }`}
             required
@@ -125,7 +125,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onEmailConfirmatio
             value={formData.email}
             onChange={handleInputChange}
             placeholder="Email"
-            className={`w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
+            className={`w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
               errors.email ? 'ring-2 ring-red-500' : ''
             }`}
             required
@@ -146,7 +146,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onEmailConfirmatio
             value={formData.password}
             onChange={handleInputChange}
             placeholder="Contraseña"
-            className={`w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
+            className={`w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
               errors.password ? 'ring-2 ring-red-500' : ''
             }`}
             required
@@ -167,7 +167,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onEmailConfirmatio
             value={formData.confirmPassword}
             onChange={handleInputChange}
             placeholder="Confirmar contraseña"
-            className={`w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
+            className={`w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors ${
               errors.confirmPassword ? 'ring-2 ring-red-500' : ''
             }`}
             required

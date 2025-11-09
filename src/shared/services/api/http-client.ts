@@ -10,7 +10,7 @@ export class HttpClient {
   constructor(baseURL: string, apiKey?: string) {
     this.client = axios.create({
       baseURL,
-      timeout: 30000, // Increased to 30 seconds for AI operations
+      timeout: 90000, // Increased to 90 seconds (1.5 minutes) for AI generation operations
       headers: {
         'Content-Type': 'application/json',
         ...(apiKey && { 'Authorization': `Bearer ${apiKey}` }),
