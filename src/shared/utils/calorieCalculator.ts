@@ -101,7 +101,12 @@ export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number
  * Ajusta las calorías según el objetivo de fitness
  */
 export function adjustCaloriesForGoal(tdee: number, fitnessGoal: FitnessGoal): number {
-  const adjustment = GOAL_ADJUSTMENTS[fitnessGoal].adjustment;
+  const goalAdjustment = GOAL_ADJUSTMENTS[fitnessGoal];
+  if (!goalAdjustment) {
+    console.warn(`Unknown fitness goal: ${fitnessGoal}, using maintenance`);
+    return Math.round(tdee);
+  }
+  const adjustment = goalAdjustment.adjustment;
   return Math.round(tdee + adjustment);
 }
 
@@ -189,12 +194,15 @@ export function calculateDailyCalories(input: CalorieCalculationInput): CalorieC
   const macrosData = calculateMacros(targetCalories, input.fitnessGoal);
 
   // 5. Retornar resultado completo
+  const goalAdjustment = GOAL_ADJUSTMENTS[input.fitnessGoal];
+  const activityFactor = ACTIVITY_FACTORS[input.activityLevel];
+
   return {
     bmr: Math.round(bmr),
     tdee,
     targetCalories,
-    adjustment: GOAL_ADJUSTMENTS[input.fitnessGoal].adjustment,
-    activityFactor: ACTIVITY_FACTORS[input.activityLevel].factor,
+    adjustment: goalAdjustment?.adjustment || 0,
+    activityFactor: activityFactor?.factor || 1.2,
     macros: {
       protein_g: macrosData.protein_g,
       carbs_g: macrosData.carbs_g,

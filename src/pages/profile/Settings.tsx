@@ -166,6 +166,27 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
+        {/* Trash Bin */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Papelera de Reciclaje</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3">
+              <div>
+                <h4 className="font-medium text-gray-900">Elementos Eliminados</h4>
+                <p className="text-sm text-gray-500">Ver y restaurar rutinas y dietas eliminadas</p>
+              </div>
+              <button
+                onClick={() => navigate('/profile/trash')}
+                className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors"
+              >
+                Ver Papelera
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Subscription */}
         <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg shadow border-2 border-orange-200 dark:border-orange-800 p-6 mb-6">
           <div className="flex items-start gap-4">

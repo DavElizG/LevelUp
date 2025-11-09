@@ -29,6 +29,9 @@ export interface AdminUser {
   email_confirmed: boolean;
   is_banned: boolean;
   banned_until: string | null;
+  banned_reason: string | null;
+  banned_at: string | null;
+  banned_by: string | null;
   deleted_at: string | null;
   roles: Array<{ id: string; name: string }>;
   stats: {

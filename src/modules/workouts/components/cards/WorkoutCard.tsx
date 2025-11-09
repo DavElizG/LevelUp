@@ -189,9 +189,9 @@ const WorkoutCard: React.FC<Props> = ({ routine, onStart, onEdit, onDelete, onCl
               onClick={async () => {
                 const confirmed = await confirm(
                   'Eliminar rutina',
-                  `¿Estás seguro de eliminar la rutina "${routine.name}"? Esta acción no se puede deshacer.`,
+                  `¿Estás seguro de eliminar la rutina "${routine.name}"? Se moverá a la papelera de reciclaje y podrás recuperarla según tu plan de suscripción.`,
                   {
-                    confirmText: 'Eliminar',
+                    confirmText: 'Mover a papelera',
                     cancelText: 'Cancelar',
                     type: 'danger'
                   }

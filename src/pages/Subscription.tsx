@@ -23,6 +23,7 @@ interface SubscriptionPlanDetails {
   workout_limit: number;
   diet_limit: number;
   price: number;
+  trash_retention_days: number;
   features: string[];
 }
 

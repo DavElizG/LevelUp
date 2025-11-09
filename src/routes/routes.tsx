@@ -26,11 +26,12 @@ import {
   FoodSearchPage,
   FoodPhotoAnalyzerPage
 } from '../pages';
+import TrashBin from '../pages/profile/TrashBin';
 
 // Admin Components
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { AdminDashboard } from '../pages/admin/AdminDashboard';
-import { UserManagement } from '../pages/admin/UserManagement';
+import { UserManagement } from '../pages/admin/users/UserManagement';
 import { RoleManagement } from '../pages/admin/RoleManagement';
 import { RoutineManagement } from '../pages/admin/RoutineManagement';
 import ExerciseManagement from '../pages/admin/ExerciseManagement';
@@ -163,6 +164,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/profile/trash" element={
+        <ProtectedRoute>
+          <TrashBin />
         </ProtectedRoute>
       } />
 

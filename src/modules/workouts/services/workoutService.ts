@@ -258,15 +258,13 @@ export const workoutService: WorkoutService = {
     }
 
     const { error } = await supabase
-      .from('workout_routines')
-      .delete()
-      .eq('id', id);
+      .rpc('move_routine_to_trash', { p_routine_id: id });
 
     return { 
       success: !error, 
       data: null, 
       error,
-      message: error ? 'Failed to delete workout' : 'Workout deleted successfully'
+      message: error ? 'Failed to move workout to trash' : 'Workout moved to trash successfully'
     };
   },
 
