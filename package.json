@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.2",
     "@capacitor/android": "^7.4.3",
     "@capacitor/camera": "^7.0.2",
     "@capacitor/cli": "^7.4.3",
@@ -32,6 +33,7 @@
     "react-i18next": "^16.2.3",
     "react-router-dom": "^7.9.3",
     "react-swipeable": "^7.0.2",
+    "sql.js": "^1.13.0",
     "zod": "^4.1.11",
     "zustand": "^5.0.8"
   },
