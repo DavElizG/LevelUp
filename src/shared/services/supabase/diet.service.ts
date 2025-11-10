@@ -230,17 +230,9 @@ export class SupabaseDietService implements DietService {
 
   async deleteDietPlan(id: string): Promise<ApiResponse<void>> {
     try {
-      // Delete meal foods first, then meals, then plan (cascade should handle this)
-      await supabase.from('diet_meal_foods').delete().match({ 
-        meal_id: supabase.from('diet_meals').select('id').eq('diet_plan_id', id) 
-      });
-      await supabase.from('diet_meals').delete().eq('diet_plan_id', id);
-      
-      // Delete diet plan
+      // Use the move_diet_plan_to_trash RPC function
       const { error } = await supabase
-        .from('diet_plans')
-        .delete()
-        .eq('id', id);
+        .rpc('move_diet_plan_to_trash', { p_diet_plan_id: id });
 
       if (error) {
         return {
@@ -253,7 +245,7 @@ export class SupabaseDietService implements DietService {
       return {
         success: true,
         data: null,
-        message: 'Diet plan deleted successfully',
+        message: 'Diet plan moved to trash successfully',
       };
     } catch (error) {
       return {

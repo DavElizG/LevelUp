@@ -111,7 +111,7 @@ export class ServiceAdapter {
   }): Promise<ApiResponse<DietPlan>> {
     try {
       // Generate diet plan with AI - map to the expected format
-      // IMPORTANTE: Solo enviamos los campos que el backend espera
+      // IMPORTANTE: Solo enviamos los campos que el backend espera y validamos tipos
       const aiRequest: {
         userId: string;
         goal: string;
@@ -123,22 +123,25 @@ export class ServiceAdapter {
       } = {
         userId: preferences.userId,
         goal: preferences.goal,
-        calories: preferences.calories,
+        calories: Number(preferences.calories), // Asegurar que sea número
       };
       
-      // Solo agregar campos opcionales si tienen valor
-      if (preferences.restrictions && preferences.restrictions.length > 0) {
+      // Solo agregar campos opcionales si tienen valor válido
+      if (preferences.restrictions && Array.isArray(preferences.restrictions) && preferences.restrictions.length > 0) {
         aiRequest.restrictions = preferences.restrictions;
       }
-      if (preferences.meals) {
+      if (preferences.meals && typeof preferences.meals === 'number') {
         aiRequest.mealsPerDay = preferences.meals;
       }
-      if (preferences.allergies && preferences.allergies.length > 0) {
+      if (preferences.allergies && Array.isArray(preferences.allergies) && preferences.allergies.length > 0) {
         aiRequest.avoidFoods = preferences.allergies;
       }
-      if (preferences.dietType) {
+      if (preferences.dietType && typeof preferences.dietType === 'string' && preferences.dietType.trim()) {
         aiRequest.preferences = preferences.dietType;
       }
+      
+      // NUNCA enviar targetProtein a menos que esté explícitamente definido
+      // (actualmente no se captura en el frontend)
       
       // Debug: ver qué estamos enviando a la API
       console.log('🚀 Petición a AI API:', JSON.stringify(aiRequest, null, 2));

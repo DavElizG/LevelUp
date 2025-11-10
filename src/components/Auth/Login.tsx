@@ -76,7 +76,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
             value={formData.email}
             onChange={handleInputChange}
             placeholder={t('auth.email')}
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
+            className="w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
             required
           />
         </div>
@@ -92,7 +92,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
             value={formData.password}
             onChange={handleInputChange}
             placeholder={t('auth.password')}
-            className="w-full pl-10 pr-12 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
+            className="w-full pl-10 pr-12 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
             required
           />
           <button

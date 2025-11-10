@@ -1,14 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, Globe, Bell, Lock, HelpCircle, Info, ChevronRight, Contrast } from 'lucide-react';
+import { Moon, Sun, Globe, Bell, Lock, HelpCircle, Info, ChevronRight, Contrast, Trash2, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/useTheme';
 import type { ThemeMode } from '../../../app/providers/ThemeProvider';
 import { cn, themeText } from '../../../shared/utils/themeUtils';
+import { supabase } from '../../../lib/supabase';
 
 const SettingsSection: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const { i18n, t } = useTranslation();
+  const navigate = useNavigate();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['is-admin'],
+    queryFn: async () => {
+      if (!supabase) return false;
+      const { data, error } = await supabase.rpc('is_admin');
+      if (error) return false;
+      return data === true;
+    },
+  });
   
   useEffect(() => {
     const savedNotifications = localStorage.getItem('notifications') !== 'false';
@@ -201,51 +216,141 @@ const SettingsSection: React.FC = () => {
           </div>
         </div>
 
+        {/* Trash Bin */}
+        <button 
+          onClick={() => navigate('/profile/trash')}
+          className={cn(
+            "w-full group backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 hover:shadow-lg text-left",
+            "bg-white/80 border-gray-100 hover:border-red-200",
+            "dark:bg-gray-900/50 dark:border-gray-700 dark:hover:border-red-700",
+            "high-contrast:bg-black/50 high-contrast:border-white/30 high-contrast:hover:border-red-500 high-contrast:border-2"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                <Trash2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h4 className={cn("text-sm font-semibold", themeText.primary)}>Papelera de Reciclaje</h4>
+                <p className={cn("text-xs", themeText.muted)}>Ver elementos eliminados</p>
+              </div>
+            </div>
+            <ChevronRight className={cn(
+              "w-5 h-5 transition-all duration-300 group-hover:translate-x-1",
+              "text-gray-400 group-hover:text-red-600",
+              "dark:text-gray-500 dark:group-hover:text-red-400",
+              "high-contrast:text-white high-contrast:group-hover:text-red-400"
+            )} />
+          </div>
+        </button>
+
+        {/* Admin Dashboard - Only visible for admins */}
+        {isAdmin && (
+          <button 
+            onClick={() => navigate('/admin')}
+            className={cn(
+              "w-full group backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 hover:shadow-lg text-left",
+              "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300",
+              "dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-700 dark:hover:border-blue-600",
+              "high-contrast:from-blue-900/30 high-contrast:to-indigo-900/30 high-contrast:border-blue-500 high-contrast:hover:border-blue-400 high-contrast:border-2"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className={cn("text-sm font-semibold", themeText.primary)}>Panel de Administrador</h4>
+                  <p className={cn("text-xs", themeText.muted)}>Gestionar sistema</p>
+                </div>
+              </div>
+              <ChevronRight className={cn(
+                "w-5 h-5 transition-all duration-300 group-hover:translate-x-1",
+                "text-blue-400 group-hover:text-blue-600",
+                "dark:text-blue-500 dark:group-hover:text-blue-400",
+                "high-contrast:text-blue-300 high-contrast:group-hover:text-blue-100"
+              )} />
+            </div>
+          </button>
+        )}
+
         {/* Privacy Settings */}
-        <button className="w-full group bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100 hover:border-indigo-200 transition-all duration-300 hover:shadow-lg text-left">
+        <button className={cn(
+          "w-full group backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 hover:shadow-lg text-left",
+          "bg-white/80 border-gray-100 hover:border-indigo-200",
+          "dark:bg-gray-900/50 dark:border-gray-700 dark:hover:border-indigo-700",
+          "high-contrast:bg-black/50 high-contrast:border-white/30 high-contrast:hover:border-indigo-500 high-contrast:border-2"
+        )}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                 <Lock className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Privacidad y Seguridad</h4>
-                <p className="text-xs text-gray-500">Gestiona tus datos y seguridad</p>
+                <h4 className={cn("text-sm font-semibold", themeText.primary)}>Privacidad y Seguridad</h4>
+                <p className={cn("text-xs", themeText.muted)}>Gestiona tus datos y seguridad</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all duration-300" />
+            <ChevronRight className={cn(
+              "w-5 h-5 transition-all duration-300 group-hover:translate-x-1",
+              "text-gray-400 group-hover:text-indigo-600",
+              "dark:text-gray-500 dark:group-hover:text-indigo-400",
+              "high-contrast:text-white high-contrast:group-hover:text-indigo-300"
+            )} />
           </div>
         </button>
 
         {/* Help & Support */}
-        <button className="w-full group bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100 hover:border-green-200 transition-all duration-300 hover:shadow-lg text-left">
+        <button className={cn(
+          "w-full group backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 hover:shadow-lg text-left",
+          "bg-white/80 border-gray-100 hover:border-green-200",
+          "dark:bg-gray-900/50 dark:border-gray-700 dark:hover:border-green-700",
+          "high-contrast:bg-black/50 high-contrast:border-white/30 high-contrast:hover:border-green-500 high-contrast:border-2"
+        )}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                 <HelpCircle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Ayuda y Soporte</h4>
-                <p className="text-xs text-gray-500">Centro de ayuda y preguntas frecuentes</p>
+                <h4 className={cn("text-sm font-semibold", themeText.primary)}>Ayuda y Soporte</h4>
+                <p className={cn("text-xs", themeText.muted)}>Centro de ayuda y preguntas frecuentes</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all duration-300" />
+            <ChevronRight className={cn(
+              "w-5 h-5 transition-all duration-300 group-hover:translate-x-1",
+              "text-gray-400 group-hover:text-green-600",
+              "dark:text-gray-500 dark:group-hover:text-green-400",
+              "high-contrast:text-white high-contrast:group-hover:text-green-300"
+            )} />
           </div>
         </button>
 
         {/* About */}
-        <button className="w-full group bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100 hover:border-gray-300 transition-all duration-300 hover:shadow-lg text-left">
+        <button className={cn(
+          "w-full group backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 hover:shadow-lg text-left",
+          "bg-white/80 border-gray-100 hover:border-gray-300",
+          "dark:bg-gray-900/50 dark:border-gray-700 dark:hover:border-gray-600",
+          "high-contrast:bg-black/50 high-contrast:border-white/30 high-contrast:hover:border-gray-400 high-contrast:border-2"
+        )}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                 <Info className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Acerca de LevelUp</h4>
-                <p className="text-xs text-gray-500">Versión 1.0.0</p>
+                <h4 className={cn("text-sm font-semibold", themeText.primary)}>Acerca de LevelUp</h4>
+                <p className={cn("text-xs", themeText.muted)}>Versión 1.0.0</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-700 group-hover:translate-x-1 transition-all duration-300" />
+            <ChevronRight className={cn(
+              "w-5 h-5 transition-all duration-300 group-hover:translate-x-1",
+              "text-gray-400 group-hover:text-gray-700",
+              "dark:text-gray-500 dark:group-hover:text-gray-300",
+              "high-contrast:text-white high-contrast:group-hover:text-gray-200"
+            )} />
           </div>
         </button>
       </div>
