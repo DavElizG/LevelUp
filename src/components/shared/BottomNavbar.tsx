@@ -1,15 +1,17 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../shared/utils/themeUtils';
 
 const BottomNavbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const navItems = [
     {
       id: 'home',
-      label: 'Home',
+      label: t('navigation.dashboard'),
       path: '/dashboard',
       icon: (isActive: boolean) => (
         <svg className={cn(
@@ -22,7 +24,7 @@ const BottomNavbar: React.FC = () => {
     },
     {
       id: 'workouts',
-      label: 'Workouts',
+      label: t('navigation.workouts'),
       path: '/workouts',
       icon: (isActive: boolean) => (
         <svg className={cn(
@@ -35,7 +37,7 @@ const BottomNavbar: React.FC = () => {
     },
     {
       id: 'progress',
-      label: 'Progress',
+      label: t('navigation.progress'),
       path: '/progress',
       icon: (isActive: boolean) => (
         <svg className={cn(
@@ -48,7 +50,7 @@ const BottomNavbar: React.FC = () => {
     },
     {
       id: 'nutrition',
-      label: 'Nutrition',
+      label: t('navigation.nutrition'),
       path: '/nutrition',
       icon: (isActive: boolean) => (
         <svg className={cn(
@@ -61,7 +63,7 @@ const BottomNavbar: React.FC = () => {
     },
     {
       id: 'profile',
-      label: 'Profile',
+      label: t('navigation.profile'),
       path: '/profile',
       icon: (isActive: boolean) => (
         <svg className={cn(

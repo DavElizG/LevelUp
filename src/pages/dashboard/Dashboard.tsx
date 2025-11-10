@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useSetup } from '../../hooks/useSetup';
 import { useProfile } from '../../hooks/useProfile';
@@ -9,9 +10,12 @@ import type { CalorieCalculationResult } from '../../shared/utils/calorieCalcula
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
 import DashboardSkeleton from './components/DashboardSkeleton';
+import StatsCard from './components/StatsCard';
+import SubscriptionBanner from './components/SubscriptionBanner';
 import { cn, themeText } from '../../shared/utils/themeUtils';
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { loadExistingProfile } = useSetup();
   const { profile } = useProfile(user?.id);
@@ -107,61 +111,13 @@ const Dashboard: React.FC = () => {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return '¡Buenos días';
-    if (hour < 18) return '¡Buenas tardes';
-    return '¡Buenas noches';
-  };
-
-  const getMotivationalMessage = () => {
-    const messages = [
-      "¡Hoy es el día perfecto para superarte!",
-      "Cada repetición te acerca a tu meta",
-      "Tu único límite eres tú mismo",
-      "El progreso, no la perfección",
-      "¡Vamos por esos objetivos!",
-      "La disciplina vence a la motivación",
-      "El dolor de hoy es la fuerza de mañana",
-      "No pares cuando estés cansado, para cuando hayas terminado",
-      "Un paso más es un paso menos hacia tu meta",
-      "La constancia construye resultados",
-      "Los cambios pequeños crean grandes transformaciones",
-      "Entrena fuerte, mantente humilde",
-      "Suda, sonríe y repite",
-      "Nunca es tarde para empezar, pero siempre es tarde para rendirse",
-      "Eres más fuerte de lo que piensas"
-    ];
-    return messages[Math.floor(Math.random() * messages.length)];
-  };
-
-  const formatGoal = () => {
-    if (!profile?.fitness_goal) return 'Definir objetivo';
-    const goals: Record<string, string> = {
-      'lose_weight': 'Perder Peso',
-      'gain_weight': 'Ganar Peso',
-      'gain_muscle': 'Ganar Músculo',
-      'maintain': 'Mantener Peso',
-      'improve_endurance': 'Mejorar Resistencia'
-    };
-    return goals[profile.fitness_goal] || 'Objetivo personalizado';
-  };
-
-  const getGoalIcon = () => {
-    if (!profile?.fitness_goal) return '🎯';
-    const icons: Record<string, string> = {
-      'lose_weight': '📉',
-      'gain_weight': '📈',
-      'gain_muscle': '💪',
-      'maintain': '⚖️',
-      'improve_endurance': '🏃'
-    };
-    return icons[profile.fitness_goal] || '🎯';
+    if (hour < 12) return t('dashboard.goodMorning');
+    if (hour < 18) return t('dashboard.goodAfternoon');
+    return t('dashboard.goodEvening');
   };
 
   const completedDays = weekProgress.filter(Boolean).length;
   const weekProgressPercentage = Math.round((completedDays / 7) * 100);
-  const calorieProgress = calorieData && todayStats.calories > 0 
-    ? Math.min(100, Math.round((todayStats.calories / calorieData.targetCalories) * 100))
-    : 0;
 
   // Show loading while checking profile
   if (isLoading) {
@@ -224,7 +180,7 @@ const Dashboard: React.FC = () => {
               {getGreeting()}, {profile?.name || 'Usuario'} 👋
             </h2>
             <p className="text-white/90 text-base font-medium drop-shadow">
-              {getMotivationalMessage()}
+              {t('dashboard.trainHard')}
             </p>
           </div>
         </div>
@@ -236,147 +192,34 @@ const Dashboard: React.FC = () => {
 
           {/* Today's Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
-            {/* Calories Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 high-contrast:from-orange-900/50 high-contrast:to-orange-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-orange-500 dark:text-orange-400 high-contrast:text-orange-500"
-                )}>🔥 Calorías</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{todayStats.calories}</div>
-                {calorieData && (
-                  <>
-                    <div className={cn("text-xs", themeText.muted)}>de {calorieData.targetCalories}</div>
-                    <div className={cn(
-                      "w-full rounded-full h-1.5 mt-2",
-                      "bg-orange-100 dark:bg-orange-900/30 high-contrast:bg-orange-900/50"
-                    )}>
-                      <div 
-                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-1.5 rounded-full transition-all duration-500"
-                        style={{ width: `${calorieProgress}%` }}
-                      ></div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Workouts Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 high-contrast:from-blue-900/50 high-contrast:to-blue-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-blue-500 dark:text-blue-400 high-contrast:text-blue-500"
-                )}>💪 Entrenos</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{completedDays}</div>
-                <div className={cn("text-xs", themeText.muted)}>de 7 días</div>
-                <div className={cn(
-                  "w-full rounded-full h-1.5 mt-2",
-                  "bg-blue-100 dark:bg-blue-900/30 high-contrast:bg-blue-900/50"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-blue-400 to-blue-600 h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${weekProgressPercentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Water Card */}
-            <div className={cn(
-              "rounded-2xl p-4 shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-300",
-              "bg-white dark:bg-gray-800 high-contrast:bg-black",
-              "border border-cyan-100 dark:border-cyan-900 high-contrast:border-cyan-600 high-contrast:border-2"
-            )}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-900/30 dark:to-cyan-800/20 high-contrast:from-cyan-900/50 high-contrast:to-cyan-800/30 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-300"></div>
-              <div className="relative z-10">
-                <div className={cn(
-                  "text-sm font-semibold mb-1",
-                  "text-cyan-500 dark:text-cyan-400 high-contrast:text-cyan-500"
-                )}>💧 Agua</div>
-                <div className={cn(
-                  "text-2xl font-bold mb-1",
-                  themeText.primary
-                )}>{(todayStats.water / 1000).toFixed(1)}</div>
-                <div className={cn("text-xs", themeText.muted)}>de 2.5 L</div>
-                <div className={cn(
-                  "w-full rounded-full h-1.5 mt-2",
-                  "bg-cyan-100 dark:bg-cyan-900/30 high-contrast:bg-cyan-900/50"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-cyan-400 to-cyan-600 h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, (todayStats.water / 2500) * 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <StatsCard
+              icon="🔥"
+              label={t('dashboard.calories')}
+              value={todayStats.calories}
+              target={calorieData?.targetCalories}
+              color="orange"
+              unit=""
+            />
+            <StatsCard
+              icon="💪"
+              label={t('dashboard.workouts')}
+              value={completedDays}
+              target={7}
+              color="green"
+              unit={t('dashboard.days')}
+            />
+            <StatsCard
+              icon="💧"
+              label={t('dashboard.water')}
+              value={Number.parseFloat((todayStats.water / 1000).toFixed(1))}
+              target={2.5}
+              color="cyan"
+              unit="L"
+            />
           </div>
 
-          {/* Goal Card with Animation */}
-          <div className={cn(
-            "rounded-3xl p-6 shadow-xl relative overflow-hidden",
-            "bg-gradient-to-br from-white to-orange-50 dark:from-gray-800 dark:to-gray-800/50 high-contrast:from-black high-contrast:to-black",
-            "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600 high-contrast:border-2"
-          )}>
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-orange-200 to-pink-200 dark:from-orange-900/30 dark:to-pink-900/30 high-contrast:from-orange-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-900/30 dark:to-pink-900/30 high-contrast:from-purple-900/50 high-contrast:to-pink-900/50 rounded-full opacity-20 blur-2xl"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Tu Objetivo Actual</h3>
-                  <p className={cn("text-sm", themeText.muted)}>Enfócate en lo que importa</p>
-                </div>
-                <div className="text-4xl animate-pulse">{getGoalIcon()}</div>
-              </div>
-
-              <div className={cn(
-                "backdrop-blur-sm rounded-2xl p-5 mb-4",
-                "bg-white/80 dark:bg-gray-900/50 high-contrast:bg-black/50",
-                "border border-orange-100 dark:border-orange-900 high-contrast:border-orange-600"
-              )}>
-                <h4 className={cn("text-2xl font-bold mb-2", themeText.primary)}>{formatGoal()}</h4>
-                <div className="flex items-center justify-between text-sm">
-                  <span className={themeText.secondary}>Progreso semanal</span>
-                  <span className="font-bold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{weekProgressPercentage}%</span>
-                </div>
-                <div className={cn(
-                  "w-full rounded-full h-3 mt-3 overflow-hidden",
-                  "bg-gray-100 dark:bg-gray-800 high-contrast:bg-gray-900"
-                )}>
-                  <div 
-                    className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 h-3 rounded-full transition-all duration-700 relative"
-                    style={{ width: `${weekProgressPercentage}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => navigate('/workouts')}
-                className="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold py-4 rounded-xl hover:from-orange-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                Empezar Entrenamiento 🚀
-              </button>
-            </div>
-          </div>
+          {/* Subscription CTA Banner */}
+          <SubscriptionBanner />
 
           {/* Navigation Menu with Enhanced Design */}
           <div className="space-y-3">
@@ -397,8 +240,8 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Entrenamientos</h3>
-                    <p className={cn("text-sm", themeText.muted)}>Rutinas personalizadas</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.workouts')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.personalizedRoutines')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -430,8 +273,8 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>Nutrición</h3>
-                    <p className={cn("text-sm", themeText.muted)}>Plan alimenticio diario</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.nutrition')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.dailyNutritionPlan')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -463,13 +306,16 @@ const Dashboard: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-gray-900 text-base font-bold mb-1">Progreso</h3>
-                    <p className="text-gray-500 text-sm">Estadísticas y logros</p>
+                    <h3 className={cn("text-base font-bold mb-1", themeText.primary)}>{t('navigation.progress')}</h3>
+                    <p className={cn("text-sm", themeText.muted)}>{t('dashboard.statsAndAchievements')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn(
+                    "w-5 h-5 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300",
+                    "text-gray-400 dark:text-gray-500 high-contrast:text-gray-400"
+                  )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -487,8 +333,8 @@ const Dashboard: React.FC = () => {
             
             <div className="relative z-10">
               <div className="text-center mb-6">
-                <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>Esta Semana</h3>
-                <p className={cn("text-sm", themeText.muted)}>Desafío de 7 días</p>
+                <h3 className={cn("text-lg font-bold mb-1", themeText.primary)}>{t('dashboard.thisWeek')}</h3>
+                <p className={cn("text-sm", themeText.muted)}>{t('dashboard.weekChallenge')}</p>
               </div>
 
               <div className="flex justify-center space-x-3 mb-6">
@@ -529,8 +375,8 @@ const Dashboard: React.FC = () => {
                 "border border-blue-100 dark:border-blue-900 high-contrast:border-blue-600"
               )}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className={cn("text-sm font-medium", themeText.secondary)}>Progreso</span>
-                  <span className={cn("font-bold", themeText.primary)}>{completedDays} de 7 días</span>
+                  <span className={cn("text-sm font-medium", themeText.secondary)}>{t('dashboard.progress')}</span>
+                  <span className={cn("font-bold", themeText.primary)}>{completedDays} {t('dashboard.of')} 7 {t('dashboard.days')}</span>
                 </div>
                 <div className={cn(
                   "w-full rounded-full h-3 overflow-hidden",
@@ -556,10 +402,10 @@ const Dashboard: React.FC = () => {
             <div className="relative z-10 text-center text-white">
               <div className="text-4xl mb-3">💪</div>
               <p className="text-lg font-bold mb-2 drop-shadow-lg">
-                "El único mal entrenamiento es el que no hiciste"
+                "{t('dashboard.motivationalQuote')}"
               </p>
               <p className="text-white/80 text-sm">
-                Cada día es una nueva oportunidad
+                {t('dashboard.newOpportunity')}
               </p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft, 
   Play, 
@@ -24,6 +25,7 @@ interface WorkoutExecutionPageProps {
 const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
   routineId: propRoutineId
 }) => {
+  const { t } = useTranslation();
   const { routineId: urlRoutineId } = useParams();
   const navigate = useNavigate();
 
@@ -53,7 +55,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
   React.useEffect(() => {
     const loadRoutineData = async () => {
       if (!routineId) {
-        setRoutineError('ID de rutina no proporcionado');
+        setRoutineError(t('workoutExecution.routineIdMissing'));
         setLoadingRoutine(false);
         return;
       }
@@ -63,7 +65,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         const result = await workoutService.getWorkout(routineId);
         
         if (result.error || !result.data) {
-          const errorMessage = typeof result.error === 'string' ? result.error : 'No se pudo cargar la rutina';
+          const errorMessage = typeof result.error === 'string' ? result.error : t('workoutExecution.routineLoadError');
           throw new Error(errorMessage);
         }
 
@@ -72,7 +74,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         // Mapear ejercicios con todos los campos incluyendo dayOfWeek
         const allExercises = (routine.exercises || []).map((routineExercise: RoutineExercise) => ({
           id: routineExercise.exerciseId || routineExercise.id,
-          name: routineExercise.exercise?.name || 'Ejercicio sin nombre',
+          name: routineExercise.exercise?.name || t('workoutExecution.unnamedExercise'),
           category: routineExercise.exercise?.category || 'general',
           muscleGroups: routineExercise.exercise?.muscleGroups || [],
           description: routineExercise.exercise?.description || routineExercise.notes || '',
@@ -97,7 +99,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
           .sort((a, b) => a.orderInDay - b.orderInDay);
 
         if (dayExercises.length === 0 && allExercises.length > 0) {
-          throw new Error(`No hay ejercicios configurados para el día ${currentDay}`);
+          throw new Error(t('workoutExecution.noDayExercises', { day: currentDay }));
         }
 
         setRoutineData({
@@ -110,7 +112,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         setRoutineError(null);
       } catch (error) {
         console.error('Error cargando rutina:', error);
-        setRoutineError(error instanceof Error ? error.message : 'Error desconocido');
+        setRoutineError(error instanceof Error ? error.message : t('common.unknownError'));
       } finally {
         setLoadingRoutine(false);
       }
@@ -249,7 +251,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         startRestCountdown(recommendedRestTime);
         await startRest(recommendedRestTime);
       } else {
-        toast.success('✅ ¡Ejercicio completado! Pasa al siguiente cuando estés listo.');
+        toast.success(t('workoutExecution.exerciseCompleted'));
       }
     }
     setIsSaving(false);
@@ -268,11 +270,11 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
     if (isLast) {
       // Es el último ejercicio del día
       const shouldComplete = await confirm(
-        '¡Completar día!',
-        '¡Has completado todos los ejercicios del día! ¿Terminar rutina por hoy?',
+        t('workoutExecution.completeDayTitle'),
+        t('workoutExecution.completeDayMessage'),
         {
-          confirmText: 'Completar',
-          cancelText: 'Continuar',
+          confirmText: t('common.complete'),
+          cancelText: t('common.continue'),
           type: 'info'
         }
       );
@@ -283,11 +285,11 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
         // Verificar si hay más días
         if (routineData && currentDay < routineData.totalDays) {
           const goToNextDay = await confirm(
-            '¡Excelente trabajo!',
-            `¿Quieres empezar el Día ${currentDay + 1}?`,
+            t('workoutExecution.excellentWorkTitle'),
+            t('workoutExecution.startNextDayMessage', { day: currentDay + 1 }),
             {
-              confirmText: 'Comenzar',
-              cancelText: 'Terminar',
+              confirmText: t('common.start'),
+              cancelText: t('common.finish'),
               type: 'info'
             }
           );
@@ -299,7 +301,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
             navigate('/workouts');
           }
         } else {
-          toast.success('🎉 ¡Rutina completada! Has terminado todos los días.');
+          toast.success(t('workoutExecution.allDaysCompleted'));
           navigate('/workouts');
         }
       }
@@ -307,18 +309,18 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
       // No es el último, continuar normalmente
       const success = await nextExercise(true);
       if (!success) {
-        toast.error('⚠️ Error al pasar al siguiente ejercicio');
+        toast.error(t('workoutExecution.nextExerciseError'));
       }
     }
   };
 
   const handleSkipExercise = async () => {
     const shouldSkip = await confirm(
-      'Saltar ejercicio',
-      '¿Saltar este ejercicio sin guardarlo como completado?',
+      t('workoutExecution.skipExerciseTitle'),
+      t('workoutExecution.skipExerciseMessage'),
       {
-        confirmText: 'Saltar',
-        cancelText: 'Continuar',
+        confirmText: t('common.skip'),
+        cancelText: t('common.continue'),
         type: 'warning'
       }
     );
@@ -347,11 +349,11 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
 
   const handleExit = async () => {
     const shouldExit = await confirm(
-      'Salir del entrenamiento',
-      '¿Seguro que quieres salir? Tu progreso se guardará.',
+      t('workoutExecution.exitTitle'),
+      t('workoutExecution.exitMessage'),
       {
-        confirmText: 'Salir',
-        cancelText: 'Continuar',
+        confirmText: t('common.exit'),
+        cancelText: t('common.continue'),
         type: 'warning'
       }
     );
@@ -363,9 +365,9 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
 
   // Determinar mensaje del temporizador
   const getRestMessage = () => {
-    if (restTimer > 45) return '💪 Relájate';
-    if (restTimer > 15) return '⚡ Prepárate';
-    return '🔥 ¡Casi listo!';
+    if (restTimer > 45) return t('workoutExecution.relax');
+    if (restTimer > 15) return t('workoutExecution.getPrepared');
+    return t('workoutExecution.almostReady');
   };
 
   // Renderizado de estados de carga y error
@@ -374,7 +376,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando rutina...</p>
+          <p className="text-gray-600">{t('workoutExecution.loadingRoutine')}</p>
         </div>
       </div>
     );
@@ -389,13 +391,13 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Error cargando rutina</h3>
-          <p className="text-red-600 mb-4">{routineError || 'Rutina no encontrada'}</p>
+          <h3 className="text-lg font-semibold text-red-800 mb-2">{t('workoutExecution.routineLoadErrorTitle')}</h3>
+          <p className="text-red-600 mb-4">{routineError || t('workoutExecution.routineNotFound')}</p>
           <button
             onClick={() => navigate('/workouts')}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            Volver a Entrenamientos
+            {t('workoutExecution.backToWorkouts')}
           </button>
         </div>
       </div>
@@ -407,7 +409,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando entrenamiento...</p>
+          <p className="text-gray-600">{t('workoutExecution.loadingWorkout')}</p>
         </div>
       </div>
     );
@@ -422,13 +424,13 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Error en el entrenamiento</h3>
+          <h3 className="text-lg font-semibold text-red-800 mb-2">{t('workoutExecution.workoutErrorTitle')}</h3>
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => navigate('/workouts')}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            Volver a Entrenamientos
+            {t('workoutExecution.backToWorkouts')}
           </button>
         </div>
       </div>
@@ -439,12 +441,12 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">No se pudo cargar la sesión de entrenamiento</p>
+          <p className="text-gray-600 mb-4">{t('workoutExecution.sessionLoadError')}</p>
           <button
             onClick={() => navigate('/workouts')}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Volver a Entrenamientos
+            {t('workoutExecution.backToWorkouts')}
           </button>
         </div>
       </div>
@@ -465,13 +467,13 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors min-h-[44px]"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline font-medium">Volver</span>
+              <span className="hidden sm:inline font-medium">{t('common.back')}</span>
             </button>
 
             {/* Indicador de Día */}
             {routineData && routineData.totalDays > 1 && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-600">Día {currentDay} de {routineData.totalDays}</span>
+                <span className="text-sm font-semibold text-gray-600">{t('workoutExecution.dayOf', { current: currentDay, total: routineData.totalDays })}</span>
                 <select
                   value={currentDay}
                   onChange={(e) => {
@@ -482,7 +484,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                   className="text-sm border-2 border-blue-300 rounded-lg px-2 py-1 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   {Array.from({ length: routineData.totalDays }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day}>Día {day}</option>
+                    <option key={day} value={day}>{t('workoutExecution.day')} {day}</option>
                   ))}
                 </select>
               </div>
@@ -495,16 +497,16 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm">
                 <span className="text-gray-600">
                   <span className="font-medium text-orange-600">{progress.exerciseIndex + 1}</span>
-                  /{progress.totalExercises} ejercicios
+                  /{progress.totalExercises} {t('workoutExecution.exercises')}
                 </span>
                 <span className="text-gray-400 hidden md:inline">•</span>
                 <span className="text-gray-600">
                   <span className="font-medium text-blue-600">{progress.setNumber}</span>
-                  /{totalSets} series
+                  /{totalSets} {t('workoutExecution.sets')}
                 </span>
                 <span className="text-gray-400 hidden md:inline">•</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                  {progress.completedExercises} completados
+                  {progress.completedExercises} {t('workoutExecution.completed')}
                 </span>
               </div>
             </div>
@@ -513,14 +515,14 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm md:text-base font-medium hover:bg-yellow-600 transition-all shadow-md hover:shadow-lg min-h-[44px]"
             >
               <Pause className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden md:inline">Pausar</span>
+              <span className="hidden md:inline">{t('common.pause')}</span>
             </button>
           </div>
 
           {/* Barra de progreso mejorada con cálculo correcto */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-gray-500">
-              <span>Progreso del entrenamiento</span>
+              <span>{t('workoutExecution.workoutProgress')}</span>
               <span>{Math.min(100, Math.round(((progress.exerciseIndex + (Math.min(progress.setNumber, totalSets) / totalSets)) / progress.totalExercises) * 100))}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
@@ -563,11 +565,11 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border-2 border-blue-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-blue-600 mb-1">Serie Actual</p>
-                      <p className="text-4xl font-bold text-blue-700">{progress.setNumber} <span className="text-2xl text-blue-400">de {totalSets}</span></p>
+                      <p className="text-sm font-medium text-blue-600 mb-1">{t('workoutExecution.currentSet')}</p>
+                      <p className="text-4xl font-bold text-blue-700">{progress.setNumber} <span className="text-2xl text-blue-400">{t('common.of')} {totalSets}</span></p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-blue-600 mb-1">Repeticiones recomendadas</p>
+                      <p className="text-sm font-medium text-blue-600 mb-1">{t('workoutExecution.recommendedReps')}</p>
                       <p className="text-2xl font-bold text-blue-700">{recommendedReps}</p>
                     </div>
                   </div>
@@ -577,7 +579,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <label htmlFor="reps-input" className="block text-base font-semibold text-gray-700 mb-2">
-                      Repeticiones realizadas *
+                      {t('workoutExecution.repsPerformed')} *
                     </label>
                     <input 
                       type="number"
@@ -586,7 +588,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                       min="1"
                       value={reps || ''}
                       onChange={(e) => setReps(Number(e.target.value))}
-                      placeholder="Ej: 10"
+                      placeholder={t('workoutExecution.exampleReps')}
                       className="w-full border-2 border-gray-300 rounded-lg px-4 py-4 text-lg font-medium focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all min-h-[48px]"
                       id="reps-input"
                     />
@@ -594,7 +596,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                   
                   <div>
                     <label htmlFor="weight-input" className="block text-base font-semibold text-gray-700 mb-2">
-                      Peso usado (kg)
+                      {t('workoutExecution.weightUsed')}
                     </label>
                     <input 
                       type="number"
@@ -603,7 +605,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                       min="0"
                       value={weight || ''}
                       onChange={(e) => setWeight(Number(e.target.value))}
-                      placeholder="Ej: 50"
+                      placeholder={t('workoutExecution.exampleWeight')}
                       className="w-full border-2 border-gray-300 rounded-lg px-4 py-4 text-lg font-medium focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all min-h-[48px]"
                       id="weight-input"
                     />
@@ -624,7 +626,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
-                          Guardando...
+                          {t('common.saving')}
                         </>
                       );
                     }
@@ -633,7 +635,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                       return (
                         <>
                           <X className="w-5 h-5 md:w-6 md:h-6" />
-                          Todas las series completadas
+                          {t('workoutExecution.allSetsCompleted')}
                         </>
                       );
                     }
@@ -641,7 +643,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     return (
                       <>
                         <Check className="w-5 h-5 md:w-6 md:h-6" />
-                        Completar Serie {Math.min(progress.setNumber, totalSets)}/{totalSets}
+                        {t('workoutExecution.completeSet', { current: Math.min(progress.setNumber, totalSets), total: totalSets })}
                       </>
                     );
                   })()}
@@ -654,7 +656,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-4 md:p-6 text-white">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex-1">
-                    <p className="text-xs md:text-sm font-medium text-blue-100 mb-1">Tiempo de descanso</p>
+                    <p className="text-xs md:text-sm font-medium text-blue-100 mb-1">{t('workoutExecution.restTime')}</p>
                     <div className="flex items-baseline gap-2 md:gap-3">
                       <span className="text-4xl md:text-6xl font-bold font-mono">
                         {Math.floor(restTimer / 60)}:{(restTimer % 60).toString().padStart(2, '0')}
@@ -689,12 +691,12 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     {isTimerRunning ? (
                       <>
                         <Pause className="w-4 h-4" />
-                        Pausar
+                        {t('common.pause')}
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4" />
-                        Continuar
+                        {t('common.continue')}
                       </>
                     )}
                   </button>
@@ -703,7 +705,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     className="px-3 py-2 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-all shadow-lg text-sm min-h-[44px] flex items-center justify-center gap-1"
                   >
                     <SkipForward className="w-4 h-4" />
-                    Saltar
+                    {t('common.skip')}
                   </button>
                 </div>
 
@@ -762,14 +764,14 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     inputMode="numeric"
                     value={customRestTime}
                     onChange={(e) => setCustomRestTime(e.target.value)}
-                    placeholder="Segundos personalizados"
+                    placeholder={t('workoutExecution.customSecondsPlaceholder')}
                     className="flex-1 border-2 border-blue-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none min-h-[48px]"
                   />
                   <button
                     onClick={setCustomRest}
                     className="px-6 py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-all shadow-md min-h-[48px]"
                   >
-                    Iniciar
+                    {t('common.start')}
                   </button>
                 </div>
               </div>
@@ -786,7 +788,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     className="bg-white border-2 border-gray-300 text-gray-700 px-4 py-4 rounded-xl font-bold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[52px]"
                   >
                     <ArrowLeft className="w-5 h-5" />
-                    Ejercicio Anterior
+                    {t('workoutExecution.previousExercise')}
                   </button>
 
                   {/* Botón Siguiente Ejercicio / Terminar Rutina */}
@@ -797,11 +799,11 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                     {progress.exerciseIndex >= progress.totalExercises - 1 ? (
                       <>
                         <Check className="w-5 h-5" />
-                        Terminar Rutina por Hoy
+                        {t('workoutExecution.finishRoutineToday')}
                       </>
                     ) : (
                       <>
-                        Siguiente Ejercicio
+                        {t('workoutExecution.nextExercise')}
                         <ChevronRight className="w-5 h-5" />
                       </>
                     )}
@@ -812,7 +814,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                   onClick={handleSkipExercise}
                   className="w-full bg-white border-2 border-gray-300 text-gray-600 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all shadow-md hover:shadow-lg text-sm min-h-[48px]"
                 >
-                  Saltar este Ejercicio
+                  {t('workoutExecution.skipThisExercise')}
                 </button>
               </div>
             )}
@@ -822,7 +824,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-gray-600 text-lg">No hay ejercicio actual disponible</p>
+            <p className="text-gray-600 text-lg">{t('workoutExecution.noCurrentExercise')}</p>
           </div>
         )}
       </div>

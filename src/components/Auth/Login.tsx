@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { User, Lock, Facebook, Twitter } from 'lucide-react';
+import { User, Lock, Facebook, Twitter, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import AuthLayout from './AuthLayout';
 
 interface LoginProps {
@@ -13,7 +14,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signInWithProvider, loading, error } = useAuth();
+  const { t } = useTranslation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -72,8 +75,8 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="Email"
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
+            placeholder={t('auth.email')}
+            className="w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
             required
           />
         </div>
@@ -84,14 +87,25 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
             <Lock className="h-5 w-5 text-gray-400" />
           </div>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            placeholder="Password"
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
+            placeholder={t('auth.password')}
+            className="w-full pl-10 pr-12 py-3 bg-gray-100 text-gray-900 placeholder:text-gray-500 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
         </div>
 
         {/* Login Button */}
@@ -100,12 +114,12 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
           disabled={loading}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Iniciando...' : 'Iniciar sesión'}
+          {loading ? t('auth.loggingIn') : t('auth.login')}
         </button>
 
         {/* Social Login Section */}
         <div className="text-center">
-          <p className="text-gray-500 text-sm mb-4">inicia sesión con</p>
+          <p className="text-gray-500 text-sm mb-4">{t('auth.signInWith')}</p>
           
           <div className="flex justify-center space-x-4">
             <button
@@ -145,11 +159,11 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
             disabled={loading || !formData.email}
             className="text-blue-500 hover:text-blue-600 text-sm underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ¿Olvidaste tu contraseña?
+            {t('auth.forgotPassword')}
           </button>
           {!formData.email && (
             <p className="text-gray-400 text-xs mt-1">
-              Ingresa tu email primero
+              {t('auth.enterEmail')}
             </p>
           )}
         </div>
@@ -157,13 +171,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForgotPassw
         {/* Switch to Register */}
         <div className="text-center mt-6">
           <p className="text-gray-600 text-sm">
-            ¿No tienes una cuenta?{' '}
+            {t('auth.noAccount')}{' '}
             <button
               type="button"
               onClick={onSwitchToRegister}
               className="text-blue-500 hover:text-blue-600 underline transition-colors"
             >
-              Regístrate
+              {t('auth.register')}
             </button>
           </p>
         </div>

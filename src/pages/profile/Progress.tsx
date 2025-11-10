@@ -1,8 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
+import { useProgressDashboard } from '../../hooks/useRecommendations';
 import BottomNavbar from '../../components/shared/BottomNavbar';
 import SwipeableLayout from '../../components/Layout/SwipeableLayout';
+import InsightsCard from '../progress/components/InsightsCard';
+import MotivationalSection from '../progress/components/MotivationalSection';
 import { 
   Activity, 
   Flame, 
@@ -47,8 +51,14 @@ const ChartSkeleton = () => (
 );
 
 const Progress: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { progressData, loading } = useProgress(user?.id);
+  
+  // Obtener insights y motivación de IA
+  const { insights, motivation } = useProgressDashboard(
+    user?.id || ''
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -185,10 +195,10 @@ const Progress: React.FC = () => {
       )}>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
-            Mi Progreso
+            {t('progress.myProgress')}
           </h1>
           <span className="text-sm font-medium text-purple-600 dark:text-purple-400 high-contrast:text-purple-500">
-            {weekProgress}% completado
+            {weekProgress}% {t('progress.completed')}
           </span>
         </div>
       </div>
@@ -209,10 +219,10 @@ const Progress: React.FC = () => {
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
                 <Activity className="w-4 h-4" />
-                <p className="text-sm opacity-90">Entrenamientos</p>
+                <p className="text-sm opacity-90">{t('dashboard.workouts')}</p>
               </div>
               <p className="text-3xl font-bold">{progressData.weeklyStats.workouts}</p>
-              <p className="text-xs opacity-75 mt-1">esta semana</p>
+              <p className="text-xs opacity-75 mt-1">{t('progress.thisWeek')}</p>
             </div>
           </div>
 
@@ -228,12 +238,12 @@ const Progress: React.FC = () => {
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
                 <Flame className="w-4 h-4" />
-                <p className="text-sm opacity-90">Calorías</p>
+                <p className="text-sm opacity-90">{t('dashboard.calories')}</p>
               </div>
               <p className="text-3xl font-bold">
                 {(progressData.weeklyStats.calories / 1000).toFixed(1)}k
               </p>
-              <p className="text-xs opacity-75 mt-1">quemadas</p>
+              <p className="text-xs opacity-75 mt-1">{t('progress.burned')}</p>
             </div>
           </div>
 
@@ -249,12 +259,12 @@ const Progress: React.FC = () => {
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="w-4 h-4" />
-                <p className="text-sm opacity-90">Tiempo Activo</p>
+                <p className="text-sm opacity-90">{t('progress.activeTime')}</p>
               </div>
               <p className="text-3xl font-bold">
                 {Math.round(progressData.weeklyStats.activeMinutes / 60)}h
               </p>
-              <p className="text-xs opacity-75 mt-1">esta semana</p>
+              <p className="text-xs opacity-75 mt-1">{t('progress.thisWeek')}</p>
             </div>
           </div>
 
@@ -270,10 +280,10 @@ const Progress: React.FC = () => {
             <div className="relative">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="w-4 h-4" />
-                <p className="text-sm opacity-90">Racha</p>
+                <p className="text-sm opacity-90">{t('progress.streak')}</p>
               </div>
               <p className="text-3xl font-bold">{progressData.weeklyStats.streak}</p>
-              <p className="text-xs opacity-75 mt-1">días seguidos</p>
+              <p className="text-xs opacity-75 mt-1">{t('progress.daysInRow')}</p>
             </div>
           </div>
         </div>
@@ -291,7 +301,7 @@ const Progress: React.FC = () => {
           <div className="relative">
             <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", themeText.primary)}>
               <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400 high-contrast:text-orange-500" />
-              Evolución de Peso
+              {t('progress.weightEvolution')}
             </h3>
             <div className={cn(
               "h-48 flex items-center justify-center rounded-2xl",
@@ -340,20 +350,20 @@ const Progress: React.FC = () => {
                 })}
               </svg>
             ) : (
-              <p className={cn(themeText.muted)}>No hay datos suficientes</p>
+              <p className={cn(themeText.muted)}>{t('progress.noDataAvailable')}</p>
             )}
             </div>
             <div className="mt-4 flex items-center justify-between text-sm">
               <div>
-                <p className={cn(themeText.muted)}>Inicial</p>
+                <p className={cn(themeText.muted)}>{t('progress.initial')}</p>
                 <p className={cn("font-semibold", themeText.primary)}>{progressData.initialWeight} kg</p>
               </div>
               <div className="text-center">
-                <p className={cn(themeText.muted)}>Actual</p>
+                <p className={cn(themeText.muted)}>{t('progress.current')}</p>
                 <p className="font-semibold text-orange-600 dark:text-orange-400 high-contrast:text-orange-500">{progressData.currentWeight} kg</p>
               </div>
               <div className="text-right">
-                <p className={cn(themeText.muted)}>Meta</p>
+                <p className={cn(themeText.muted)}>{t('progress.goal')}</p>
                 <p className="font-semibold text-purple-600 dark:text-purple-400 high-contrast:text-purple-500">{progressData.targetWeight} kg</p>
               </div>
             </div>
@@ -372,7 +382,7 @@ const Progress: React.FC = () => {
           <div className="relative">
             <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", themeText.primary)}>
               <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400 high-contrast:text-purple-500" />
-              Frecuencia Semanal
+              {t('progress.weeklyFrequency')}
             </h3>
             <div className="grid grid-cols-7 gap-2">
               {[
@@ -474,6 +484,29 @@ const Progress: React.FC = () => {
               })}
             </div>
           </div>
+        </div>
+
+        {/* AI Insights & Tips Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <h2 className={cn("text-xl font-bold", themeText.primary)}>
+              {t('progress.insights')}
+            </h2>
+          </div>
+
+          {/* Insights Card */}
+          <InsightsCard insights={insights.data} isLoading={insights.isLoading} />
+
+          {/* Motivational Content */}
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h2 className={cn("text-xl font-bold", themeText.primary)}>
+              {t('progress.motivation')}
+            </h2>
+          </div>
+
+          <MotivationalSection content={motivation.data} isLoading={motivation.isLoading} />
         </div>
       </div>
 

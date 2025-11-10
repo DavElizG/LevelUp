@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileFormData {
   name: string;
@@ -26,6 +27,8 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   onSubmit,
   onCancel
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <form onSubmit={onSubmit} className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-4 sm:p-6 border border-white/50">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
@@ -35,7 +38,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
             </svg>
           </div>
-          Editar Información
+          {t('profile.editInfo')}
         </h3>
       </div>
       
@@ -43,13 +46,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></span>
-            Nombre *
+            {t('profile.name')} *
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => onInputChange('name', e.target.value)}
-            placeholder="Tu nombre"
+            placeholder={t('profile.yourName')}
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
             required
           />
@@ -58,13 +61,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></span>
-            Primer Apellido *
+            {t('profile.firstName')} *
           </label>
           <input
             type="text"
             value={formData.lastname1}
             onChange={(e) => onInputChange('lastname1', e.target.value)}
-            placeholder="Primer apellido"
+            placeholder={t('profile.firstLastname')}
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
             required
           />
@@ -73,13 +76,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
-            Segundo Apellido
+            {t('profile.secondName')}
           </label>
           <input
             type="text"
             value={formData.lastname2}
             onChange={(e) => onInputChange('lastname2', e.target.value)}
-            placeholder="Segundo apellido (opcional)"
+            placeholder={t('profile.secondLastname')}
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
           />
         </div>
@@ -87,13 +90,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
-            Edad *
+            {t('profile.age')} *
           </label>
           <input
             type="number"
             value={formData.age}
             onChange={(e) => onInputChange('age', parseInt(e.target.value) || '')}
-            placeholder="Tu edad"
+            placeholder={t('profile.age')}
             min="13"
             max="120"
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
@@ -104,7 +107,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-pink-500 rounded-full mr-2"></span>
-            Género *
+            {t('profile.gender')} *
           </label>
           <select 
             value={formData.gender}
@@ -112,22 +115,22 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
             required
           >
-            <option value="">Seleccionar</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
+            <option value="">{t('common.select')}</option>
+            <option value="male">{t('setup.male')}</option>
+            <option value="female">{t('setup.female')}</option>
           </select>
         </div>
         
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
-            Peso (kg) *
+            {t('profile.weight')} ({t('setup.kg')}) *
           </label>
           <input
             type="number"
             value={formData.current_weight_kg}
-            onChange={(e) => onInputChange('current_weight_kg', parseFloat(e.target.value) || '')}
-            placeholder="Tu peso en kg"
+            onChange={(e) => onInputChange('current_weight_kg', Number.parseFloat(e.target.value) || '')}
+            placeholder={t('profile.weight')}
             min="30"
             max="300"
             step="0.1"
@@ -139,13 +142,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-            Altura (cm) *
+            {t('profile.height')} ({t('setup.cm')}) *
           </label>
           <input
             type="number"
             value={formData.height_cm}
-            onChange={(e) => onInputChange('height_cm', parseInt(e.target.value) || '')}
-            placeholder="Tu altura en cm"
+            onChange={(e) => onInputChange('height_cm', Number.parseInt(e.target.value) || '')}
+            placeholder={t('profile.height')}
             min="100"
             max="250"
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
@@ -156,7 +159,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
         <div className="group">
           <label className="flex text-sm font-semibold text-gray-700 mb-2 items-center">
             <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></span>
-            Objetivo de fitness *
+            {t('profile.fitnessGoal')} *
           </label>
           <select 
             value={formData.fitness_goal}
@@ -164,12 +167,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
             className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-all duration-200 text-sm sm:text-base group-hover:border-gray-300"
             required
           >
-            <option value="">Seleccionar objetivo</option>
-            <option value="lose_weight">Perder peso</option>
-            <option value="maintain">Mantener peso</option>
-            <option value="gain_weight">Ganar peso</option>
-            <option value="gain_muscle">Ganar músculo</option>
-            <option value="improve_endurance">Mejorar resistencia</option>
+            <option value="">{t('setup.selectGoal')}</option>
+            <option value="lose_weight">{t('setup.loseWeight')}</option>
+            <option value="maintain">{t('setup.stayFit')}</option>
+            <option value="gain_weight">{t('setup.loseWeight')}</option>
+            <option value="gain_muscle">{t('setup.gainMuscle')}</option>
+            <option value="improve_endurance">{t('workouts.intensity')}</option>
           </select>
         </div>
       </div>
@@ -181,7 +184,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
           disabled={isSaving}
           className="w-full sm:w-auto px-6 py-2.5 border-2 border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base shadow-sm hover:shadow-md"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
         <button
           type="submit"
@@ -194,14 +197,14 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                 <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
                 <div className="absolute inset-0 rounded-full border-2 border-t-white animate-spin"></div>
               </div>
-              Guardando...
+              {t('common.loading')}
             </>
           ) : (
             <>
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
               </svg>
-              Guardar cambios
+              {t('profile.saveChanges')}
             </>
           )}
         </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useSetup, type FitnessGoal } from '../../hooks/useSetup';
@@ -12,6 +13,7 @@ import GoalSelection from './GoalSelection';
 import FinalStep from './FinalStep';
 
 const Setup: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const {
@@ -27,12 +29,12 @@ const Setup: React.FC = () => {
 
   const handleCompleteSetup = async (generateRoutine: boolean = true) => {
     if (!isSetupComplete()) {
-      alert('Por favor completa todos los pasos');
+      alert(t('setup.pleaseCompleteAllSteps'));
       return;
     }
 
     if (!user) {
-      alert('Error: Usuario no autenticado');
+      alert(t('setup.userNotAuthenticated'));
       return;
     }
 
@@ -46,11 +48,11 @@ const Setup: React.FC = () => {
         }
         navigate('/dashboard');
       } else {
-        alert('Error al guardar el perfil. Por favor intenta de nuevo.');
+        alert(t('setup.errorSavingProfile'));
       }
     } catch (err) {
       console.error('Error completing setup:', err);
-      alert('Error al completar el setup. Por favor intenta de nuevo.');
+      alert(t('setup.errorSavingProfile'));
     }
   };
 
