@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import DeletedItemDetailModal from './components/DeletedItemDetailModal';
+import { toast, confirm } from '../../hooks/useNotification';
 
 export interface DeletedItem {
   id: string;
@@ -47,6 +48,7 @@ const TrashBin: React.FC = () => {
   // Get deleted routines
   const { data: deletedRoutines = [], isLoading: loadingRoutines } = useQuery({
     queryKey: ['deleted-routines'],
+    refetchInterval: 10000, // Auto-refresh cada 10 segundos
     queryFn: async () => {
       if (!supabase) return [];
       const { data, error } = await supabase
@@ -69,6 +71,7 @@ const TrashBin: React.FC = () => {
   // Get deleted diet plans
   const { data: deletedDiets = [], isLoading: loadingDiets } = useQuery({
     queryKey: ['deleted-diets'],
+    refetchInterval: 10000, // Auto-refresh cada 10 segundos
     queryFn: async () => {
       if (!supabase) return [];
       const { data, error } = await supabase
@@ -99,12 +102,28 @@ const TrashBin: React.FC = () => {
       
       const { error } = await supabase.rpc(procedureName, { p_item_id: id });
       if (error) throw error;
+      
+      return { type };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
-      queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
-      queryClient.invalidateQueries({ queryKey: ['workout-routines'] });
-      queryClient.invalidateQueries({ queryKey: ['diet-plans'] });
+    onSuccess: async ({ type }) => {
+      // Refrescar las queries de items eliminados
+      await queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
+      
+      // Refrescar las listas principales (aunque no usen React Query en Workouts.tsx)
+      await queryClient.invalidateQueries({ queryKey: ['workout-routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['diet-plans'] });
+      
+      // Cerrar el modal si está abierto
+      setSelectedItem(null);
+      
+      // Mostrar mensaje de éxito
+      const itemType = type === 'routine' ? 'Rutina' : 'Plan de dieta';
+      toast.success(`✅ ${itemType} restaurada exitosamente`);
+    },
+    onError: (error) => {
+      console.error('❌ Error al restaurar:', error);
+      toast.error('Error al restaurar el elemento. Por favor, intenta de nuevo.');
     },
   });
 
@@ -119,10 +138,18 @@ const TrashBin: React.FC = () => {
       
       const { error } = await supabase.rpc(procedureName, { p_item_id: id });
       if (error) throw error;
+      
+      return { type };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
-      queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
+    onSuccess: async ({ type }) => {
+      await queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
+      
+      const itemType = type === 'routine' ? 'Rutina' : 'Plan de dieta';
+      toast.success(`${itemType} eliminada permanentemente`);
+    },
+    onError: () => {
+      toast.error('Error al eliminar permanentemente. Por favor, intenta de nuevo.');
     },
   });
 
@@ -133,9 +160,13 @@ const TrashBin: React.FC = () => {
       const { error } = await supabase.rpc('empty_trash');
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
-      queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['deleted-routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['deleted-diets'] });
+      toast.success('🗑️ Papelera vaciada exitosamente');
+    },
+    onError: () => {
+      toast.error('Error al vaciar la papelera. Por favor, intenta de nuevo.');
     },
   });
 
@@ -150,8 +181,18 @@ const TrashBin: React.FC = () => {
     deletePermanentlyMutation.mutate({ id, type });
   };
 
-  const handleEmptyTrash = () => {
-    if (window.confirm('¿Estás seguro de que quieres vaciar la papelera? Esta acción no se puede deshacer.')) {
+  const handleEmptyTrash = async () => {
+    const confirmed = await confirm(
+      'Vaciar papelera',
+      '¿Estás seguro de que quieres vaciar la papelera? Esta acción NO se puede deshacer y se eliminarán permanentemente todos los elementos.',
+      {
+        confirmText: 'Sí, vaciar',
+        cancelText: 'Cancelar',
+        type: 'danger'
+      }
+    );
+    
+    if (confirmed) {
       emptyTrashMutation.mutate();
     }
   };
@@ -367,8 +408,18 @@ const TrashBin: React.FC = () => {
                         Restaurar
                       </button>
                       <button
-                        onClick={() => {
-                          if (window.confirm('¿Estás seguro de que quieres eliminar permanentemente este elemento? Esta acción NO se puede deshacer.')) {
+                        onClick={async () => {
+                          const confirmed = await confirm(
+                            'Eliminar permanentemente',
+                            '¿Estás seguro de que quieres eliminar permanentemente este elemento? Esta acción NO se puede deshacer.',
+                            {
+                              confirmText: 'Sí, eliminar',
+                              cancelText: 'Cancelar',
+                              type: 'danger'
+                            }
+                          );
+                          
+                          if (confirmed) {
                             handlePermanentDelete(item.id, item.type);
                           }
                         }}
