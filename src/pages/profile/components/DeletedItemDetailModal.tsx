@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, Dumbbell, TrendingUp, Target, Clock, Utensils } from 'lucide-react';
 import type { DeletedItem } from '../TrashBin';
+import { confirm as confirmDialog } from '../../../hooks/useNotification';
 
 interface DeletedItemDetailModalProps {
   item: DeletedItem | null;
@@ -258,8 +259,18 @@ const DeletedItemDetailModal: React.FC<DeletedItemDetailModalProps> = ({
             Restaurar
           </button>
           <button
-            onClick={() => {
-              if (confirm('¿Estás seguro de eliminar permanentemente este elemento?')) {
+            onClick={async () => {
+              const confirmed = await confirmDialog(
+                'Eliminar permanentemente',
+                '¿Estás seguro de eliminar permanentemente este elemento? Esta acción NO se puede deshacer.',
+                {
+                  confirmText: 'Sí, eliminar',
+                  cancelText: 'Cancelar',
+                  type: 'danger'
+                }
+              );
+              
+              if (confirmed) {
                 onPermanentDelete(item.id, item.type);
                 onClose();
               }
