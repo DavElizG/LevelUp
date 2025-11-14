@@ -3,14 +3,19 @@
  * Servicio para analizar imágenes de comida usando el microservicio de IA
  */
 
-// Priority: VITE_AI_MICROSERVICE_URL > VITE_AI_SERVICE_URL > development default
-const AI_MICROSERVICE_URL = 
+// Priority: VITE_AI_MICROSERVICE_URL > VITE_AI_SERVICE_URL
+const rawUrl = 
   import.meta.env.VITE_AI_MICROSERVICE_URL || 
-  import.meta.env.VITE_AI_SERVICE_URL || 
-  (import.meta.env.DEV ? 'http://localhost:3005' : null);
+  import.meta.env.VITE_AI_SERVICE_URL;
+
+// Smart URL handling: remove /api/ai suffix if present to avoid duplication
+const AI_MICROSERVICE_URL = rawUrl?.endsWith('/api/ai') 
+  ? rawUrl.slice(0, -7) // Remove '/api/ai' suffix
+  : rawUrl;
 
 if (!AI_MICROSERVICE_URL) {
-  console.warn('Warning: AI_MICROSERVICE_URL not configured. Food vision features will not work.');
+  console.warn('⚠️ AI Microservice URL not configured. Food Vision features disabled.');
+  console.warn('💡 Set VITE_AI_MICROSERVICE_URL or VITE_AI_SERVICE_URL in your environment.');
 }
 
 export interface DetectedFood {
@@ -40,8 +45,8 @@ export async function analyzeFoodImage(
   mimeType: string = 'image/jpeg'
 ): Promise<FoodVisionResult> {
   try {
-    if (!AI_MICROSERVICE_URL) {
-      throw new Error('AI Microservice URL is not configured. Please set VITE_AI_MICROSERVICE_URL or VITE_AI_SERVICE_URL environment variable.');
+    if (!AI_MICROSERVICE_URL || AI_MICROSERVICE_URL.trim() === '') {
+      throw new Error('🚫 Food Vision no disponible: Microservicio no configurado.\n💡 Configura VITE_AI_MICROSERVICE_URL o VITE_AI_SERVICE_URL en tu hosting.');
     }
 
     const response = await fetch(`${AI_MICROSERVICE_URL}/api/ai/food-vision/analyze`, {
@@ -80,8 +85,8 @@ export async function analyzeFoodImage(
  */
 export async function analyzeFoodImageFile(file: File): Promise<FoodVisionResult> {
   try {
-    if (!AI_MICROSERVICE_URL) {
-      throw new Error('AI Microservice URL is not configured. Please set VITE_AI_MICROSERVICE_URL or VITE_AI_SERVICE_URL environment variable.');
+    if (!AI_MICROSERVICE_URL || AI_MICROSERVICE_URL.trim() === '') {
+      throw new Error('🚫 Food Vision no disponible: Microservicio no configurado.\n💡 Configura VITE_AI_MICROSERVICE_URL o VITE_AI_SERVICE_URL en tu hosting.');
     }
 
     const formData = new FormData();
