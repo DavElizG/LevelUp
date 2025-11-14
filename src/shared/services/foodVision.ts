@@ -44,7 +44,7 @@ export async function analyzeFoodImage(
       throw new Error('AI Microservice URL is not configured. Please set VITE_AI_MICROSERVICE_URL or VITE_AI_SERVICE_URL environment variable.');
     }
 
-    const response = await fetch(`${AI_MICROSERVICE_URL}/api/food-vision/analyze`, {
+    const response = await fetch(`${AI_MICROSERVICE_URL}/api/ai/food-vision/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export async function analyzeFoodImageFile(file: File): Promise<FoodVisionResult
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${AI_MICROSERVICE_URL}/api/food-vision/analyze-upload`, {
+    const response = await fetch(`${AI_MICROSERVICE_URL}/api/ai/food-vision/analyze-upload`, {
       method: 'POST',
       body: formData,
     });
