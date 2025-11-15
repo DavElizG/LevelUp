@@ -22,6 +22,7 @@ import {
   WorkoutExecutionPage,
   DietGeneratorPage,
   DietPlanView,
+  DietHistory,
   Nutrition,
   FoodSearchPage,
   FoodPhotoAnalyzerPage
@@ -158,6 +159,13 @@ const AppRoutes: React.FC = () => {
       <Route path="/diet/plan" element={
         <ProtectedRoute>
           <DietPlanView />
+        </ProtectedRoute>
+      } />
+      
+      {/* Diet history route */}
+      <Route path="/diet/history" element={
+        <ProtectedRoute>
+          <DietHistory />
         </ProtectedRoute>
       } />
       

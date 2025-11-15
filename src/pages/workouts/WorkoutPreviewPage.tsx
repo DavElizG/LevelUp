@@ -93,7 +93,10 @@ const WorkoutPreviewPage: React.FC = () => {
         }
         
         setExercisesByDay(grouped);
-        setSelectedDay(1);
+        
+        // Seleccionar el primer día disponible
+        const firstAvailableDay = Object.keys(grouped).map(Number).sort((a, b) => a - b)[0] || 1;
+        setSelectedDay(firstAvailableDay);
         
       } catch (err) {
         console.error('❌ Error loading routine:', err);

@@ -34,6 +34,13 @@ const Nutrition: React.FC = () => {
   const [waterIntake, setWaterIntake] = useState(0); // in mL
   const [waterGoal] = useState(2500); // 2.5L in mL
   const [calorieData, setCalorieData] = useState<CalorieCalculationResult | null>(null);
+  
+  // Estado para el plan de dieta del usuario
+  interface MealPlanConfig {
+    mealType: MealType;
+    orderInDay: number;
+  }
+  const [userMealPlan, setUserMealPlan] = useState<MealPlanConfig[]>([]);
 
   // Calculate personalized calories when profile is loaded
   useEffect(() => {
@@ -46,6 +53,83 @@ const Nutrition: React.FC = () => {
       }
     }
   }, [profile]);
+
+  // Cargar configuración de comidas del plan activo del usuario
+  const loadUserMealPlan = async () => {
+    if (!isSupabaseConfigured || !supabase) return;
+    
+    try {
+      const userRes = await supabase.auth.getUser();
+      const userId = userRes?.data?.user?.id;
+      if (!userId) return;
+
+      // Obtener el plan activo del usuario
+      const { data: activePlan, error: planError } = await supabase
+        .from('diet_plans')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (planError || !activePlan) {
+        // Si no hay plan, usar orden por defecto
+        setUserMealPlan([
+          { mealType: 'breakfast', orderInDay: 1 },
+          { mealType: 'lunch', orderInDay: 2 },
+          { mealType: 'snack', orderInDay: 3 },
+          { mealType: 'dinner', orderInDay: 4 }
+        ]);
+        return;
+      }
+
+      // Obtener las comidas únicas del plan con su orden
+      const { data: planMeals, error: mealsError } = await supabase
+        .from('diet_meals')
+        .select('meal_type, order_in_day')
+        .eq('diet_plan_id', activePlan.id)
+        .eq('day_of_week', 1); // Solo tomamos un día de referencia para obtener el orden
+
+      if (mealsError || !planMeals || planMeals.length === 0) {
+        // Si no hay comidas, usar orden por defecto
+        setUserMealPlan([
+          { mealType: 'breakfast', orderInDay: 1 },
+          { mealType: 'lunch', orderInDay: 2 },
+          { mealType: 'snack', orderInDay: 3 },
+          { mealType: 'dinner', orderInDay: 4 }
+        ]);
+        return;
+      }
+
+      // Crear un mapa único de meal_type -> order_in_day
+      const uniqueMeals = new Map<string, number>();
+      planMeals.forEach((meal) => {
+        if (!uniqueMeals.has(meal.meal_type)) {
+          uniqueMeals.set(meal.meal_type, meal.order_in_day);
+        }
+      });
+
+      // Convertir a array y ordenar por order_in_day
+      const mealConfig: MealPlanConfig[] = Array.from(uniqueMeals.entries())
+        .map(([mealType, orderInDay]) => ({
+          mealType: mealType as MealType,
+          orderInDay
+        }))
+        .sort((a, b) => a.orderInDay - b.orderInDay);
+
+      setUserMealPlan(mealConfig);
+    } catch (err) {
+      console.error('Error loading user meal plan:', err);
+      // En caso de error, usar orden por defecto
+      setUserMealPlan([
+        { mealType: 'breakfast', orderInDay: 1 },
+        { mealType: 'lunch', orderInDay: 2 },
+        { mealType: 'snack', orderInDay: 3 },
+        { mealType: 'dinner', orderInDay: 4 }
+      ]);
+    }
+  };
 
   const fetchData = async () => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -122,7 +206,9 @@ const Nutrition: React.FC = () => {
   };
 
   useEffect(() => {
+    loadUserMealPlan();
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Agrupar comidas por tipo
@@ -355,94 +441,107 @@ const Nutrition: React.FC = () => {
           </div>
 
           {/* AI Diet Plan Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* View Diet Plan Button */}
-            <button
-              onClick={() => navigate('/diet/plan')}
-              className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
-              
-              <div className="relative z-10 flex items-center justify-center space-x-3">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span className="text-xl font-bold">{t('nutrition.viewMyPlan')}</span>
-              </div>
-              <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.reviewWeeklyPlan')}</p>
-            </button>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* View Diet Plan Button */}
+              <button
+                onClick={() => navigate('/diet/plan')}
+                className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
+                
+                <div className="relative z-10 flex items-center justify-center space-x-3">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="text-xl font-bold">{t('nutrition.viewMyPlan')}</span>
+                </div>
+                <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.reviewWeeklyPlan')}</p>
+              </button>
 
-            {/* AI Generator Button */}
+              {/* AI Generator Button */}
+              <button
+                onClick={() => navigate('/diet/generate')}
+                className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
+                
+                <div className="relative z-10 flex items-center justify-center space-x-3">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="text-xl font-bold">{t('nutrition.generatePlan')}</span>
+                </div>
+                <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.createPersonalizedPlan')}</p>
+              </button>
+            </div>
+
+            {/* Diet History Button */}
             <button
-              onClick={() => navigate('/diet/generate')}
-              className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
+              onClick={() => navigate('/diet/history')}
+              className="w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-3xl p-5 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden group"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
               
               <div className="relative z-10 flex items-center justify-center space-x-3">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-xl font-bold">{t('nutrition.generatePlan')}</span>
+                <span className="text-lg font-bold">Ver Historial de Planes</span>
               </div>
-              <p className="text-white/90 text-sm mt-2 relative z-10">{t('nutrition.createPersonalizedPlan')}</p>
             </button>
           </div>
 
-          {/* Meal Cards - Large and Colorful */}
+          {/* Meal Cards - Large and Colorful - Orden Dinámico según Plan */}
           <div className="space-y-4">
             <h3 className={cn("text-xl font-bold", themeText.primary)}>{t('nutrition.addMeals')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
-              {/* Breakfast */}
-              <button 
-                onClick={() => navigate('/food-search', { state: { mealType: 'breakfast' } })}
-                className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-4xl mb-2">🌅</div>
-                  <span className="text-lg font-bold">{t('nutrition.breakfast')}</span>
-                </div>
-              </button>
+              {userMealPlan.map((mealConfig) => {
+                const mealStyles = {
+                  breakfast: {
+                    gradient: 'from-orange-400 to-orange-600',
+                    icon: '🌅',
+                    label: t('nutrition.breakfast')
+                  },
+                  lunch: {
+                    gradient: 'from-green-400 to-green-600',
+                    icon: '☀️',
+                    label: t('nutrition.lunch')
+                  },
+                  snack: {
+                    gradient: 'from-pink-400 to-pink-600',
+                    icon: '🍪',
+                    label: t('nutrition.snack')
+                  },
+                  dinner: {
+                    gradient: 'from-purple-400 to-purple-600',
+                    icon: '🌙',
+                    label: t('nutrition.dinner')
+                  }
+                };
 
-              {/* Lunch */}
-              <button 
-                onClick={() => navigate('/food-search', { state: { mealType: 'lunch' } })}
-                className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-4xl mb-2">☀️</div>
-                  <span className="text-lg font-bold">{t('nutrition.lunch')}</span>
-                </div>
-              </button>
+                const style = mealStyles[mealConfig.mealType];
 
-              {/* Snack */}
-              <button 
-                onClick={() => navigate('/food-search', { state: { mealType: 'snack' } })}
-                className="bg-gradient-to-br from-pink-400 to-pink-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-4xl mb-2">🍪</div>
-                  <span className="text-lg font-bold">{t('nutrition.snack')}</span>
-                </div>
-              </button>
-
-              {/* Dinner */}
-              <button 
-                onClick={() => navigate('/food-search', { state: { mealType: 'dinner' } })}
-                className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-4xl mb-2">🌙</div>
-                  <span className="text-lg font-bold">{t('nutrition.dinner')}</span>
-                </div>
-              </button>
+                return (
+                  <button
+                    key={mealConfig.mealType}
+                    onClick={() => navigate('/food-search', { state: { mealType: mealConfig.mealType } })}
+                    className={`bg-gradient-to-br ${style.gradient} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden group`}
+                  >
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-20 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
+                    <div className="relative z-10 text-center">
+                      <div className="text-4xl mb-2">{style.icon}</div>
+                      <span className="text-lg font-bold">{style.label}</span>
+                      {userMealPlan.length < 4 && (
+                        <div className="text-xs opacity-80 mt-1">#{mealConfig.orderInDay}</div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -538,9 +637,9 @@ const Nutrition: React.FC = () => {
                 </div>
               </div>
 
-              {/* Meal Details by Type */}
+              {/* Meal Details by Type - Orden Dinámico */}
               <div className="space-y-5">
-                {(Object.keys(groupedMeals) as MealType[]).map((type) => {
+                {userMealPlan.map(({ mealType: type }) => {
                   const mealConfig = {
                     breakfast: { name: '🌅 Desayuno', color: 'orange' },
                     lunch: { name: '☀️ Almuerzo', color: 'green' },

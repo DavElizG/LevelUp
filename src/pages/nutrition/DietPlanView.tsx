@@ -46,10 +46,28 @@ const DietPlanView: React.FC = () => {
 
   const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+  // Obtener planId de URL query params si existe
+  const searchParams = new URLSearchParams(globalThis.location.search);
+  const planIdFromUrl = searchParams.get('planId');
+
   useEffect(() => {
     loadDietPlan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, planIdFromUrl]);
+
+  // Manejar el botón atrás del navegador y gestos móviles
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate('/nutrition', { replace: true });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
 
   const loadDietPlan = async () => {
     if (!user || !supabase) return;
@@ -57,15 +75,34 @@ const DietPlanView: React.FC = () => {
     try {
       setLoading(true);
       
-      // Cargar el plan de dieta
-      const { data: planData, error: planError } = await supabase
-        .from('diet_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      let planData;
+      let planError;
+
+      // Si hay planId en la URL, cargar ese plan específico
+      if (planIdFromUrl) {
+        const result = await supabase
+          .from('diet_plans')
+          .select('*')
+          .eq('id', planIdFromUrl)
+          .eq('user_id', user.id) // Verificar que sea del usuario
+          .maybeSingle();
+        
+        planData = result.data;
+        planError = result.error;
+      } else {
+        // Si no, cargar el plan activo
+        const result = await supabase
+          .from('diet_plans')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        planData = result.data;
+        planError = result.error;
+      }
 
       if (planError) throw planError;
       
@@ -161,7 +198,7 @@ const DietPlanView: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-start gap-4">
             <button
-              onClick={() => navigate('/diet')}
+              onClick={() => navigate('/nutrition')}
               className="p-2 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 hover:scale-105 flex-shrink-0 mt-1"
             >
               <ArrowLeft className="w-6 h-6" />
