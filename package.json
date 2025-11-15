@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.2",
-    "@capacitor/android": "^7.4.3",
+    "@capacitor/android": "^7.4.4",
     "@capacitor/camera": "^7.0.2",
-    "@capacitor/cli": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "@capacitor/preferences": "^7.0.2",
     "@supabase/supabase-js": "^2.75.0",
     "@tailwindcss/vite": "^4.1.13",
