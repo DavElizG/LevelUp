@@ -34,7 +34,7 @@
     "react-router-dom": "^7.9.3",
     "react-swipeable": "^7.0.2",
     "sql.js": "^1.13.0",
-    "zod": "^4.1.11",
+    "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
