@@ -71,7 +71,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
 
         const routine = result.data;
         
-        // Mapear ejercicios con todos los campos incluyendo dayOfWeek
+        // Mapear ejercicios con todos los campos incluyendo dayOfWeek, videoUrl y thumbnailUrl
         const allExercises = (routine.exercises || []).map((routineExercise: RoutineExercise) => ({
           id: routineExercise.exerciseId || routineExercise.id,
           name: routineExercise.exercise?.name || t('workoutExecution.unnamedExercise'),
@@ -79,6 +79,8 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
           muscleGroups: routineExercise.exercise?.muscleGroups || [],
           description: routineExercise.exercise?.description || routineExercise.notes || '',
           equipment: routineExercise.exercise?.equipment,
+          videoUrl: routineExercise.exercise?.videoUrl,
+          thumbnailUrl: routineExercise.exercise?.thumbnailUrl,
           createdAt: routineExercise.exercise?.createdAt || new Date().toISOString(),
           updatedAt: routineExercise.exercise?.updatedAt || new Date().toISOString(),
           sets: routineExercise.sets || 3,
@@ -555,6 +557,64 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                 </div>
               </div>
 
+              {/* Video del ejercicio - Siempre visible */}
+              <div className="relative w-full bg-gray-100 border-t border-gray-200">
+                <div className="aspect-video w-full">
+                  {currentExercise.videoUrl ? (
+                    currentExercise.videoUrl.includes('youtube.com') || currentExercise.videoUrl.includes('youtu.be') ? (
+                      <iframe
+                        src={currentExercise.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                        title={currentExercise.name}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : currentExercise.videoUrl.match(/\.(gif|mp4|webm)$/i) ? (
+                      currentExercise.videoUrl.endsWith('.gif') ? (
+                        <img 
+                          src={currentExercise.videoUrl} 
+                          alt={currentExercise.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <video 
+                          src={currentExercise.videoUrl}
+                          className="w-full h-full object-contain"
+                          controls
+                          loop
+                          muted
+                          playsInline
+                        />
+                      )
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <div className="text-center p-6">
+                          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-300 flex items-center justify-center">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <p className="text-gray-500 text-sm font-medium">Formato de video no compatible</p>
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
+                      <div className="text-center p-6">
+                        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-200 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-orange-600 text-sm font-medium">Video de demostración</p>
+                        <p className="text-orange-500 text-xs mt-1">Próximamente disponible</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Cuerpo del ejercicio */}
               <div className="p-6">
                 {currentExercise.description && (
@@ -566,7 +626,7 @@ const WorkoutExecutionPage: React.FC<WorkoutExecutionPageProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-600 mb-1">{t('workoutExecution.currentSet')}</p>
-                      <p className="text-4xl font-bold text-blue-700">{progress.setNumber} <span className="text-2xl text-blue-400">{t('common.of')} {totalSets}</span></p>
+                      <p className="text-4xl font-bold text-blue-700">{progress.setNumber} <span className="text-2xl text-blue-400">{t('workoutExecution.of')} {totalSets}</span></p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium text-blue-600 mb-1">{t('workoutExecution.recommendedReps')}</p>

@@ -138,7 +138,7 @@ const DietGeneratorPage: React.FC = () => {
         setToast({ message: '¡Plan de dieta generado exitosamente! Redirigiendo...', type: 'success' });
         // Redirigir a la página de dieta después de 2 segundos
         setTimeout(() => {
-          navigate('/diet');
+          navigate('/nutrition');
         }, 2000);
       } else {
         // Manejar errores del backend con mensajes claros
@@ -297,7 +297,7 @@ const DietGeneratorPage: React.FC = () => {
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-start gap-4">
               <button
-                onClick={() => navigate('/diet')}
+                onClick={() => navigate('/nutrition')}
                 className="p-2 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 hover:scale-105 flex-shrink-0 mt-1"
               >
                 <ArrowLeft className="w-6 h-6" />
