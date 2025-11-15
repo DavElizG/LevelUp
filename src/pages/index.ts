@@ -7,6 +7,7 @@ export { default as Dashboard } from './dashboard/Dashboard';
 
 // Nutrition pages
 export { default as DietGeneratorPage } from './nutrition/DietGeneratorPage';
+export { default as DietHistory } from './nutrition/DietHistory';
 export { default as DietPlanView } from './nutrition/DietPlanView';
 export { default as FoodPhotoAnalyzerPage } from './nutrition/FoodPhotoAnalyzerPage';
 export { default as FoodSearchPage } from './nutrition/FoodSearchPage';

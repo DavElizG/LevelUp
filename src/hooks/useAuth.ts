@@ -96,12 +96,52 @@ export const useAuth = () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+      
+      // Verificar si el usuario está baneado
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('is_banned, banned_until, banned_reason')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        if (!profileError && profileData && profileData.is_banned) {
+          // Verificar si el ban ya expiró
+          const now = new Date();
+          const bannedUntil = profileData.banned_until ? new Date(profileData.banned_until) : null;
+
+          if (bannedUntil && now > bannedUntil) {
+            // El ban expiró, permitir login
+            return { success: true };
+          }
+
+          // Calcular días restantes
+          let daysRemaining = null;
+          if (bannedUntil) {
+            const diffTime = bannedUntil.getTime() - now.getTime();
+            daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          }
+
+          // Cerrar sesión inmediatamente
+          await supabase.auth.signOut();
+
+          const banMessage = bannedUntil
+            ? `Tu cuenta está suspendida hasta el ${bannedUntil.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}. Días restantes: ${daysRemaining}.\nRazón: ${profileData.banned_reason || 'No especificada'}`
+            : `Tu cuenta está baneada permanentemente.\nRazón: ${profileData.banned_reason || 'No especificada'}`;
+
+          throw new Error(banMessage);
+        }
+      }
       
       return { success: true };
     } catch (error) {

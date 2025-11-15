@@ -16,9 +16,11 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const mealType = (location.state as { mealType?: string })?.mealType || 'lunch';
-
+  
   // Estados
+  const [mealType, setMealType] = useState<string>(
+    (location.state as { mealType?: string })?.mealType || 'lunch'
+  );
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -369,6 +371,57 @@ const FoodPhotoAnalyzerPage: React.FC = () => {
                     </ul>
                   </div>
                 )}
+
+                {/* Meal Type Selector */}
+                <div className="bg-white rounded-3xl p-6 shadow-xl">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">🍽️ Selecciona el tipo de comida</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setMealType('breakfast')}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        mealType === 'breakfast'
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-orange-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">🌅</div>
+                      <div className="font-semibold">Desayuno</div>
+                    </button>
+                    <button
+                      onClick={() => setMealType('lunch')}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        mealType === 'lunch'
+                          ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-yellow-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">☀️</div>
+                      <div className="font-semibold">Almuerzo</div>
+                    </button>
+                    <button
+                      onClick={() => setMealType('snack')}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        mealType === 'snack'
+                          ? 'border-pink-500 bg-pink-50 text-pink-700'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-pink-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">🍎</div>
+                      <div className="font-semibold">Merienda</div>
+                    </button>
+                    <button
+                      onClick={() => setMealType('dinner')}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        mealType === 'dinner'
+                          ? 'border-purple-500 bg-purple-50 text-purple-700'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">🌙</div>
+                      <div className="font-semibold">Cena</div>
+                    </button>
+                  </div>
+                </div>
 
                 {/* Save Button */}
                 <button

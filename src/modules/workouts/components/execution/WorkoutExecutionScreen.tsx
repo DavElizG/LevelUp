@@ -303,6 +303,45 @@ const WorkoutExecutionScreen: React.FC<Props> = ({ routine, onComplete, onCancel
           </div>
         </div>
 
+        {/* Video de demostración */}
+        {currentExercise.exercise.videoUrl && (
+          <div className="mb-6 rounded-2xl overflow-hidden border-2 border-orange-100 bg-orange-50">
+            <div className="bg-gradient-to-r from-orange-500 to-pink-500 px-4 py-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9.5 16.5l7-4.5-7-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              </svg>
+              <span className="text-white font-semibold text-sm">Video de demostración</span>
+            </div>
+            <div className="aspect-video bg-black">
+              <iframe
+                src={currentExercise.exercise.videoUrl.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/').split('&')[0].split('?si=')[0]}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={currentExercise.exercise.name}
+              />
+            </div>
+          </div>
+        )}
+        {!currentExercise.exercise.videoUrl && (
+          <div className="mb-6 rounded-2xl overflow-hidden border-2 border-gray-200 bg-gray-50">
+            <div className="bg-gradient-to-r from-gray-400 to-gray-500 px-4 py-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9.5 16.5l7-4.5-7-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              </svg>
+              <span className="text-white font-semibold text-sm">Video de demostración</span>
+            </div>
+            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <div className="text-center px-6">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9.5 16.5l7-4.5-7-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                </svg>
+                <p className="text-gray-600 font-medium text-sm">Próximamente disponible</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Set Info */}
         <div className="bg-orange-50 rounded-xl p-6 mb-6">
           <div className="text-center mb-4">
